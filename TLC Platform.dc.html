@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;}
+  body{margin:0;background:#eef1f7;-webkit-font-smoothing:antialiased;
+    font-family:'Public Sans',system-ui,sans-serif;color:#22223a;}
+  ::selection{background:#b8d8e6;color:#1a1830;}
+  h1,h2,h3,h4{font-family:'Newsreader',Georgia,serif;font-weight:500;letter-spacing:-.014em;margin:0;}
+  p{margin:0;}
+  .swtab[data-active="true"]{background:#262161!important;color:#fff!important;}
+  .phasetab[data-active="true"]{background:#024794!important;color:#fff!important;border-color:#024794!important;}
+  .lnav:hover{color:#024794;}
+  .bp{white-space:nowrap;}
+  button{white-space:nowrap;}
+  .bp:hover{background:#013a7c;}
+  .bg2:hover{border-color:#024794;color:#024794;}
+  .faqitem:hover{background:#f7f9fc;}
+  .aopt{transition:border-color .12s, background .12s;}
+  .aopt:hover{border-color:#9bb4d6;background:#f6f9fe;}
+  .aopt[data-selected="true"]{border-color:#024794!important;background:#eaf2fc!important;}
+  .aopt[data-selected="true"] .adot{border-color:#024794!important;background:#024794!important;}
+  .lift{transition:transform .18s ease, box-shadow .18s ease;}
+  .lift:hover{transform:translateY(-4px);box-shadow:0 16px 38px rgba(26,24,48,.14);}
+  .sidelink{transition:background .12s;}
+  .sidelink:hover{background:#eef1fa;}
+  .surface{opacity:1;}
+  .ul{text-decoration:none;color:inherit;}
+</style>
+</helmet>
+<div style="min-height:100vh;background:#eef1f7;">
+
+  <!-- ===== PROTOTYPE SWITCHER ===== -->
+  <div style="position:sticky;top:0;z-index:200;background:#16142b;color:#fff;padding:9px clamp(14px,4vw,30px);display:flex;align-items:center;gap:14px;border-bottom:1px solid #2a2747;">
+    <div style="display:flex;align-items:center;gap:9px;">
+      <img src="assets/wisdomtri-logo.jpg" alt="The Wisdom Tri" style="width:24px;height:24px;object-fit:contain;background:#fff;border-radius:6px;padding:2px;">
+      <span style="font:600 12.5px/1 'Public Sans';letter-spacing:.02em;">TLC Platform</span>
+      <span style="font:600 9.5px/1 'Public Sans';letter-spacing:.14em;color:#8a86b8;padding:3px 7px;border:1px solid #34315a;border-radius:100px;">PROTOTYPE</span>
+    </div>
+    <div style="margin-left:auto;display:flex;gap:5px;background:#221f3d;padding:4px;border-radius:9px;flex-wrap:wrap;">
+      <button class="swtab" data-k="surface" data-v="landing" data-active="{{ isLanding }}" onClick="{{ nav }}" style="border:none;cursor:pointer;background:transparent;color:#bdb9e0;font:600 12px/1 'Public Sans';padding:7px 13px;border-radius:6px;">Landing</button>
+      <button class="swtab" data-k="surface" data-v="participant" data-active="{{ isPart }}" onClick="{{ nav }}" style="border:none;cursor:pointer;background:transparent;color:#bdb9e0;font:600 12px/1 'Public Sans';padding:7px 13px;border-radius:6px;">Participant</button>
+      <button class="swtab" data-k="surface" data-v="trainer" data-active="{{ isTrainer }}" onClick="{{ nav }}" style="border:none;cursor:pointer;background:transparent;color:#bdb9e0;font:600 12px/1 'Public Sans';padding:7px 13px;border-radius:6px;">Trainer</button>
+      <button class="swtab" data-k="surface" data-v="admin" data-active="{{ isAdmin }}" onClick="{{ nav }}" style="border:none;cursor:pointer;background:transparent;color:#bdb9e0;font:600 12px/1 'Public Sans';padding:7px 13px;border-radius:6px;">Admin</button>
+    </div>
+  </div>
+
+  <!-- ================= LANDING ================= -->
+  <sc-if value="{{ isLanding }}" hint-placeholder-val="{{ true }}">
+  <div class="surface" style="background:#fff;color:#22223a;">
+
+    <!-- nav -->
+    <div style="position:sticky;top:42px;z-index:100;background:rgba(255,255,255,.92);backdrop-filter:blur(10px);border-bottom:1px solid #ececf2;">
+      <div style="max-width:1140px;margin:0 auto;padding:14px clamp(18px,5vw,40px);display:flex;align-items:center;gap:14px;">
+        <img src="assets/wisdomtri-logo.jpg" alt="The Wisdom Tri" style="width:102px;height:102px;object-fit:contain;">
+        <div style="margin-left:26px;display:flex;gap:24px;">
+          <span class="lnav" style="font:500 13.5px/1 'Public Sans';color:#55596e;cursor:pointer;">Why TLC</span>
+          <span class="lnav" style="font:500 13.5px/1 'Public Sans';color:#55596e;cursor:pointer;">The Program</span>
+          <span class="lnav" style="font:500 13.5px/1 'Public Sans';color:#55596e;cursor:pointer;">About Tri</span>
+          <span class="lnav" style="font:500 13.5px/1 'Public Sans';color:#55596e;cursor:pointer;">Stories</span>
+        </div>
+        <div style="margin-left:auto;display:flex;align-items:center;gap:14px;">
+          <span class="lnav" style="font:600 13.5px/1 'Public Sans';color:#024794;cursor:pointer;">Book a call</span>
+          <button class="bp" onClick="{{ startAssess }}" style="border:none;cursor:pointer;background:#024794;color:#fff;font:600 13.5px/1 'Public Sans';padding:11px 18px;border-radius:8px;transition:background .15s;">Start the Assessment</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- hero -->
+    <div style="max-width:1140px;margin:0 auto;padding:clamp(40px,6vw,76px) clamp(18px,5vw,40px) 40px;display:grid;grid-template-columns:1.04fr .96fr;gap:clamp(28px,5vw,60px);align-items:center;">
+      <div>
+        <div style="display:inline-flex;align-items:center;gap:9px;font:600 11.5px/1 'Public Sans';letter-spacing:.16em;text-transform:uppercase;color:#662d91;margin-bottom:22px;">
+          <span style="width:24px;height:1px;background:#662d91;display:inline-block;"></span>An Invitation · Fall 2026 Cohort
+        </div>
+        <h1 style="font-size:clamp(38px,5vw,58px);line-height:1.04;color:#1c1a33;margin-bottom:20px;">Grow into your best as a leader —<br>and become a leader <em style="font-style:italic;color:#024794;">worth following.</em></h1>
+        <p style="font-size:18px;line-height:1.55;color:#4c5066;max-width:30em;margin-bottom:30px;">The workplace asks more of you than answers — faster pace, more complexity, higher stakes. TLC is a practical leadership operating system that builds the clarity, trust, and accountability so execution holds <em style="font-style:italic;color:#262161;">through</em> your people, not around them.</p>
+        <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:24px;">
+          <button class="bp" onClick="{{ startAssess }}" style="border:none;cursor:pointer;background:#024794;color:#fff;font:600 15px/1 'Public Sans';padding:15px 24px;border-radius:9px;transition:background .15s;">Start the Leadership Assessment →</button>
+          <button class="bg2" style="border:1px solid #d6d9e6;cursor:pointer;background:#fff;color:#2a2a3c;font:600 15px/1 'Public Sans';padding:15px 22px;border-radius:9px;transition:.15s;">Book a 15-min call</button>
+        </div>
+        <div style="font:500 13px/1.5 'Public Sans';color:#8a8fa3;">Free · 4 minutes · no card required</div>
+      </div>
+      <div style="position:relative;">
+        <img src="assets/tri_T.png" alt="" style="width:100%;border-radius:18px;display:block;box-shadow:0 24px 60px rgba(26,24,48,.18);">
+        <div style="position:absolute;left:-18px;bottom:24px;background:#fff;border-radius:14px;box-shadow:0 14px 34px rgba(26,24,48,.18);padding:16px 18px;display:flex;gap:16px;align-items:center;">
+          <div style="text-align:center;"><div style="font:500 22px/1 'Newsreader';color:#024794;">6 mo</div><div style="font:500 10px/1.4 'Public Sans';color:#8a8fa3;margin-top:3px;letter-spacing:.04em;">PROGRAM</div></div>
+          <div style="width:1px;height:34px;background:#ececf2;"></div>
+          <div style="text-align:center;"><div style="font:500 22px/1 'Newsreader';color:#262161;">Thu</div><div style="font:500 10px/1.4 'Public Sans';color:#8a8fa3;margin-top:3px;letter-spacing:.04em;">9–11 PST</div></div>
+          <div style="width:1px;height:34px;background:#ececf2;"></div>
+          <div style="text-align:center;"><div style="font:500 22px/1 'Newsreader';color:#662d91;">EQ·IQ·MQ</div><div style="font:500 10px/1.4 'Public Sans';color:#8a8fa3;margin-top:3px;letter-spacing:.04em;">METHOD</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- trust strip -->
+    <div style="border-top:1px solid #eef0f5;border-bottom:1px solid #eef0f5;background:#fafbfd;">
+      <div style="max-width:1140px;margin:0 auto;padding:16px clamp(18px,5vw,40px);display:flex;align-items:center;gap:18px;flex-wrap:wrap;">
+        <span style="font:600 11.5px/1 'Public Sans';letter-spacing:.13em;text-transform:uppercase;color:#9498ab;">For advancing leaders to C-Suite</span>
+        <span style="color:#dfe2ec;">·</span>
+        <span style="font:italic 400 15px/1.4 'Newsreader';color:#3c3c52;flex:1;min-width:260px;">"TLC taught me to lead in my own way — more confident and more effective with my team."</span>
+        <span style="font:600 12px/1 'Public Sans';color:#8a8fa3;">S. Manii, CEO</span>
+      </div>
+    </div>
+
+    <!-- problem -->
+    <div style="max-width:1140px;margin:0 auto;padding:clamp(56px,7vw,96px) clamp(18px,5vw,40px);">
+      <div style="font:600 11.5px/1 'Public Sans';letter-spacing:.16em;text-transform:uppercase;color:#a23bb0;margin-bottom:14px;">The challenge</div>
+      <h2 style="font-size:clamp(28px,3.4vw,40px);line-height:1.1;color:#1c1a33;max-width:16em;margin-bottom:8px;">The role changed. <em style="font-style:italic;color:#662d91;">The playbook didn't.</em></h2>
+      <p style="font-size:17px;line-height:1.55;color:#5a5e72;max-width:40em;margin-bottom:40px;">The world does not slow down for leaders. Most were promoted for being excellent at the work — then handed a role that asks for something else entirely.</p>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:18px;">
+        <div><div style="font:500 15px/1 'Newsreader';color:#c3c6d4;margin-bottom:12px;">01</div><h4 style="font-size:18px;color:#262161;margin-bottom:7px;">Relentless pace</h4><p style="font:400 14px/1.5 'Public Sans';color:#62657a;">Rapid change and pressure leave no room to lead deliberately.</p></div>
+        <div><div style="font:500 15px/1 'Newsreader';color:#c3c6d4;margin-bottom:12px;">02</div><h4 style="font-size:18px;color:#262161;margin-bottom:7px;">Execution drift</h4><p style="font:400 14px/1.5 'Public Sans';color:#62657a;">Small misalignments and unclear expectations quietly erode results.</p></div>
+        <div><div style="font:500 15px/1 'Newsreader';color:#c3c6d4;margin-bottom:12px;">03</div><h4 style="font-size:18px;color:#262161;margin-bottom:7px;">Hard conversations</h4><p style="font:400 14px/1.5 'Public Sans';color:#62657a;">Avoided or "winged" — the moments that matter most go unhandled.</p></div>
+        <div><div style="font:500 15px/1 'Newsreader';color:#c3c6d4;margin-bottom:12px;">04</div><h4 style="font-size:18px;color:#262161;margin-bottom:7px;">Isolation at the top</h4><p style="font:400 14px/1.5 'Public Sans';color:#62657a;">Leading alone, with no place to think clearly or be challenged well.</p></div>
+      </div>
+      <div style="margin-top:42px;padding:26px 30px;background:#f6f4fb;border-radius:14px;border-left:3px solid #662d91;">
+        <p style="font:italic 400 19px/1.5 'Newsreader';color:#2b2747;max-width:34em;">"Poor leadership doesn't show up on a P&amp;L. It shows up at your employees' dinner table." Leadership today isn't about having the answers — it's about creating clarity, trust, and momentum through others.</p>
+      </div>
+    </div>
+
+    <!-- promise stats -->
+    <div style="background:linear-gradient(160deg,#262161,#1b1942 60%,#024794);color:#fff;">
+      <div style="max-width:1140px;margin:0 auto;padding:clamp(46px,5vw,68px) clamp(18px,5vw,40px);display:grid;grid-template-columns:1.2fr 1fr 1fr 1fr;gap:24px;align-items:center;">
+        <div><div style="font:600 11.5px/1 'Public Sans';letter-spacing:.15em;text-transform:uppercase;color:#a9b8e0;margin-bottom:12px;">The promise</div><h3 style="font-size:25px;line-height:1.18;color:#fff;">Six months from pressure to a clear, grounded way of leading.</h3></div>
+        <div><div style="font:500 38px/1 'Newsreader';color:#fff;">6</div><div style="font:500 12.5px/1.4 'Public Sans';color:#b8c6e8;margin-top:6px;">months · weekly live sessions</div></div>
+        <div><div style="font:500 38px/1 'Newsreader';color:#fff;">2×</div><div style="font:500 12.5px/1.4 'Public Sans';color:#b8c6e8;margin-top:6px;">private 1:1 coaching sessions</div></div>
+        <div><div style="font:500 38px/1 'Newsreader';color:#b8d8e6;">1</div><div style="font:500 12.5px/1.4 'Public Sans';color:#b8c6e8;margin-top:6px;">cohort · limited seating</div></div>
+      </div>
+    </div>
+
+    <!-- meet tri (guide) -->
+    <div style="max-width:1140px;margin:0 auto;padding:clamp(56px,7vw,96px) clamp(18px,5vw,40px);display:grid;grid-template-columns:.9fr 1.1fr;gap:clamp(28px,5vw,56px);align-items:center;">
+      <img src="assets/mq_E.png" alt="Tri T. Nguyen coaching" style="width:100%;border-radius:18px;box-shadow:0 20px 50px rgba(26,24,48,.16);">
+      <div>
+        <div style="font:600 11.5px/1 'Public Sans';letter-spacing:.16em;text-transform:uppercase;color:#024794;margin-bottom:14px;">Your guide</div>
+        <h2 style="font-size:clamp(27px,3.2vw,38px);line-height:1.1;color:#1c1a33;margin-bottom:8px;">Meet Tri T. Nguyen, <em style="font-style:italic;color:#662d91;">MA, PCC</em></h2>
+        <p style="font:500 14px/1.5 'Public Sans';color:#8a8fa3;margin-bottom:18px;">Founder, The Wisdom Tri · "Tree Win"</p>
+        <p style="font-size:16.5px;line-height:1.6;color:#4c5066;margin-bottom:14px;">For more than 30 years, Tri has worked with leaders as an HR executive, a business and leadership coach, and chair of CEO peer-advisory boards — from founder-led businesses to publicly traded companies.</p>
+        <p style="font-size:16.5px;line-height:1.6;color:#4c5066;margin-bottom:24px;">Sitting in all three seats taught her one lesson from every angle: <em style="font-style:italic;color:#262161;">how a person leads impacts far more than the numbers.</em> Lead well, and the ripple reaches people's homes.</p>
+        <button class="bg2" style="border:1px solid #d6d9e6;cursor:pointer;background:#fff;color:#2a2a3c;font:600 14px/1 'Public Sans';padding:13px 20px;border-radius:9px;transition:.15s;">Get to know Tri →</button>
+      </div>
+    </div>
+
+    <!-- the plan -->
+    <div style="background:#f8f9fc;border-top:1px solid #eef0f5;">
+      <div style="max-width:1140px;margin:0 auto;padding:clamp(56px,7vw,92px) clamp(18px,5vw,40px);">
+        <div style="text-align:center;margin-bottom:46px;">
+          <div style="font:600 11.5px/1 'Public Sans';letter-spacing:.16em;text-transform:uppercase;color:#a23bb0;margin-bottom:14px;">The plan</div>
+          <h2 style="font-size:clamp(28px,3.4vw,40px);line-height:1.1;color:#1c1a33;">Three steps. <em style="font-style:italic;color:#024794;">One clear path.</em></h2>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-bottom:54px;">
+          <div style="background:#fff;border:1px solid #eceef4;border-radius:14px;padding:26px;"><div style="font:500 14px/1 'Newsreader';color:#024794;margin-bottom:14px;">Step 01</div><h4 style="font-size:20px;color:#1c1a33;margin-bottom:8px;">Take the assessment</h4><p style="font:400 14.5px/1.55 'Public Sans';color:#62657a;">A 4-minute leadership diagnostic. We learn exactly where you're stretched today.</p></div>
+          <div style="background:#fff;border:1px solid #eceef4;border-radius:14px;padding:26px;"><div style="font:500 14px/1 'Newsreader';color:#024794;margin-bottom:14px;">Step 02</div><h4 style="font-size:20px;color:#1c1a33;margin-bottom:8px;">Join the cohort</h4><p style="font:400 14.5px/1.55 'Public Sans';color:#62657a;">Get matched into the Fall 2026 cohort with your workbook and live weekly sessions.</p></div>
+          <div style="background:#fff;border:1px solid #eceef4;border-radius:14px;padding:26px;"><div style="font:500 14px/1 'Newsreader';color:#024794;margin-bottom:14px;">Step 03</div><h4 style="font-size:20px;color:#1c1a33;margin-bottom:8px;">Lead differently</h4><p style="font:400 14.5px/1.55 'Public Sans';color:#62657a;">Six months later, lead from a grounded place — and grow the leaders around you.</p></div>
+        </div>
+        <div style="text-align:center;margin-bottom:30px;">
+          <h3 style="font-size:23px;color:#1c1a33;">Built on the <em style="font-style:italic;color:#662d91;">MQ™</em> method — EQ · IQ · MQ™</h3>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:18px;">
+          <div class="lift" style="background:#024794;color:#fff;border-radius:16px;padding:26px;"><div style="font:600 12px/1 'Public Sans';letter-spacing:.1em;opacity:.85;margin-bottom:6px;">EQ · EMOTIONAL</div><h4 style="font-size:24px;color:#fff;margin-bottom:10px;">Build the Leader</h4><p style="font:400 14px/1.55 'Public Sans';color:#d4e0f4;">Self-awareness and self-trust. Lead from a steady, grounded place.</p></div>
+          <div class="lift" style="background:#262161;color:#fff;border-radius:16px;padding:26px;"><div style="font:600 12px/1 'Public Sans';letter-spacing:.1em;opacity:.85;margin-bottom:6px;">IQ · INTELLECTUAL</div><h4 style="font-size:24px;color:#fff;margin-bottom:10px;">Build the Team</h4><p style="font:400 14px/1.55 'Public Sans';color:#cfd2ea;">Trust, accountability, and execution that holds through people.</p></div>
+          <div class="lift" style="background:#662d91;color:#fff;border-radius:16px;padding:26px;"><div style="font:600 12px/1 'Public Sans';letter-spacing:.1em;opacity:.85;margin-bottom:6px;">MQ™ · MENTORSHIP</div><h4 style="font-size:24px;color:#fff;margin-bottom:10px;">Build Future Leaders</h4><p style="font:400 14px/1.55 'Public Sans';color:#e4d3ef;">Mentor and grow the next generation. An employee-centered culture.</p></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- what changes -->
+    <div style="max-width:1140px;margin:0 auto;padding:clamp(56px,7vw,92px) clamp(18px,5vw,40px);">
+      <div style="font:600 11.5px/1 'Public Sans';letter-spacing:.16em;text-transform:uppercase;color:#024794;margin-bottom:14px;">What changes</div>
+      <h2 style="font-size:clamp(28px,3.4vw,40px);line-height:1.1;color:#1c1a33;max-width:14em;margin-bottom:42px;">The leader you become <em style="font-style:italic;color:#662d91;">— and the people who feel it.</em></h2>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px 26px;">
+        <div style="display:flex;gap:14px;"><img src="assets/selfdiscovery.png" style="width:44px;height:44px;flex:none;" alt=""><div><h4 style="font-size:17px;color:#1c1a33;margin-bottom:4px;">Lead from a grounded place</h4><p style="font:400 14px/1.5 'Public Sans';color:#62657a;">Steadier under pressure, with deeper self-trust.</p></div></div>
+        <div style="display:flex;gap:14px;"><img src="assets/harmony.png" style="width:44px;height:44px;flex:none;" alt=""><div><h4 style="font-size:17px;color:#1c1a33;margin-bottom:4px;">Hard conversations, with ease</h4><p style="font:400 14px/1.5 'Public Sans';color:#62657a;">Prepare and hold them with confidence and intention.</p></div></div>
+        <div style="display:flex;gap:14px;"><img src="assets/trust.png" style="width:44px;height:44px;flex:none;" alt=""><div><h4 style="font-size:17px;color:#1c1a33;margin-bottom:4px;">Trust, both ways</h4><p style="font:400 14px/1.5 'Public Sans';color:#62657a;">Increase self-trust and trust with the people you lead.</p></div></div>
+        <div style="display:flex;gap:14px;"><img src="assets/inspire.png" style="width:44px;height:44px;flex:none;" alt=""><div><h4 style="font-size:17px;color:#1c1a33;margin-bottom:4px;">Accountability &amp; engagement</h4><p style="font:400 14px/1.5 'Public Sans';color:#62657a;">Raise ownership across the team — without chasing.</p></div></div>
+        <div style="display:flex;gap:14px;"><img src="assets/buildtrust.png" style="width:44px;height:44px;flex:none;" alt=""><div><h4 style="font-size:17px;color:#1c1a33;margin-bottom:4px;">Stronger relationships</h4><p style="font:400 14px/1.5 'Public Sans';color:#62657a;">Connect and build a culture people want to work in.</p></div></div>
+        <div style="display:flex;gap:14px;"><img src="assets/grit.png" style="width:44px;height:44px;flex:none;" alt=""><div><h4 style="font-size:17px;color:#1c1a33;margin-bottom:4px;">Mentor the next generation</h4><p style="font:400 14px/1.5 'Public Sans';color:#62657a;">Develop your potentials and grow future leaders.</p></div></div>
+      </div>
+    </div>
+
+    <!-- at a glance -->
+    <div style="background:#f8f9fc;border-top:1px solid #eef0f5;border-bottom:1px solid #eef0f5;">
+      <div style="max-width:1140px;margin:0 auto;padding:clamp(48px,6vw,76px) clamp(18px,5vw,40px);">
+        <div style="font:600 11.5px/1 'Public Sans';letter-spacing:.16em;text-transform:uppercase;color:#a23bb0;margin-bottom:18px;">The program at a glance</div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:#e7eaf2;border:1px solid #e7eaf2;border-radius:14px;overflow:hidden;">
+          <div style="background:#fff;padding:22px;"><div style="font:600 11px/1 'Public Sans';letter-spacing:.08em;text-transform:uppercase;color:#9498ab;margin-bottom:9px;">Duration</div><div style="font:500 19px/1.2 'Newsreader';color:#1c1a33;">Aug 2026 – Feb 2027</div><div style="font:400 13px/1.4 'Public Sans';color:#7a7e92;margin-top:5px;">Six months</div></div>
+          <div style="background:#fff;padding:22px;"><div style="font:600 11px/1 'Public Sans';letter-spacing:.08em;text-transform:uppercase;color:#9498ab;margin-bottom:9px;">Sessions</div><div style="font:500 19px/1.2 'Newsreader';color:#1c1a33;">Thursdays, 9–11 PST</div><div style="font:400 13px/1.4 'Public Sans';color:#7a7e92;margin-top:5px;">Live virtual · weekly</div></div>
+          <div style="background:#fff;padding:22px;"><div style="font:600 11px/1 'Public Sans';letter-spacing:.08em;text-transform:uppercase;color:#9498ab;margin-bottom:9px;">Coaching</div><div style="font:500 19px/1.2 'Newsreader';color:#1c1a33;">2 private 1:1s</div><div style="font:400 13px/1.4 'Public Sans';color:#7a7e92;margin-top:5px;">+ physical workbook shipped</div></div>
+          <div style="background:#fff;padding:22px;"><div style="font:600 11px/1 'Public Sans';letter-spacing:.08em;text-transform:uppercase;color:#9498ab;margin-bottom:9px;">Format</div><div style="font:500 19px/1.2 'Newsreader';color:#1c1a33;">Cohort · limited seats</div><div style="font:400 13px/1.4 'Public Sans';color:#7a7e92;margin-top:5px;">Session 1 · intersession · Session 2</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- testimonials -->
+    <div style="max-width:1140px;margin:0 auto;padding:clamp(56px,7vw,92px) clamp(18px,5vw,40px);">
+      <div style="font:600 11.5px/1 'Public Sans';letter-spacing:.16em;text-transform:uppercase;color:#024794;margin-bottom:14px;">Stories</div>
+      <h2 style="font-size:clamp(27px,3.2vw,38px);line-height:1.1;color:#1c1a33;margin-bottom:42px;">Leaders who answered the call.</h2>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;">
+        <div style="border:1px solid #eceef4;border-radius:14px;padding:26px;"><p style="font:italic 400 17px/1.5 'Newsreader';color:#2b2747;margin-bottom:20px;">"It has made a more compassionate and visionary mentor out of me — and fueled growth in all spheres of my life."</p><div style="font:600 14px/1 'Public Sans';color:#262161;">B. Hatchel</div><div style="font:400 12.5px/1.4 'Public Sans';color:#8a8fa3;margin-top:3px;">Supervisor, American Airlines</div></div>
+        <div style="border:1px solid #eceef4;border-radius:14px;padding:26px;"><p style="font:italic 400 17px/1.5 'Newsreader';color:#2b2747;margin-bottom:20px;">"I witnessed remarkable enhancements in conflict resolution — both at work and in my personal life."</p><div style="font:600 14px/1 'Public Sans';color:#262161;">J. DeLeon</div><div style="font:400 12.5px/1.4 'Public Sans';color:#8a8fa3;margin-top:3px;">Quality Director, Earthlab Botanicals</div></div>
+        <div style="border:1px solid #eceef4;border-radius:14px;padding:26px;"><p style="font:italic 400 17px/1.5 'Newsreader';color:#2b2747;margin-bottom:20px;">"Tri has a unique ability to truly listen, then ask the right questions to help me find the right solution."</p><div style="font:600 14px/1 'Public Sans';color:#262161;">J. Fisher</div><div style="font:400 12.5px/1.4 'Public Sans';color:#8a8fa3;margin-top:3px;">CEO, Capital Financial Consultants Group</div></div>
+      </div>
+    </div>
+
+    <!-- final CTA + FAQ -->
+    <div style="background:linear-gradient(160deg,#1b1942,#262161 55%,#024794);color:#fff;">
+      <div style="max-width:1140px;margin:0 auto;padding:clamp(56px,7vw,92px) clamp(18px,5vw,40px);display:grid;grid-template-columns:1fr 1fr;gap:clamp(30px,5vw,64px);align-items:start;">
+        <div>
+          <div style="font:600 11.5px/1 'Public Sans';letter-spacing:.16em;text-transform:uppercase;color:#b8d8e6;margin-bottom:16px;">Your invitation</div>
+          <h2 style="font-size:clamp(30px,3.6vw,44px);line-height:1.06;color:#fff;margin-bottom:18px;">Here's to <em style="font-style:italic;color:#b8d8e6;">answering the call.</em></h2>
+          <p style="font-size:17px;line-height:1.55;color:#cdd6ee;margin-bottom:30px;max-width:26em;">The Fall 2026 cohort is opening a limited number of seats. Start with the 4-minute assessment — and see exactly how TLC meets you where you are.</p>
+          <div style="display:flex;gap:14px;flex-wrap:wrap;">
+            <button class="bp" onClick="{{ startAssess }}" style="border:none;cursor:pointer;background:#fff;color:#262161;font:700 15px/1 'Public Sans';padding:15px 24px;border-radius:9px;transition:.15s;">Start the Assessment →</button>
+            <button style="border:1px solid rgba(255,255,255,.4);cursor:pointer;background:transparent;color:#fff;font:600 15px/1 'Public Sans';padding:15px 22px;border-radius:9px;">Book a call with Tri</button>
+          </div>
+        </div>
+        <div style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:16px;overflow:hidden;">
+          <div class="faqitem" data-i="0" onClick="{{ setFaq }}" style="padding:18px 22px;border-bottom:1px solid rgba(255,255,255,.1);cursor:pointer;"><div style="display:flex;justify-content:space-between;gap:12px;font:600 15px/1.3 'Public Sans';color:#fff;">What is the time commitment?<span style="color:#b8d8e6;">+</span></div><sc-if value="{{ faq0 }}"><p style="font:400 14px/1.55 'Public Sans';color:#c2cbe6;margin-top:10px;">Weekly live virtual sessions on Thursdays, 9–11 AM PST, across six months — plus a 10-week independent intersession and two private 1:1 coaching sessions.</p></sc-if></div>
+          <div class="faqitem" data-i="1" onClick="{{ setFaq }}" style="padding:18px 22px;border-bottom:1px solid rgba(255,255,255,.1);cursor:pointer;"><div style="display:flex;justify-content:space-between;gap:12px;font:600 15px/1.3 'Public Sans';color:#fff;">Who is this for?<span style="color:#b8d8e6;">+</span></div><sc-if value="{{ faq1 }}"><p style="font:400 14px/1.55 'Public Sans';color:#c2cbe6;margin-top:10px;">Advancing leaders on the path to the C-Suite who want to lead through people — not around them. Cohorts can also be run privately for a single company's team.</p></sc-if></div>
+          <div class="faqitem" data-i="2" onClick="{{ setFaq }}" style="padding:18px 22px;border-bottom:1px solid rgba(255,255,255,.1);cursor:pointer;"><div style="display:flex;justify-content:space-between;gap:12px;font:600 15px/1.3 'Public Sans';color:#fff;">What's included?<span style="color:#b8d8e6;">+</span></div><sc-if value="{{ faq2 }}"><p style="font:400 14px/1.55 'Public Sans';color:#c2cbe6;margin-top:10px;">All weekly training and materials, a shipped physical workbook plus digital versions, two 1:1 coaching sessions, and lifetime access to the resource library after you complete.</p></sc-if></div>
+          <div class="faqitem" data-i="3" onClick="{{ setFaq }}" style="padding:18px 22px;cursor:pointer;"><div style="display:flex;justify-content:space-between;gap:12px;font:600 15px/1.3 'Public Sans';color:#fff;">What happens after I start the assessment?<span style="color:#b8d8e6;">+</span></div><sc-if value="{{ faq3 }}"><p style="font:400 14px/1.55 'Public Sans';color:#c2cbe6;margin-top:10px;">You'll see your personalized leadership snapshot and how TLC maps to it, then a short path to reserve your seat in the cohort and complete enrollment.</p></sc-if></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- footer -->
+    <div style="background:#fff;border-top:1px solid #eef0f5;">
+      <div style="max-width:1140px;margin:0 auto;padding:34px clamp(18px,5vw,40px);display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+        <img src="assets/wisdomtri-logo.jpg" alt="" style="width:30px;height:30px;object-fit:contain;">
+        <span style="font:600 14px/1 'Public Sans';color:#262161;">The Wisdom Tri</span>
+        <span style="margin-left:auto;font:400 13px/1.5 'Public Sans';color:#8a8fa3;">thewisdomtri.com&nbsp;·&nbsp;tri.nguyen@thewisdomtri.com</span>
+        <span style="font:400 13px/1.5 'Public Sans';color:#b3b7c6;width:100%;text-align:left;">© 2026 The Wisdom Tri · Do Good While Doing Well.</span>
+      </div>
+    </div>
+
+  </div>
+  </sc-if>
+
+  <!-- ================= ASSESSMENT ================= -->
+  <sc-if value="{{ isAssess }}" hint-placeholder-val="{{ true }}">
+  <div class="surface" style="background:#f4f6fb;min-height:calc(100vh - 42px);display:flex;flex-direction:column;align-items:center;padding:clamp(24px,5vw,60px) 20px 60px;">
+    <div style="width:100%;max-width:660px;">
+      <!-- header -->
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:26px;">
+        <img src="assets/wisdomtri-logo.jpg" alt="" style="width:40px;height:40px;object-fit:contain;">
+        <div><div style="font:600 13px/1.1 'Public Sans';color:#262161;">The Wisdom Tri</div><div style="font:600 10.5px/1.3 'Public Sans';letter-spacing:.14em;text-transform:uppercase;color:#9498ab;">Leadership Assessment</div></div>
+        <button onClick="{{ nav }}" data-k="surface" data-v="landing" style="margin-left:auto;border:none;background:transparent;cursor:pointer;font:600 12.5px/1 'Public Sans';color:#9498ab;">Exit</button>
+      </div>
+
+      <!-- QUESTION -->
+      <sc-if value="{{ isQuestion }}">
+      <div style="background:#fff;border:1px solid #e7eaf2;border-radius:18px;padding:clamp(24px,4vw,40px);box-shadow:0 12px 34px rgba(26,24,48,.07);">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <span style="font:600 11px/1 'Public Sans';letter-spacing:.08em;text-transform:uppercase;color:#024794;background:#eef4fc;padding:6px 11px;border-radius:100px;">{{ aTheme }}</span>
+          <span style="font:600 12.5px/1 'Public Sans';color:#9498ab;">Question {{ aNum }} of {{ aTotal }}</span>
+        </div>
+        <div style="height:6px;background:#e7ebf4;border-radius:100px;overflow:hidden;margin-bottom:26px;"><div style="width:{{ aProgress }};height:100%;background:linear-gradient(90deg,#024794,#662d91);border-radius:100px;transition:width .25s;"></div></div>
+        <h2 style="font-size:clamp(23px,3vw,30px);line-height:1.2;color:#1c1a33;margin-bottom:8px;">{{ aPrompt }}</h2>
+        <p style="font:400 14px/1.5 'Public Sans';color:#8a8fa3;margin-bottom:24px;">Answer honestly — your personalized plan is built from this. <span style="color:#b3b7c6;">[Placeholder question — swap in your own]</span></p>
+        <div style="display:flex;flex-direction:column;gap:11px;">
+          <sc-for list="{{ aOptions }}" as="opt" hint-placeholder-count="4">
+            <button class="aopt" data-q="{{ opt.q }}" data-v="{{ opt.value }}" data-selected="{{ opt.selected }}" onClick="{{ aAnswer }}" style="display:flex;align-items:center;gap:14px;width:100%;text-align:left;cursor:pointer;border:1.5px solid #e0e4ee;background:#fff;border-radius:12px;padding:16px 18px;font:500 16px/1.2 'Public Sans';color:#2b2747;">
+              <span class="adot" style="width:20px;height:20px;border-radius:50%;border:2px solid #c3c6d4;flex:none;"></span>{{ opt.label }}
+            </button>
+          </sc-for>
+        </div>
+        <div style="margin-top:22px;">
+          <sc-if value="{{ aBackVisible }}"><button onClick="{{ aBack }}" style="border:none;background:transparent;cursor:pointer;font:600 13.5px/1 'Public Sans';color:#62657a;">← Back</button></sc-if>
+        </div>
+      </div>
+      <p style="text-align:center;font:400 12.5px/1.5 'Public Sans';color:#a2a6b8;margin-top:18px;">Takes about 4 minutes · no account required to start</p>
+      </sc-if>
+
+      <!-- RESULTS / MIRROR -->
+      <sc-if value="{{ isResults }}">
+      <div style="background:#fff;border:1px solid #e7eaf2;border-radius:18px;padding:clamp(24px,4vw,40px);box-shadow:0 12px 34px rgba(26,24,48,.07);">
+        <div style="font:600 11px/1 'Public Sans';letter-spacing:.14em;text-transform:uppercase;color:#662d91;margin-bottom:12px;">Your leadership snapshot</div>
+        <h2 style="font-size:clamp(25px,3.2vw,34px);line-height:1.15;color:#1c1a33;margin-bottom:10px;">Here's what TLC was <em style="font-style:italic;color:#024794;">built to do for you.</em></h2>
+        <p style="font:400 15.5px/1.6 'Public Sans';color:#5a5e72;margin-bottom:24px;">Based on your answers, these are the areas stretching you most right now — and exactly how the program meets each one.</p>
+
+        <sc-if value="{{ hasGrowth }}">
+        <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:26px;">
+          <sc-for list="{{ aGrowth }}" as="g" hint-placeholder-count="3">
+            <div style="display:flex;gap:14px;align-items:flex-start;border:1px solid #eceef4;border-left:3px solid #024794;border-radius:12px;padding:16px 18px;">
+              <span style="width:34px;height:34px;border-radius:9px;flex:none;display:flex;align-items:center;justify-content:center;font:700 11px/1 'Public Sans';color:#fff;background:{{ g.color }};">{{ g.pillar }}</span>
+              <div><div style="font:600 15px/1.2 'Public Sans';color:#1c1a33;margin-bottom:3px;">{{ g.label }}</div><div style="font:400 14px/1.5 'Public Sans';color:#5a5e72;">{{ g.benefit }}</div></div>
+            </div>
+          </sc-for>
+        </div>
+        </sc-if>
+
+        <div style="background:#f6f8fc;border-radius:12px;padding:16px 18px;margin-bottom:26px;">
+          <div style="font:600 11px/1 'Public Sans';letter-spacing:.08em;text-transform:uppercase;color:#9498ab;margin-bottom:6px;">Strengths to build on</div>
+          <div style="font:500 15px/1.4 'Public Sans';color:#2b2747;">{{ aStrengths }}</div>
+        </div>
+
+        <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;">
+          <button onClick="{{ enterPortal }}" style="border:none;cursor:pointer;background:#024794;color:#fff;font:700 15px/1 'Public Sans';padding:15px 24px;border-radius:10px;">Continue to your portal →</button>
+          <button onClick="{{ aRestart }}" style="border:1px solid #d6d9e6;cursor:pointer;background:#fff;color:#2a2a3c;font:600 14px/1 'Public Sans';padding:15px 20px;border-radius:10px;">Retake</button>
+        </div>
+        <p style="font:400 12.5px/1.5 'Public Sans';color:#a2a6b8;margin-top:16px;">Next, you'll confirm your seat in the Fall 2026 cohort and complete enrollment.</p>
+      </div>
+      </sc-if>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ================= PARTICIPANT PORTAL ================= -->
+  <sc-if value="{{ isPart }}" hint-placeholder-val="{{ true }}">
+  <div class="surface" style="background:#eef1f7;min-height:calc(100vh - 42px);display:grid;grid-template-columns:236px 1fr;">
+
+    <!-- sidebar -->
+    <div style="background:#1b1942;color:#cdd0e8;padding:20px 14px;display:flex;flex-direction:column;gap:4px;">
+      <div style="display:flex;align-items:center;gap:9px;padding:4px 8px 16px;">
+        <img src="assets/wisdomtri-logo.jpg" alt="" style="width:30px;height:30px;object-fit:contain;background:#fff;border-radius:7px;padding:2px;">
+        <div><div style="font:600 13px/1.1 'Public Sans';color:#fff;">The Wisdom Tri</div><div style="font:500 10px/1.3 'Public Sans';color:#8f8cc0;letter-spacing:.04em;">PARTICIPANT</div></div>
+      </div>
+      <div style="background:#262161;border-radius:10px;padding:11px 12px;display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+        <div style="width:34px;height:34px;border-radius:50%;background:#b8d8e6;color:#262161;display:flex;align-items:center;justify-content:center;font:600 13px/1 'Public Sans';">JA</div>
+        <div><div style="font:600 12.5px/1.2 'Public Sans';color:#fff;">Jordan Avery</div><div style="font:500 10.5px/1.3 'Public Sans';color:#9b98ca;">Fall 2026 Cohort</div></div>
+      </div>
+      <div class="sidelink" style="display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:9px;background:#322c5c;color:#fff;cursor:pointer;"><span style="width:7px;height:7px;border-radius:2px;background:#b8d8e6;"></span><span style="font:600 13px/1 'Public Sans';">Home</span></div>
+      <div class="sidelink" style="display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:9px;cursor:pointer;"><span style="width:7px;height:7px;border-radius:2px;background:#4a4577;"></span><span style="font:500 13px/1 'Public Sans';">This Week</span></div>
+      <div class="sidelink" style="display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:9px;cursor:pointer;"><span style="width:7px;height:7px;border-radius:2px;background:#4a4577;"></span><span style="font:500 13px/1 'Public Sans';">Materials</span></div>
+      <div class="sidelink" style="display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:9px;cursor:pointer;"><span style="width:7px;height:7px;border-radius:2px;background:#4a4577;"></span><span style="font:500 13px/1 'Public Sans';">Progress</span></div>
+      <div class="sidelink" style="display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:9px;cursor:pointer;"><span style="width:7px;height:7px;border-radius:2px;background:#4a4577;"></span><span style="font:500 13px/1 'Public Sans';">Workbook</span></div>
+      <div class="sidelink" style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-radius:9px;cursor:pointer;"><span style="display:flex;align-items:center;gap:11px;"><span style="width:7px;height:7px;border-radius:2px;background:#4a4577;"></span><span style="font:500 13px/1 'Public Sans';">Messages</span></span><span style="background:#024794;color:#fff;font:600 10px/1 'Public Sans';padding:3px 6px;border-radius:100px;">2</span></div>
+      <div class="sidelink" style="display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:9px;cursor:pointer;"><span style="width:7px;height:7px;border-radius:2px;background:#4a4577;"></span><span style="font:500 13px/1 'Public Sans';">Resource Library</span></div>
+      <div class="sidelink" style="display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:9px;cursor:pointer;"><span style="width:7px;height:7px;border-radius:2px;background:#4a4577;"></span><span style="font:500 13px/1 'Public Sans';">Coaching</span></div>
+    </div>
+
+    <!-- main column -->
+    <div style="display:flex;flex-direction:column;min-width:0;">
+      <div style="background:#fff;border-bottom:1px solid #e7eaf2;padding:14px clamp(18px,3vw,30px);display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+        <div><div style="font:600 11px/1 'Public Sans';letter-spacing:.1em;text-transform:uppercase;color:#9498ab;">Participant Portal</div><div style="font:500 15px/1.2 'Newsreader';color:#1c1a33;margin-top:3px;">Your TLC home</div></div>
+        <div style="margin-left:auto;display:flex;align-items:center;gap:10px;">
+          <span style="font:500 11px/1 'Public Sans';color:#a2a6b8;">Journey phase</span>
+          <div style="display:flex;gap:3px;background:#eef1f7;padding:4px;border-radius:9px;border:1px solid #e3e7f1;">
+            <button class="phasetab" data-k="phase" data-v="before" data-active="{{ isBefore }}" onClick="{{ nav }}" style="border:none;cursor:pointer;background:transparent;color:#5a5e72;font:600 12px/1 'Public Sans';padding:7px 12px;border-radius:6px;">Before</button>
+            <button class="phasetab" data-k="phase" data-v="during" data-active="{{ isDuring }}" onClick="{{ nav }}" style="border:none;cursor:pointer;background:transparent;color:#5a5e72;font:600 12px/1 'Public Sans';padding:7px 12px;border-radius:6px;">During</button>
+            <button class="phasetab" data-k="phase" data-v="after" data-active="{{ isAfter }}" onClick="{{ nav }}" style="border:none;cursor:pointer;background:transparent;color:#5a5e72;font:600 12px/1 'Public Sans';padding:7px 12px;border-radius:6px;">After</button>
+          </div>
+        </div>
+      </div>
+
+      <div style="padding:clamp(18px,3vw,30px);">
+
+        <!-- ===== BEFORE ===== -->
+        <sc-if value="{{ isBefore }}">
+        <div style="display:grid;grid-template-columns:1fr 320px;gap:20px;align-items:start;">
+          <div style="display:flex;flex-direction:column;gap:18px;min-width:0;">
+            <div style="background:linear-gradient(150deg,#262161,#024794);border-radius:16px;padding:30px;color:#fff;">
+              <div style="font:600 11px/1 'Public Sans';letter-spacing:.14em;text-transform:uppercase;color:#b8d8e6;margin-bottom:12px;">You're enrolled · Fall 2026</div>
+              <h3 style="font-size:27px;color:#fff;margin-bottom:8px;">Your cohort begins in <em style="font-style:italic;color:#b8d8e6;">46 days.</em></h3>
+              <p style="font:400 14.5px/1.5 'Public Sans';color:#cdd6ee;margin-bottom:20px;">First live session: Thursday, Aug 13, 2026 · 9:00–11:00 AM PST. We'll send your join link and reminders as it gets closer.</p>
+              <div style="display:flex;gap:26px;">
+                <div><div style="font:500 26px/1 'Newsreader';">Aug 13</div><div style="font:500 11px/1.3 'Public Sans';color:#a9b8e0;margin-top:4px;">KICKOFF</div></div>
+                <div><div style="font:500 26px/1 'Newsreader';">24</div><div style="font:500 11px/1.3 'Public Sans';color:#a9b8e0;margin-top:4px;">WEEKLY SESSIONS</div></div>
+                <div><div style="font:500 26px/1 'Newsreader';">2</div><div style="font:500 11px/1.3 'Public Sans';color:#a9b8e0;margin-top:4px;">1:1 COACHING</div></div>
+              </div>
+            </div>
+            <div style="background:#fff;border:1px solid #e7eaf2;border-radius:14px;padding:22px;">
+              <h4 style="font-size:18px;color:#1c1a33;margin-bottom:4px;">While you wait</h4>
+              <p style="font:400 13.5px/1.5 'Public Sans';color:#7a7e92;margin-bottom:16px;">A few small steps to arrive ready.</p>
+              <div style="display:flex;flex-direction:column;gap:10px;">
+                <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:#f5fbf7;border:1px solid #d6ecdf;border-radius:10px;"><span style="width:20px;height:20px;border-radius:50%;background:#1c7d4d;color:#fff;display:flex;align-items:center;justify-content:center;font:700 12px/1 'Public Sans';">✓</span><span style="font:500 14px/1.3 'Public Sans';color:#2b2747;flex:1;">Complete your profile &amp; goals</span><span style="font:500 12px/1 'Public Sans';color:#1c7d4d;">Done</span></div>
+                <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:#fafbfd;border:1px solid #e7eaf2;border-radius:10px;"><span style="width:20px;height:20px;border-radius:50%;border:2px solid #c3c6d4;"></span><span style="font:500 14px/1.3 'Public Sans';color:#2b2747;flex:1;">Read the welcome letter from Tri</span><span style="font:600 12px/1 'Public Sans';color:#024794;cursor:pointer;">Open</span></div>
+                <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:#fafbfd;border:1px solid #e7eaf2;border-radius:10px;"><span style="width:20px;height:20px;border-radius:50%;border:2px solid #c3c6d4;"></span><span style="font:500 14px/1.3 'Public Sans';color:#2b2747;flex:1;">Add the session schedule to your calendar</span><span style="font:600 12px/1 'Public Sans';color:#024794;cursor:pointer;">View</span></div>
+                <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:#fafbfd;border:1px solid #e7eaf2;border-radius:10px;"><span style="width:20px;height:20px;border-radius:50%;border:2px solid #c3c6d4;"></span><span style="font:500 14px/1.3 'Public Sans';color:#2b2747;flex:1;">Preview the digital workbook</span><span style="font:600 12px/1 'Public Sans';color:#024794;cursor:pointer;">Preview</span></div>
+              </div>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:18px;">
+            <div style="background:#fff;border:1px solid #e7eaf2;border-radius:14px;padding:20px;">
+              <div style="font:600 11px/1 'Public Sans';letter-spacing:.1em;text-transform:uppercase;color:#9498ab;margin-bottom:14px;">Workbook shipment</div>
+              <div style="display:flex;align-items:center;gap:0;margin-bottom:12px;">
+                <div style="flex:1;text-align:center;"><div style="width:24px;height:24px;border-radius:50%;background:#1c7d4d;color:#fff;display:flex;align-items:center;justify-content:center;font:700 12px/1 'Public Sans';margin:0 auto;">✓</div><div style="font:500 10px/1.3 'Public Sans';color:#1c7d4d;margin-top:6px;">Ordered</div></div>
+                <div style="height:2px;flex:1;background:#1c7d4d;"></div>
+                <div style="flex:1;text-align:center;"><div style="width:24px;height:24px;border-radius:50%;background:#024794;color:#fff;display:flex;align-items:center;justify-content:center;font:700 11px/1 'Public Sans';margin:0 auto;">●</div><div style="font:600 10px/1.3 'Public Sans';color:#024794;margin-top:6px;">Printing</div></div>
+                <div style="height:2px;flex:1;background:#e0e3ee;"></div>
+                <div style="flex:1;text-align:center;"><div style="width:24px;height:24px;border-radius:50%;background:#eef1f7;border:1px solid #d3d7e4;margin:0 auto;"></div><div style="font:500 10px/1.3 'Public Sans';color:#a2a6b8;margin-top:6px;">Shipped</div></div>
+              </div>
+              <p style="font:400 12.5px/1.5 'Public Sans';color:#7a7e92;">Your physical workbook &amp; materials ship the week before kickoff. We'll email tracking.</p>
+            </div>
+            <div style="background:#f6f4fb;border:1px solid #e6dff3;border-radius:14px;padding:20px;">
+              <div style="display:flex;align-items:center;gap:11px;margin-bottom:12px;"><div style="width:40px;height:40px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;"><img src="assets/wisdomtri-logo.jpg" style="width:30px;height:30px;object-fit:contain;" alt=""></div><div><div style="font:600 13px/1.2 'Public Sans';color:#262161;">A note from Tri</div><div style="font:500 11px/1.3 'Public Sans';color:#9a7bb0;">Founder</div></div></div>
+              <p style="font:italic 400 14px/1.55 'Newsreader';color:#3a2e4d;">"Welcome — and thank you for answering the call. Come as you are; we'll build the rest together."</p>
+            </div>
+          </div>
+        </div>
+        </sc-if>
+
+        <!-- ===== DURING ===== -->
+        <sc-if value="{{ isDuring }}">
+        <div style="margin-bottom:18px;">
+          <h3 style="font-size:24px;color:#1c1a33;margin-bottom:4px;">Welcome back, Jordan.</h3>
+          <p style="font:500 13.5px/1.4 'Public Sans';color:#7a7e92;">Fall 2026 Cohort · Week 7 of 24</p>
+          <div style="margin-top:14px;height:9px;background:#e3e7f1;border-radius:100px;overflow:hidden;max-width:520px;"><div style="width:29%;height:100%;background:linear-gradient(90deg,#024794,#662d91);border-radius:100px;"></div></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 320px;gap:20px;align-items:start;">
+          <div style="display:flex;flex-direction:column;gap:18px;min-width:0;">
+            <div style="background:#fff;border:1px solid #e7eaf2;border-radius:16px;padding:24px;">
+              <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;"><span style="background:#262161;color:#fff;font:600 11px/1 'Public Sans';letter-spacing:.06em;padding:5px 9px;border-radius:6px;">IQ · BUILD THE TEAM</span><span style="font:500 12px/1 'Public Sans';color:#9498ab;">Week 7</span></div>
+              <h3 style="font-size:25px;color:#1c1a33;margin-bottom:6px;">Hard Conversations</h3>
+              <p style="font:400 14.5px/1.55 'Public Sans';color:#5a5e72;margin-bottom:20px;max-width:42em;">Prepare for and hold the conversations you've been avoiding — with structure, intention, and confidence.</p>
+              <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px;">
+                <div style="display:flex;align-items:center;gap:12px;padding:13px 15px;background:#f5fbf7;border:1px solid #d6ecdf;border-radius:10px;"><span style="width:20px;height:20px;border-radius:50%;background:#1c7d4d;color:#fff;display:flex;align-items:center;justify-content:center;font:700 12px/1 'Public Sans';">✓</span><span style="font:500 14px/1.3 'Public Sans';color:#2b2747;flex:1;">Pre-work: read &amp; reflect</span></div>
+                <div style="display:flex;align-items:center;gap:12px;padding:13px 15px;background:#fafbfd;border:1px solid #e7eaf2;border-radius:10px;"><span style="width:20px;height:20px;border-radius:50%;border:2px solid #c3c6d4;"></span><span style="font:500 14px/1.3 'Public Sans';color:#2b2747;flex:1;">Worksheet 7 — Conversation Map</span><span style="display:flex;gap:10px;"><span style="font:600 12px/1 'Public Sans';color:#024794;cursor:pointer;">Download PDF</span><span style="font:600 12px/1 'Public Sans';color:#9498ab;cursor:pointer;">Print</span></span></div>
+                <div style="display:flex;align-items:center;gap:12px;padding:13px 15px;background:#fafbfd;border:1px solid #e7eaf2;border-radius:10px;"><span style="width:20px;height:20px;border-radius:50%;border:2px solid #c3c6d4;"></span><span style="font:500 14px/1.3 'Public Sans';color:#2b2747;flex:1;">Live session — Thursday, 9:00 AM PST</span></div>
+              </div>
+              <button style="border:none;cursor:pointer;background:#024794;color:#fff;font:600 14px/1 'Public Sans';padding:13px 20px;border-radius:9px;">Mark week complete</button>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+              <div style="background:#fff;border:1px solid #e7eaf2;border-radius:14px;padding:18px;"><div style="font:600 11px/1 'Public Sans';letter-spacing:.1em;text-transform:uppercase;color:#9498ab;margin-bottom:10px;">Up next</div><div style="font:500 16px/1.2 'Newsreader';color:#1c1a33;">Week 8 · Accountability</div><p style="font:400 12.5px/1.4 'Public Sans';color:#7a7e92;margin-top:5px;">Unlocks next Thursday — raise ownership without chasing.</p></div>
+              <div style="background:#fff;border:1px solid #e7eaf2;border-radius:14px;padding:18px;"><div style="font:600 11px/1 'Public Sans';letter-spacing:.1em;text-transform:uppercase;color:#9498ab;margin-bottom:10px;">Recently completed</div><div style="font:500 16px/1.2 'Newsreader';color:#1c1a33;">Week 6 · Clarity &amp; Expectations</div><p style="font:400 12.5px/1.4 'Public Sans';color:#7a7e92;margin-top:5px;">Session notes &amp; recording available.</p></div>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:18px;">
+            <div style="background:#262161;border-radius:14px;padding:20px;color:#fff;">
+              <div style="font:600 11px/1 'Public Sans';letter-spacing:.1em;text-transform:uppercase;color:#b8d8e6;margin-bottom:12px;">This week's live session</div>
+              <div style="font:500 19px/1.2 'Newsreader';margin-bottom:4px;">Thursday · 9:00 AM PST</div>
+              <div style="font:400 12.5px/1.4 'Public Sans';color:#bcc6e6;margin-bottom:16px;">Hard Conversations · with Tri</div>
+              <button style="width:100%;border:none;cursor:pointer;background:#fff;color:#262161;font:700 13px/1 'Public Sans';padding:12px;border-radius:8px;">Join session</button>
+            </div>
+            <div style="background:#fff;border:1px solid #e7eaf2;border-radius:14px;padding:18px;">
+              <div style="font:600 11px/1 'Public Sans';letter-spacing:.1em;text-transform:uppercase;color:#9498ab;margin-bottom:12px;">Workbook</div>
+              <div style="display:flex;align-items:center;gap:10px;"><span style="width:34px;height:34px;border-radius:50%;background:#f5fbf7;border:1px solid #d6ecdf;color:#1c7d4d;display:flex;align-items:center;justify-content:center;font:700 14px/1 'Public Sans';">✓</span><div><div style="font:600 13px/1.2 'Public Sans';color:#1c1a33;">Delivered</div><div style="font:400 11.5px/1.3 'Public Sans';color:#7a7e92;">Digital version always available</div></div></div>
+            </div>
+            <div style="background:#f6f4fb;border:1px solid #e6dff3;border-radius:14px;padding:18px;">
+              <div style="font:600 11px/1 'Public Sans';letter-spacing:.1em;text-transform:uppercase;color:#8a5fb0;margin-bottom:8px;">Next coaching 1:1</div>
+              <div style="font:500 17px/1.2 'Newsreader';color:#3a2e4d;">Nov 12 · 2:00 PM PST</div>
+              <div style="font:600 12px/1 'Public Sans';color:#662d91;margin-top:8px;cursor:pointer;">Reschedule</div>
+            </div>
+          </div>
+        </div>
+        </sc-if>
+
+        <!-- ===== AFTER ===== -->
+        <sc-if value="{{ isAfter }}">
+        <div style="display:grid;grid-template-columns:1fr 320px;gap:20px;align-items:start;">
+          <div style="display:flex;flex-direction:column;gap:18px;min-width:0;">
+            <div style="background:linear-gradient(150deg,#662d91,#262161);border-radius:16px;padding:30px;color:#fff;">
+              <div style="font:600 11px/1 'Public Sans';letter-spacing:.14em;text-transform:uppercase;color:#e2cdf0;margin-bottom:12px;">Program complete · Feb 2027</div>
+              <h3 style="font-size:27px;color:#fff;margin-bottom:8px;">You answered the call, <em style="font-style:italic;color:#e2cdf0;">Jordan.</em></h3>
+              <p style="font:400 14.5px/1.5 'Public Sans';color:#e6ddf2;max-width:40em;">You completed all 24 weeks of TLC. Your materials, recordings, and the full resource library stay open to you — for whenever you need them.</p>
+            </div>
+            <div style="background:#fff;border:1px solid #e7eaf2;border-radius:14px;padding:22px;">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;"><h4 style="font-size:18px;color:#1c1a33;">Resource library</h4><span style="font:500 12px/1 'Public Sans';color:#9498ab;">Always accessible · 24 modules</span></div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                <div style="display:flex;gap:12px;padding:14px;border:1px solid #eceef4;border-radius:11px;"><img src="assets/selfdiscovery.png" style="width:34px;height:34px;flex:none;" alt=""><div><div style="font:600 13.5px/1.2 'Public Sans';color:#1c1a33;">EQ · Build the Leader</div><div style="font:400 11.5px/1.4 'Public Sans';color:#7a7e92;margin-top:3px;">8 modules · workbook · recordings</div></div></div>
+                <div style="display:flex;gap:12px;padding:14px;border:1px solid #eceef4;border-radius:11px;"><img src="assets/trust.png" style="width:34px;height:34px;flex:none;" alt=""><div><div style="font:600 13.5px/1.2 'Public Sans';color:#1c1a33;">IQ · Build the Team</div><div style="font:400 11.5px/1.4 'Public Sans';color:#7a7e92;margin-top:3px;">10 modules · workbook · recordings</div></div></div>
+                <div style="display:flex;gap:12px;padding:14px;border:1px solid #eceef4;border-radius:11px;"><img src="assets/grit.png" style="width:34px;height:34px;flex:none;" alt=""><div><div style="font:600 13.5px/1.2 'Public Sans';color:#1c1a33;">MQ™ · Future Leaders</div><div style="font:400 11.5px/1.4 'Public Sans';color:#7a7e92;margin-top:3px;">6 modules · workbook · recordings</div></div></div>
+                <div style="display:flex;gap:12px;padding:14px;border:1px solid #eceef4;border-radius:11px;"><img src="assets/inspire.png" style="width:34px;height:34px;flex:none;" alt=""><div><div style="font:600 13.5px/1.2 'Public Sans';color:#1c1a33;">Coaching notes</div><div style="font:400 11.5px/1.4 'Public Sans';color:#7a7e92;margin-top:3px;">Your 1:1 summaries &amp; actions</div></div></div>
+              </div>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:18px;">
+            <div style="background:#fff;border:1px solid #e7eaf2;border-radius:14px;padding:20px;">
+              <div style="font:600 11px/1 'Public Sans';letter-spacing:.1em;text-transform:uppercase;color:#9498ab;margin-bottom:12px;">Your journey</div>
+              <div style="display:flex;align-items:baseline;gap:8px;"><span style="font:500 34px/1 'Newsreader';color:#024794;">100%</span><span style="font:500 13px/1 'Public Sans';color:#7a7e92;">complete</span></div>
+              <div style="margin-top:10px;height:8px;background:#e3e7f1;border-radius:100px;overflow:hidden;"><div style="width:100%;height:100%;background:linear-gradient(90deg,#024794,#662d91);"></div></div>
+              <div style="font:400 12px/1.4 'Public Sans';color:#7a7e92;margin-top:10px;">24 of 24 weeks · 2 coaching sessions · Aug 2026–Feb 2027</div>
+            </div>
+            <div style="background:#fff;border:1px solid #e7eaf2;border-radius:14px;padding:20px;">
+              <div style="font:600 11px/1 'Public Sans';letter-spacing:.1em;text-transform:uppercase;color:#9498ab;margin-bottom:10px;">Stay connected</div>
+              <p style="font:400 13px/1.5 'Public Sans';color:#62657a;margin-bottom:12px;">The portal remains your home base — messages and the library stay open after completion.</p>
+              <button style="width:100%;border:1px solid #d6d9e6;cursor:pointer;background:#fff;color:#262161;font:600 13px/1 'Public Sans';padding:11px;border-radius:8px;">Message Tri</button>
+            </div>
+          </div>
+        </div>
+        </sc-if>
+
+      </div>
+    </div>
+  </div>
+  </sc-if>
+  <!-- ================= TRAINER ================= -->
+  <sc-if value="{{ isTrainer }}" hint-placeholder-val="{{ true }}">
+  <div class="surface" style="background:#eef1f7;min-height:calc(100vh - 42px);display:grid;grid-template-columns:236px 1fr;">
+
+    <div style="background:#16142b;color:#cdd0e8;padding:20px 14px;display:flex;flex-direction:column;gap:4px;">
+      <div style="display:flex;align-items:center;gap:9px;padding:4px 8px 16px;">
+        <img src="assets/wisdomtri-logo.jpg" alt="" style="width:30px;height:30px;object-fit:contain;background:#fff;border-radius:7px;padding:2px;">
+        <div><div style="font:600 13px/1.1 'Public Sans';color:#fff;">The Wisdom Tri</div><div style="font:500 10px/1.3 'Public Sans';color:#8f8cc0;letter-spacing:.04em;">TRAINER</div></div>
+      </div>
+      <div style="background:#241f44;border-radius:10px;padding:11px 12px;display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+        <div style="width:34px;height:34px;border-radius:50%;background:#662d91;color:#fff;display:flex;align-items:center;justify-content:center;font:600 13px/1 'Public Sans';">TN</div>
+        <div><div style="font:600 12.5px/1.2 'Public Sans';color:#fff;">Tri Nguyen</div><div style="font:500 10.5px/1.3 'Public Sans';color:#9b98ca;">Lead Trainer</div></div>
+      </div>
+      <div class="sidelink" style="display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:9px;background:#2c2752;color:#fff;cursor:pointer;"><span style="width:7px;height:7px;border-radius:2px;background:#b8d8e6;"></span><span style="font:600 13px/1 'Public Sans';">Cohort Overview</span></div>
+      <div class="sidelink" style="display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:9px;cursor:pointer;"><span style="width:7px;height:7px;border-radius:2px;background:#4a4577;"></span><span style="font:500 13px/1 'Public Sans';">Participants</span></div>
+      <div class="sidelink" style="display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:9px;cursor:pointer;"><span style="width:7px;height:7px;border-radius:2px;background:#4a4577;"></span><span style="font:500 13px/1 'Public Sans';">Resources</span></div>
+      <div class="sidelink" style="display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:9px;cursor:pointer;"><span style="width:7px;height:7px;border-radius:2px;background:#4a4577;"></span><span style="font:500 13px/1 'Public Sans';">Events &amp; Sessions</span></div>
+      <div class="sidelink" style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-radius:9px;cursor:pointer;"><span style="display:flex;align-items:center;gap:11px;"><span style="width:7px;height:7px;border-radius:2px;background:#4a4577;"></span><span style="font:500 13px/1 'Public Sans';">Messages</span></span><span style="background:#024794;color:#fff;font:600 10px/1 'Public Sans';padding:3px 6px;border-radius:100px;">5</span></div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;min-width:0;">
+      <div style="background:#fff;border-bottom:1px solid #e7eaf2;padding:14px clamp(18px,3vw,30px);display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+        <div><div style="font:600 11px/1 'Public Sans';letter-spacing:.1em;text-transform:uppercase;color:#9498ab;">Trainer Workspace</div><div style="font:500 15px/1.2 'Newsreader';color:#1c1a33;margin-top:3px;">Fall 2026 Cohort · Week 7</div></div>
+        <div style="margin-left:auto;display:flex;gap:10px;">
+          <button style="border:1px solid #d6d9e6;cursor:pointer;background:#fff;color:#262161;font:600 12.5px/1 'Public Sans';padding:10px 15px;border-radius:8px;">+ New event</button>
+          <button style="border:none;cursor:pointer;background:#024794;color:#fff;font:600 12.5px/1 'Public Sans';padding:10px 15px;border-radius:8px;">Message cohort</button>
+        </div>
+      </div>
+
+      <div style="padding:clamp(18px,3vw,30px);display:flex;flex-direction:column;gap:20px;">
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;">
+          <div style="background:#fff;border:1px solid #e7eaf2;border-radius:13px;padding:18px;"><div style="font:500 30px/1 'Newsreader';color:#024794;">18</div><div style="font:500 12px/1.3 'Public Sans';color:#7a7e92;margin-top:6px;">Active participants</div></div>
+          <div style="background:#fff;border:1px solid #e7eaf2;border-radius:13px;padding:18px;"><div style="font:500 30px/1 'Newsreader';color:#262161;">82%</div><div style="font:500 12px/1.3 'Public Sans';color:#7a7e92;margin-top:6px;">Avg. weekly completion</div></div>
+          <div style="background:#fff;border:1px solid #e7eaf2;border-radius:13px;padding:18px;"><div style="font:500 30px/1 'Newsreader';color:#662d91;">3</div><div style="font:500 12px/1.3 'Public Sans';color:#7a7e92;margin-top:6px;">Need a nudge</div></div>
+          <div style="background:#fff;border:1px solid #e7eaf2;border-radius:13px;padding:18px;"><div style="font:500 30px/1 'Newsreader';color:#1c1a33;">Thu</div><div style="font:500 12px/1.3 'Public Sans';color:#7a7e92;margin-top:6px;">Next live session</div></div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 340px;gap:20px;align-items:start;">
+          <div style="background:#fff;border:1px solid #e7eaf2;border-radius:14px;overflow:hidden;min-width:0;">
+            <div style="padding:18px 20px;border-bottom:1px solid #eef0f5;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;"><h4 style="font-size:17px;color:#1c1a33;">Participants &amp; progress</h4><span style="font:500 12px/1 'Public Sans';color:#9498ab;">Acme Corp · Northwind · 3 individuals</span></div>
+            <div style="display:grid;grid-template-columns:1.7fr 1fr 1.3fr 0.8fr;font:600 10.5px/1 'Public Sans';letter-spacing:.07em;text-transform:uppercase;color:#9498ab;padding:11px 20px;border-bottom:1px solid #eef0f5;background:#fafbfd;"><span>Participant</span><span>Company</span><span>Progress</span><span>Status</span></div>
+            <div style="display:grid;grid-template-columns:1.7fr 1fr 1.3fr 0.8fr;align-items:center;padding:12px 20px;border-bottom:1px solid #f1f3f8;"><span style="display:flex;align-items:center;gap:10px;"><span style="width:30px;height:30px;border-radius:50%;background:#b8d8e6;color:#262161;display:flex;align-items:center;justify-content:center;font:600 11px/1 'Public Sans';">JA</span><span style="font:600 13px/1.2 'Public Sans';color:#1c1a33;">Jordan Avery</span></span><span style="font:400 12.5px/1 'Public Sans';color:#62657a;">Acme Corp</span><span style="height:6px;background:#e3e7f1;border-radius:100px;overflow:hidden;max-width:130px;"><span style="display:block;width:75%;height:100%;background:#024794;"></span></span><span style="font:600 11px/1 'Public Sans';color:#1c7d4d;">On track</span></div>
+            <div style="display:grid;grid-template-columns:1.7fr 1fr 1.3fr 0.8fr;align-items:center;padding:12px 20px;border-bottom:1px solid #f1f3f8;"><span style="display:flex;align-items:center;gap:10px;"><span style="width:30px;height:30px;border-radius:50%;background:#d9cde8;color:#662d91;display:flex;align-items:center;justify-content:center;font:600 11px/1 'Public Sans';">MR</span><span style="font:600 13px/1.2 'Public Sans';color:#1c1a33;">Maya Rao</span></span><span style="font:400 12.5px/1 'Public Sans';color:#62657a;">Acme Corp</span><span style="height:6px;background:#e3e7f1;border-radius:100px;overflow:hidden;max-width:130px;"><span style="display:block;width:88%;height:100%;background:#024794;"></span></span><span style="font:600 11px/1 'Public Sans';color:#1c7d4d;">On track</span></div>
+            <div style="display:grid;grid-template-columns:1.7fr 1fr 1.3fr 0.8fr;align-items:center;padding:12px 20px;border-bottom:1px solid #f1f3f8;"><span style="display:flex;align-items:center;gap:10px;"><span style="width:30px;height:30px;border-radius:50%;background:#cfe0c9;color:#3a6b2e;display:flex;align-items:center;justify-content:center;font:600 11px/1 'Public Sans';">DC</span><span style="font:600 13px/1.2 'Public Sans';color:#1c1a33;">Devin Cole</span></span><span style="font:400 12.5px/1 'Public Sans';color:#62657a;">Northwind</span><span style="height:6px;background:#e3e7f1;border-radius:100px;overflow:hidden;max-width:130px;"><span style="display:block;width:42%;height:100%;background:#e0a32e;"></span></span><span style="font:600 11px/1 'Public Sans';color:#b8860b;">Behind</span></div>
+            <div style="display:grid;grid-template-columns:1.7fr 1fr 1.3fr 0.8fr;align-items:center;padding:12px 20px;"><span style="display:flex;align-items:center;gap:10px;"><span style="width:30px;height:30px;border-radius:50%;background:#e8cdd5;color:#9a2d4f;display:flex;align-items:center;justify-content:center;font:600 11px/1 'Public Sans';">SP</span><span style="font:600 13px/1.2 'Public Sans';color:#1c1a33;">Sam Park</span></span><span style="font:400 12.5px/1 'Public Sans';color:#62657a;">Independent</span><span style="height:6px;background:#e3e7f1;border-radius:100px;overflow:hidden;max-width:130px;"><span style="display:block;width:67%;height:100%;background:#024794;"></span></span><span style="font:600 11px/1 'Public Sans';color:#1c7d4d;">On track</span></div>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:18px;">
+            <div style="background:#fff;border:1px solid #e7eaf2;border-radius:14px;padding:20px;">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;"><div style="font:600 11px/1 'Public Sans';letter-spacing:.1em;text-transform:uppercase;color:#9498ab;">Upcoming events</div><span style="font:600 12px/1 'Public Sans';color:#024794;cursor:pointer;">Manage</span></div>
+              <div style="display:flex;flex-direction:column;gap:10px;">
+                <div style="display:flex;gap:12px;align-items:center;"><div style="width:42px;text-align:center;flex:none;"><div style="font:600 10px/1 'Public Sans';color:#9498ab;">AUG</div><div style="font:500 19px/1 'Newsreader';color:#262161;">13</div></div><div><div style="font:600 13px/1.2 'Public Sans';color:#1c1a33;">Wk 7 · Hard Conversations</div><div style="font:400 11.5px/1.3 'Public Sans';color:#7a7e92;">Thu 9:00 AM PST · live virtual</div></div></div>
+                <div style="display:flex;gap:12px;align-items:center;"><div style="width:42px;text-align:center;flex:none;"><div style="font:600 10px/1 'Public Sans';color:#9498ab;">AUG</div><div style="font:500 19px/1 'Newsreader';color:#262161;">20</div></div><div><div style="font:600 13px/1.2 'Public Sans';color:#1c1a33;">Wk 8 · Accountability</div><div style="font:400 11.5px/1.3 'Public Sans';color:#7a7e92;">Thu 9:00 AM PST · live virtual</div></div></div>
+                <div style="display:flex;gap:12px;align-items:center;"><div style="width:42px;text-align:center;flex:none;"><div style="font:600 10px/1 'Public Sans';color:#9498ab;">AUG</div><div style="font:500 19px/1 'Newsreader';color:#662d91;">25</div></div><div><div style="font:600 13px/1.2 'Public Sans';color:#1c1a33;">1:1 Coaching · Devin Cole</div><div style="font:400 11.5px/1.3 'Public Sans';color:#7a7e92;">Tue 2:00 PM PST</div></div></div>
+              </div>
+            </div>
+            <div style="background:#fff;border:1px solid #e7eaf2;border-radius:14px;padding:20px;">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;"><div style="font:600 11px/1 'Public Sans';letter-spacing:.1em;text-transform:uppercase;color:#9498ab;">Resources</div><span style="font:600 12px/1 'Public Sans';color:#024794;cursor:pointer;">+ Upload</span></div>
+              <div style="display:flex;flex-direction:column;gap:9px;">
+                <div style="display:flex;align-items:center;gap:11px;padding:10px 12px;border:1px solid #eceef4;border-radius:10px;"><span style="width:30px;height:30px;border-radius:7px;background:#eef2fb;color:#024794;display:flex;align-items:center;justify-content:center;font:700 11px/1 'Public Sans';">PDF</span><span style="font:600 12.5px/1.2 'Public Sans';color:#1c1a33;flex:1;">Worksheet 7 — Conversation Map</span><span style="font:500 11px/1 'Public Sans';color:#9498ab;">Published</span></div>
+                <div style="display:flex;align-items:center;gap:11px;padding:10px 12px;border:1px solid #eceef4;border-radius:10px;"><span style="width:30px;height:30px;border-radius:7px;background:#f3eefb;color:#662d91;display:flex;align-items:center;justify-content:center;font:700 11px/1 'Public Sans';">MP4</span><span style="font:600 12.5px/1.2 'Public Sans';color:#1c1a33;flex:1;">Wk 6 session recording</span><span style="font:500 11px/1 'Public Sans';color:#9498ab;">Published</span></div>
+                <div style="display:flex;align-items:center;gap:11px;padding:10px 12px;border:1px solid #eceef4;border-radius:10px;background:#fffdf5;"><span style="width:30px;height:30px;border-radius:7px;background:#fbf3df;color:#b8860b;display:flex;align-items:center;justify-content:center;font:700 11px/1 'Public Sans';">PDF</span><span style="font:600 12.5px/1.2 'Public Sans';color:#1c1a33;flex:1;">Worksheet 8 — draft</span><span style="font:500 11px/1 'Public Sans';color:#b8860b;">Draft</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  </sc-if>
+  <!-- ================= ADMIN ================= -->
+  <sc-if value="{{ isAdmin }}" hint-placeholder-val="{{ true }}">
+  <div class="surface" style="background:#eef1f7;min-height:calc(100vh - 42px);display:grid;grid-template-columns:236px 1fr;">
+
+    <div style="background:#0f0e22;color:#cdd0e8;padding:20px 14px;display:flex;flex-direction:column;gap:4px;">
+      <div style="display:flex;align-items:center;gap:9px;padding:4px 8px 16px;">
+        <img src="assets/wisdomtri-logo.jpg" alt="" style="width:30px;height:30px;object-fit:contain;background:#fff;border-radius:7px;padding:2px;">
+        <div><div style="font:600 13px/1.1 'Public Sans';color:#fff;">The Wisdom Tri</div><div style="font:500 10px/1.3 'Public Sans';color:#8f8cc0;letter-spacing:.04em;">ADMIN</div></div>
+      </div>
+      <div class="sidelink" style="display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:9px;background:#26234a;color:#fff;cursor:pointer;"><span style="width:7px;height:7px;border-radius:2px;background:#b8d8e6;"></span><span style="font:600 13px/1 'Public Sans';">Overview</span></div>
+      <div class="sidelink" style="display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:9px;cursor:pointer;"><span style="width:7px;height:7px;border-radius:2px;background:#4a4577;"></span><span style="font:500 13px/1 'Public Sans';">Companies</span></div>
+      <div class="sidelink" style="display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:9px;cursor:pointer;"><span style="width:7px;height:7px;border-radius:2px;background:#4a4577;"></span><span style="font:500 13px/1 'Public Sans';">Cohorts</span></div>
+      <div class="sidelink" style="display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:9px;cursor:pointer;"><span style="width:7px;height:7px;border-radius:2px;background:#4a4577;"></span><span style="font:500 13px/1 'Public Sans';">Participants</span></div>
+      <div class="sidelink" style="display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:9px;cursor:pointer;"><span style="width:7px;height:7px;border-radius:2px;background:#4a4577;"></span><span style="font:500 13px/1 'Public Sans';">Trainers</span></div>
+      <div class="sidelink" style="display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:9px;cursor:pointer;"><span style="width:7px;height:7px;border-radius:2px;background:#4a4577;"></span><span style="font:500 13px/1 'Public Sans';">Assessment</span></div>
+      <div class="sidelink" style="display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:9px;cursor:pointer;"><span style="width:7px;height:7px;border-radius:2px;background:#4a4577;"></span><span style="font:500 13px/1 'Public Sans';">Resources &amp; Events</span></div>
+      <div class="sidelink" style="display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:9px;cursor:pointer;"><span style="width:7px;height:7px;border-radius:2px;background:#4a4577;"></span><span style="font:500 13px/1 'Public Sans';">Analytics</span></div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;min-width:0;">
+      <div style="background:#fff;border-bottom:1px solid #e7eaf2;padding:14px clamp(18px,3vw,30px);display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+        <div><div style="font:600 11px/1 'Public Sans';letter-spacing:.1em;text-transform:uppercase;color:#9498ab;">Admin Console</div><div style="font:500 15px/1.2 'Newsreader';color:#1c1a33;margin-top:3px;">System overview</div></div>
+        <div style="margin-left:auto;display:flex;gap:10px;">
+          <button style="border:1px solid #d6d9e6;cursor:pointer;background:#fff;color:#262161;font:600 12.5px/1 'Public Sans';padding:10px 15px;border-radius:8px;">+ New cohort</button>
+          <button style="border:none;cursor:pointer;background:#024794;color:#fff;font:600 12.5px/1 'Public Sans';padding:10px 15px;border-radius:8px;">+ Add company</button>
+        </div>
+      </div>
+
+      <div style="padding:clamp(18px,3vw,30px);display:flex;flex-direction:column;gap:20px;">
+        <!-- KPI row -->
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;">
+          <div style="background:#fff;border:1px solid #e7eaf2;border-radius:13px;padding:18px;"><div style="font:500 30px/1 'Newsreader';color:#024794;">3</div><div style="font:500 12px/1.3 'Public Sans';color:#7a7e92;margin-top:6px;">Active cohorts</div></div>
+          <div style="background:#fff;border:1px solid #e7eaf2;border-radius:13px;padding:18px;"><div style="font:500 30px/1 'Newsreader';color:#262161;">12</div><div style="font:500 12px/1.3 'Public Sans';color:#7a7e92;margin-top:6px;">Client companies</div></div>
+          <div style="background:#fff;border:1px solid #e7eaf2;border-radius:13px;padding:18px;"><div style="font:500 30px/1 'Newsreader';color:#662d91;">214</div><div style="font:500 12px/1.3 'Public Sans';color:#7a7e92;margin-top:6px;">Enrolled participants</div></div>
+          <div style="background:#fff;border:1px solid #e7eaf2;border-radius:13px;padding:18px;"><div style="font:500 30px/1 'Newsreader';color:#1c1a33;">6</div><div style="font:500 12px/1.3 'Public Sans';color:#7a7e92;margin-top:6px;">Trainers</div></div>
+        </div>
+
+        <!-- hierarchy model -->
+        <div style="background:#fff;border:1px solid #e7eaf2;border-radius:14px;padding:22px;">
+          <div style="font:600 11px/1 'Public Sans';letter-spacing:.1em;text-transform:uppercase;color:#9498ab;margin-bottom:4px;">Access hierarchy</div>
+          <h4 style="font-size:18px;color:#1c1a33;margin-bottom:16px;">Four tiers, one tenant tree</h4>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;">
+            <div style="border:1px solid #d8def0;border-top:3px solid #024794;border-radius:11px;padding:16px;background:#fafbff;"><div style="font:600 10.5px/1 'Public Sans';letter-spacing:.08em;color:#024794;margin-bottom:8px;">TIER 1</div><div style="font:600 14px/1.2 'Public Sans';color:#1c1a33;margin-bottom:6px;">Companies</div><p style="font:400 12px/1.45 'Public Sans';color:#6c7088;">Corporate clients. Own seats, billing entity, sub-users.</p></div>
+            <div style="border:1px solid #d8def0;border-top:3px solid #262161;border-radius:11px;padding:16px;background:#fafbff;"><div style="font:600 10.5px/1 'Public Sans';letter-spacing:.08em;color:#262161;margin-bottom:8px;">TIER 2</div><div style="font:600 14px/1.2 'Public Sans';color:#1c1a33;margin-bottom:6px;">Participants</div><p style="font:400 12px/1.45 'Public Sans';color:#6c7088;">Individual logins under a company. Take the program.</p></div>
+            <div style="border:1px solid #d8def0;border-top:3px solid #b8860b;border-radius:11px;padding:16px;background:#fffdf6;"><div style="font:600 10.5px/1 'Public Sans';letter-spacing:.08em;color:#b8860b;margin-bottom:8px;">TIER 3</div><div style="font:600 14px/1.2 'Public Sans';color:#1c1a33;margin-bottom:6px;">Company Viewers</div><p style="font:400 12px/1.45 'Public Sans';color:#6c7088;">Read-only. Client managers watch their people's progress.</p></div>
+            <div style="border:1px solid #d8def0;border-top:3px solid #662d91;border-radius:11px;padding:16px;background:#fdfaff;"><div style="font:600 10.5px/1 'Public Sans';letter-spacing:.08em;color:#662d91;margin-bottom:8px;">TIER 4</div><div style="font:600 14px/1.2 'Public Sans';color:#1c1a33;margin-bottom:6px;">Trainers &amp; Admins</div><p style="font:400 12px/1.45 'Public Sans';color:#6c7088;">Operational roles. Run cohorts, content, and the system.</p></div>
+          </div>
+        </div>
+
+        <!-- assessment builder -->
+        <div style="background:#fff;border:1px solid #e7eaf2;border-radius:14px;padding:22px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:4px;">
+            <div><div style="font:600 11px/1 'Public Sans';letter-spacing:.1em;text-transform:uppercase;color:#9498ab;margin-bottom:5px;">Assessment Builder</div><h4 style="font-size:18px;color:#1c1a33;">Signup assessment questions</h4></div>
+            <button onClick="{{ addQ }}" style="border:none;cursor:pointer;background:#024794;color:#fff;font:600 12.5px/1 'Public Sans';padding:11px 16px;border-radius:8px;">+ Add question</button>
+          </div>
+          <p style="font:400 13px/1.5 'Public Sans';color:#7a7e92;margin-bottom:16px;max-width:54em;">Questions a prospect answers during signup. Each maps to the TLC benefit shown back on their results screen. Add or remove items here — the live assessment updates instantly.</p>
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <sc-for list="{{ adminQuestions }}" as="q" hint-placeholder-count="5">
+              <div style="display:flex;align-items:center;gap:14px;border:1px solid #eceef4;border-radius:11px;padding:13px 16px;">
+                <span style="font:600 13px/1 'Public Sans';color:#c3c6d4;width:18px;flex:none;text-align:center;">{{ q.num }}</span>
+                <span style="width:34px;height:24px;border-radius:6px;flex:none;display:flex;align-items:center;justify-content:center;font:700 10px/1 'Public Sans';color:#fff;background:{{ q.color }};">{{ q.pillar }}</span>
+                <div style="flex:1;min-width:0;"><div style="font:600 13px/1.2 'Public Sans';color:#1c1a33;">{{ q.theme }}</div><div style="font:400 12.5px/1.4 'Public Sans';color:#7a7e92;">{{ q.prompt }}</div></div>
+                <button data-i="{{ q.idx }}" onClick="{{ delQ }}" style="border:1px solid #ecd6db;cursor:pointer;background:#fff;color:#b03a52;font:600 12px/1 'Public Sans';padding:8px 12px;border-radius:7px;flex:none;">Delete</button>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 340px;gap:20px;align-items:start;">
+          <!-- companies / cohorts -->
+          <div style="background:#fff;border:1px solid #e7eaf2;border-radius:14px;overflow:hidden;min-width:0;">
+            <div style="padding:18px 20px;border-bottom:1px solid #eef0f5;display:flex;align-items:center;justify-content:space-between;"><h4 style="font-size:17px;color:#1c1a33;">Companies</h4><span style="font:600 12px/1 'Public Sans';color:#024794;cursor:pointer;">View all 12</span></div>
+            <div style="display:grid;grid-template-columns:1.8fr 1fr 1fr 0.9fr;font:600 10.5px/1 'Public Sans';letter-spacing:.07em;text-transform:uppercase;color:#9498ab;padding:11px 20px;border-bottom:1px solid #eef0f5;background:#fafbfd;"><span>Company</span><span>Cohort</span><span>Seats</span><span>Viewers</span></div>
+            <div style="display:grid;grid-template-columns:1.8fr 1fr 1fr 0.9fr;align-items:center;padding:13px 20px;border-bottom:1px solid #f1f3f8;"><span style="display:flex;align-items:center;gap:10px;"><span style="width:30px;height:30px;border-radius:8px;background:#eef2fb;color:#024794;display:flex;align-items:center;justify-content:center;font:700 12px/1 'Public Sans';">A</span><span style="font:600 13px/1.2 'Public Sans';color:#1c1a33;">Acme Corp</span></span><span style="font:400 12.5px/1 'Public Sans';color:#62657a;">Fall 2026</span><span style="font:600 12.5px/1 'Public Sans';color:#1c1a33;">8 / 8</span><span style="font:400 12.5px/1 'Public Sans';color:#62657a;">2</span></div>
+            <div style="display:grid;grid-template-columns:1.8fr 1fr 1fr 0.9fr;align-items:center;padding:13px 20px;border-bottom:1px solid #f1f3f8;"><span style="display:flex;align-items:center;gap:10px;"><span style="width:30px;height:30px;border-radius:8px;background:#f3eefb;color:#662d91;display:flex;align-items:center;justify-content:center;font:700 12px/1 'Public Sans';">N</span><span style="font:600 13px/1.2 'Public Sans';color:#1c1a33;">Northwind Group</span></span><span style="font:400 12.5px/1 'Public Sans';color:#62657a;">Fall 2026</span><span style="font:600 12.5px/1 'Public Sans';color:#1c1a33;">5 / 6</span><span style="font:400 12.5px/1 'Public Sans';color:#62657a;">1</span></div>
+            <div style="display:grid;grid-template-columns:1.8fr 1fr 1fr 0.9fr;align-items:center;padding:13px 20px;border-bottom:1px solid #f1f3f8;"><span style="display:flex;align-items:center;gap:10px;"><span style="width:30px;height:30px;border-radius:8px;background:#e9f2e6;color:#3a6b2e;display:flex;align-items:center;justify-content:center;font:700 12px/1 'Public Sans';">M</span><span style="font:600 13px/1.2 'Public Sans';color:#1c1a33;">Meridian Health</span></span><span style="font:400 12.5px/1 'Public Sans';color:#62657a;">Spring 2027</span><span style="font:600 12.5px/1 'Public Sans';color:#1c1a33;">10 / 12</span><span style="font:400 12.5px/1 'Public Sans';color:#62657a;">3</span></div>
+            <div style="display:grid;grid-template-columns:1.8fr 1fr 1fr 0.9fr;align-items:center;padding:13px 20px;"><span style="display:flex;align-items:center;gap:10px;"><span style="width:30px;height:30px;border-radius:8px;background:#fbeef0;color:#9a2d4f;display:flex;align-items:center;justify-content:center;font:700 12px/1 'Public Sans';">V</span><span style="font:600 13px/1.2 'Public Sans';color:#1c1a33;">Vertex Labs</span></span><span style="font:400 12.5px/1 'Public Sans';color:#62657a;">Fall 2026</span><span style="font:600 12.5px/1 'Public Sans';color:#1c1a33;">3 / 4</span><span style="font:400 12.5px/1 'Public Sans';color:#62657a;">1</span></div>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:18px;">
+            <div style="background:#fff;border:1px solid #e7eaf2;border-radius:14px;padding:20px;">
+              <div style="font:600 11px/1 'Public Sans';letter-spacing:.1em;text-transform:uppercase;color:#9498ab;margin-bottom:14px;">Cohorts running now</div>
+              <div style="display:flex;flex-direction:column;gap:12px;">
+                <div><div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px;"><span style="font:600 13px/1.2 'Public Sans';color:#1c1a33;">Fall 2026</span><span style="font:500 11px/1 'Public Sans';color:#7a7e92;">Wk 7 · 84 seats</span></div><div style="height:6px;background:#e3e7f1;border-radius:100px;overflow:hidden;"><div style="width:29%;height:100%;background:#024794;"></div></div></div>
+                <div><div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px;"><span style="font:600 13px/1.2 'Public Sans';color:#1c1a33;">Spring 2027</span><span style="font:500 11px/1 'Public Sans';color:#7a7e92;">Enrolling · 62 seats</span></div><div style="height:6px;background:#e3e7f1;border-radius:100px;overflow:hidden;"><div style="width:8%;height:100%;background:#662d91;"></div></div></div>
+                <div><div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px;"><span style="font:600 13px/1.2 'Public Sans';color:#1c1a33;">Meridian — Private</span><span style="font:500 11px/1 'Public Sans';color:#7a7e92;">Wk 3 · 12 seats</span></div><div style="height:6px;background:#e3e7f1;border-radius:100px;overflow:hidden;"><div style="width:12%;height:100%;background:#262161;"></div></div></div>
+              </div>
+            </div>
+            <div style="background:#fff;border:1px solid #e7eaf2;border-radius:14px;padding:20px;">
+              <div style="font:600 11px/1 'Public Sans';letter-spacing:.1em;text-transform:uppercase;color:#9498ab;margin-bottom:14px;">Trainers</div>
+              <div style="display:flex;flex-direction:column;gap:11px;">
+                <div style="display:flex;align-items:center;gap:10px;"><span style="width:30px;height:30px;border-radius:50%;background:#662d91;color:#fff;display:flex;align-items:center;justify-content:center;font:600 11px/1 'Public Sans';">TN</span><div style="flex:1;"><div style="font:600 12.5px/1.2 'Public Sans';color:#1c1a33;">Tri Nguyen</div><div style="font:400 11px/1.3 'Public Sans';color:#7a7e92;">2 cohorts · 30 participants</div></div></div>
+                <div style="display:flex;align-items:center;gap:10px;"><span style="width:30px;height:30px;border-radius:50%;background:#024794;color:#fff;display:flex;align-items:center;justify-content:center;font:600 11px/1 'Public Sans';">RK</span><div style="flex:1;"><div style="font:600 12.5px/1.2 'Public Sans';color:#1c1a33;">R. Kim</div><div style="font:400 11px/1.3 'Public Sans';color:#7a7e92;">1 cohort · 18 participants</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  </sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:900}}">
+class Component extends DCLogic {
+  state = {
+    surface: 'landing', phase: 'during', faq: -1, astep: 0, answers: {},
+    questions: [
+      { theme: 'Self-leadership', pillar: 'EQ', color: '#024794', prompt: 'Under pressure, I lead from a grounded, steady place — not a reactive one.', benefit: 'Lead from a steadier, grounded place and build deeper self-trust.' },
+      { theme: 'Communication', pillar: 'IQ', color: '#262161', prompt: "My team is clear on what's expected of them — and why it matters.", benefit: 'Create clarity and clear expectations so execution holds.' },
+      { theme: 'Conflict', pillar: 'IQ', color: '#262161', prompt: 'When a hard conversation is needed, I prepare for it and hold it with confidence.', benefit: 'Prepare for and hold hard conversations with ease.' },
+      { theme: 'Accountability', pillar: 'IQ', color: '#262161', prompt: 'Commitments on my team are owned and followed through — without me chasing.', benefit: 'Raise team accountability and engagement — without chasing.' },
+      { theme: 'Developing others', pillar: 'MQ\u2122', color: '#662d91', prompt: 'I actively mentor and grow the next generation of leaders around me.', benefit: 'Mentor and grow future leaders; build an employee-centered culture.' }
+    ]
+  };
+  renderVals() {
+    const s = this.state;
+    const nav = (e) => {
+      const d = e.currentTarget.dataset;
+      this.setState({ [d.k]: d.v });
+      try { window.scrollTo({ top: 0, behavior: 'instant' }); } catch (_) { window.scrollTo(0, 0); }
+    };
+    const setFaq = (e) => {
+      const i = +e.currentTarget.dataset.i;
+      this.setState((st) => ({ faq: st.faq === i ? -1 : i }));
+    };
+
+    // ----- Leadership assessment (questions live in state; admin can add/delete) -----
+    const QUESTIONS = s.questions;
+    const SCALE = [{ label: 'Rarely', value: 1 }, { label: 'Sometimes', value: 2 }, { label: 'Often', value: 3 }, { label: 'Consistently', value: 4 }];
+    const total = QUESTIONS.length;
+    const astep = s.astep;
+    const toTop = () => { try { window.scrollTo({ top: 0 }); } catch (_) { window.scrollTo(0, 0); } };
+    const startAssess = () => { this.setState({ surface: 'assessment', astep: 0, answers: {} }); toTop(); };
+    const aAnswer = (e) => {
+      const q = +e.currentTarget.dataset.q, v = +e.currentTarget.dataset.v;
+      this.setState((st) => { const answers = { ...st.answers, [q]: v }; return { answers, astep: q < total - 1 ? q + 1 : total }; });
+      toTop();
+    };
+    const aBack = () => this.setState((st) => ({ astep: Math.max(0, st.astep - 1) }));
+    const aRestart = () => { this.setState({ astep: 0, answers: {} }); toTop(); };
+    const enterPortal = () => { this.setState({ surface: 'participant', phase: 'before' }); toTop(); };
+
+    const addQ = () => this.setState((st) => ({ questions: [...st.questions, { theme: 'New theme', pillar: 'IQ', color: '#262161', prompt: 'New question — edit text and benefit mapping here.', benefit: 'Describe the TLC benefit this question maps to.' }] }));
+    const delQ = (e) => { const i = +e.currentTarget.dataset.i; this.setState((st) => ({ questions: st.questions.filter((_, idx) => idx !== i) })); };
+    const adminQuestions = s.questions.map((q, i) => ({ theme: q.theme, prompt: q.prompt, pillar: q.pillar, color: q.color, idx: i, num: i + 1 }));
+
+    const isAssess = s.surface === 'assessment';
+    const isResults = isAssess && astep >= total;
+    const isQuestion = isAssess && astep < total;
+    const cur = QUESTIONS[Math.min(astep, total - 1)];
+    const aOptions = SCALE.map((o) => ({ label: o.label, value: o.value, q: astep, selected: s.answers[astep] === o.value }));
+    const withAns = QUESTIONS.map((qq, i) => ({ ...qq, v: s.answers[i] || 0 }));
+    const growth = withAns.filter((x) => x.v > 0 && x.v <= 2).map((x) => ({ label: x.theme, benefit: x.benefit, pillar: x.pillar, color: x.color }));
+    const strengths = withAns.filter((x) => x.v >= 3).map((x) => x.theme).join(' · ');
+
+    return {
+      nav, setFaq,
+      startAssess, aAnswer, aBack, aRestart, enterPortal,
+      isAssess, isResults, isQuestion,
+      aPrompt: cur.prompt, aTheme: cur.theme, aThemeColor: cur.color,
+      aNum: Math.min(astep + 1, total), aTotal: total,
+      aProgress: Math.round((Math.min(astep + 1, total) / total) * 100) + '%',
+      aOptions,
+      aGrowth: growth, hasGrowth: growth.length > 0,
+      aStrengths: strengths || 'a steady foundation across the board',
+      aBackVisible: astep > 0,
+      addQ, delQ, adminQuestions,
+      isLanding: s.surface === 'landing',
+      isPart: s.surface === 'participant',
+      isTrainer: s.surface === 'trainer',
+      isAdmin: s.surface === 'admin',
+      isBefore: s.phase === 'before',
+      isDuring: s.phase === 'during',
+      isAfter: s.phase === 'after',
+      faq0: s.faq === 0, faq1: s.faq === 1, faq2: s.faq === 2, faq3: s.faq === 3
+    };
+  }
+}
+</script>
+</body>
+</html>
