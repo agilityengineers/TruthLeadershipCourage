@@ -6,6 +6,7 @@ import { currentWeek } from "@/lib/cohort";
 import { initials } from "@/lib/utils";
 import { DashboardShell, type NavItem } from "@/components/brand/dashboard-shell";
 import { Button } from "@/components/ui/button";
+import { NotificationBellServer } from "@/components/notifications/bell-server";
 
 export default async function TrainerLayout({ children }: { children: React.ReactNode }) {
   const principal = await requireRole("TRAINER", "ADMIN");
@@ -71,13 +72,14 @@ export default async function TrainerLayout({ children }: { children: React.Reac
               {cohort ? `${cohort.name} Cohort${week ? ` · Week ${week}` : ""}` : "No active cohort"}
             </div>
           </div>
-          <div className="ml-auto flex gap-2.5">
+          <div className="ml-auto flex items-center gap-2.5">
             <Button asChild variant="outline" size="sm">
               <Link href="/trainer/events">+ New event</Link>
             </Button>
             <Button asChild variant="primary" size="sm">
               <Link href="/trainer/messages">Message cohort</Link>
             </Button>
+            <NotificationBellServer userId={principal.id} />
           </div>
         </>
       }

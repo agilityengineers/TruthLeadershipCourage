@@ -1,6 +1,9 @@
 import Link from "next/link";
 import { Logo } from "@/components/brand/logo";
 import { LoginForm } from "./login-form";
+import { ssoEnabled } from "@/auth";
+import { ssoLoginAction } from "@/server/auth-actions";
+import { Button } from "@/components/ui/button";
 
 export const metadata = { title: "Sign in" };
 
@@ -21,6 +24,18 @@ export default async function LoginPage({
           <h1 className="font-display text-[26px] text-ink">Welcome back</h1>
           <p className="mt-1 text-sm text-muted">Sign in to your TLC portal.</p>
           <LoginForm callbackUrl={callbackUrl} />
+          {ssoEnabled && (
+            <>
+              <div className="my-5 flex items-center gap-3 text-[12px] text-muted-3">
+                <span className="h-px flex-1 bg-hair-1" /> or <span className="h-px flex-1 bg-hair-1" />
+              </div>
+              <form action={ssoLoginAction}>
+                <Button type="submit" variant="outline" className="w-full">
+                  Sign in with corporate SSO
+                </Button>
+              </form>
+            </>
+          )}
         </div>
         <p className="mt-5 text-center text-[12.5px] text-muted-2">
           New here?{" "}

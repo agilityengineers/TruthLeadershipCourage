@@ -4,6 +4,7 @@ import { z } from "zod";
 import bcrypt from "bcryptjs";
 import { db } from "@/lib/db";
 import { audit } from "@/lib/audit";
+import { evaluateCoupon } from "@/lib/coupon";
 
 const enrollSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -96,6 +97,22 @@ export async function createEnrollment(input: z.infer<typeof enrollSchema>): Pro
     return { ok: true, status: "WAITLISTED" };
   }
 
+  // Backend-apply a coupon if supplied (never shown as checkout UI).
+  let amount = cohort.price;
+  let couponId: string | undefined;
+  if (data.coupon) {
+    const result = await evaluateCoupon(data.coupon, cohort.price, cohort.id);
+    if (result.valid) {
+      amount = Math.max(0, cohort.price - result.discountCents);
+      couponId = result.couponId;
+    }
+  }
+
+  // Record marketing/privacy consent (GDPR).
+  await db.consentRecord.create({
+    data: { userId: user.id, type: "terms", grantedAt: new Date() },
+  });
+
   // Reserve a seat + create the enrollment, shipment, and pending payment.
   const enrollment = await db.$transaction(async (tx) => {
     const seat = await tx.seat.create({
@@ -127,11 +144,19 @@ export async function createEnrollment(input: z.infer<typeof enrollSchema>): Pro
         enrollmentId: enr.id,
         companyId: data.companyId || null,
         processor: "STRIPE",
-        amount: cohort.price,
+        amount,
         currency: cohort.currency,
         status: "PENDING",
+        couponId,
       },
     });
+
+    if (couponId) {
+      await tx.coupon.update({
+        where: { id: couponId },
+        data: { redeemedCount: { increment: 1 } },
+      });
+    }
 
     return enr;
   });

@@ -27,3 +27,8 @@ export async function loginAction(_prev: unknown, formData: FormData) {
 export async function logoutAction() {
   await signOut({ redirectTo: "/" });
 }
+
+/** Corporate SSO sign-in (OIDC) — only meaningful when AUTH_OKTA_* are set. */
+export async function ssoLoginAction() {
+  await signIn("okta", { redirectTo: "/portal" });
+}

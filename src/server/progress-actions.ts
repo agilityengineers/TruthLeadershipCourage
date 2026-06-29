@@ -32,6 +32,8 @@ export async function markWeekCompleteAction(enrollmentId: string, weekNo: numbe
       where: { id: enrollmentId },
       data: { status: "COMPLETED", completedAt: new Date() },
     });
+    const { issueCertificate } = await import("@/lib/certificate");
+    await issueCertificate(enrollmentId);
   }
 
   revalidatePath("/portal");

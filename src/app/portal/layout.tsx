@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { unreadCount } from "@/lib/notifications";
 import { initials } from "@/lib/utils";
 import { DashboardShell, type NavItem } from "@/components/brand/dashboard-shell";
+import { NotificationBellServer } from "@/components/notifications/bell-server";
 
 export default async function PortalLayout({ children }: { children: React.ReactNode }) {
   const principal = await requireRole("PARTICIPANT", "ADMIN");
@@ -37,6 +38,7 @@ export default async function PortalLayout({ children }: { children: React.React
     { label: "Messages", href: "/portal/messages", badge: unreadMessages || undefined },
     { label: "Resource Library", href: "/portal/library" },
     { label: "Coaching", href: "/portal/coaching" },
+    { label: "Account & Privacy", href: "/portal/settings" },
   ];
 
   const cohortName = user?.enrollments[0]?.cohort.name ?? "TLC Program";
@@ -54,10 +56,15 @@ export default async function PortalLayout({ children }: { children: React.React
         initials: initials(user?.name),
       }}
       topbar={
-        <div>
-          <div className="label-caps">Participant Portal</div>
-          <div className="mt-0.5 font-display text-[15px] text-ink">Your TLC home</div>
-        </div>
+        <>
+          <div>
+            <div className="label-caps">Participant Portal</div>
+            <div className="mt-0.5 font-display text-[15px] text-ink">Your TLC home</div>
+          </div>
+          <div className="ml-auto">
+            <NotificationBellServer userId={principal.id} />
+          </div>
+        </>
       }
     >
       {children}

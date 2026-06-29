@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Logo } from "./logo";
 import { Avatar } from "@/components/ui/avatar";
+import { SignOut } from "./sign-out";
 import { cn } from "@/lib/utils";
 
 export type NavItem = {
@@ -103,6 +104,10 @@ export function DashboardShell({
             );
           })}
         </nav>
+
+        <div className="mt-auto border-t border-white/10 pt-2">
+          <SignOut />
+        </div>
       </aside>
 
       {/* Main column */}

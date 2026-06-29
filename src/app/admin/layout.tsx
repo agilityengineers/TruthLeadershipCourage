@@ -2,6 +2,7 @@ import { requireRole } from "@/lib/session";
 import { db } from "@/lib/db";
 import { initials } from "@/lib/utils";
 import { DashboardShell, type NavItem } from "@/components/brand/dashboard-shell";
+import { NotificationBellServer } from "@/components/notifications/bell-server";
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const principal = await requireRole("ADMIN");
@@ -35,10 +36,15 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         avatarTextColor: "#fff",
       }}
       topbar={
-        <div>
-          <div className="label-caps">Admin Console</div>
-          <div className="mt-0.5 font-display text-[15px] text-ink">System overview</div>
-        </div>
+        <>
+          <div>
+            <div className="label-caps">Admin Console</div>
+            <div className="mt-0.5 font-display text-[15px] text-ink">System overview</div>
+          </div>
+          <div className="ml-auto">
+            <NotificationBellServer userId={principal.id} />
+          </div>
+        </>
       }
     >
       {children}
