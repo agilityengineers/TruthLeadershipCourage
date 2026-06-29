@@ -30,14 +30,14 @@ new `prisma/migrations/0_init` applies cleanly to a fresh database via `prisma m
 **Fixed in the second pass**
 - **D1 / E3 (rate limiting)** — added `src/lib/rate-limit.ts` (in-process fixed-window) and applied it to credential login, `submitAssessment`, and `createEnrollment`, keyed by client IP. The module documents the Autoscale per-instance caveat and is drop-in replaceable with a shared store.
 - **D3 (PENDING access)** — `getParticipantContext` now returns only `ACTIVE`/`COMPLETED` enrollments, so the paid portal no longer unlocks before fulfillment.
-- **D2 (completion integrity, partial)** — `markWeekCompleteAction` now only completes a week that is currently `AVAILABLE` for participants (enforces sequential unlock; rejects forged/out-of-order/already-done weeks). Staff may override. *The certificate-issuance policy itself is still open — see below.*
+- **D2 (completion integrity)** — `markWeekCompleteAction` now only completes a week that is currently `AVAILABLE` for participants (enforces sequential unlock; rejects forged/out-of-order/already-done weeks; staff may override). **Certificate policy decided: trainer/admin-issued.** All-weeks-done marks the enrollment `COMPLETED` but no longer auto-mints a certificate; a trainer (own cohort) or admin issues it via the new "Issue certificate" control on the participant detail page (`issueCertificateForEnrollment`, idempotent, audited). The portal certificate page already shows a "being prepared" state until issued. *Reversible:* to restore auto-issue, re-add the `issueCertificate` call in `progress-actions.ts`.
 - **J1 (tests)** — added a `test/` suite (Node test runner via `tsx`, no new deps) covering RBAC, cohort phase/week/progress math, assessment snapshot, email templating, `.ics` generation, and the rate limiter. `npm test` → 21 passing. Verified alongside `typecheck` / `lint` / `build`.
 
 **Deferred / still open** (by your decision or out-of-scope)
 - **F1 (payment trigger)** — left as-is per "decide later"; still the key revenue gap (§5/§7 Q1).
 - **C2 (pooling) operational** — set a pooled `DATABASE_URL` in Replit Secrets after import.
 - **C3 / B1 (secrets & seed)** — operational: set Secrets; do **not** seed demo data/passwords into prod.
-- **D2 (certificate policy)** — open product decision: should a self-completed program auto-issue a certificate, require the cohort to have ended, or be trainer/admin-issued? (§7 Q2)
+- **J1 (deeper tests)** — DB-backed integration tests (webhook signature paths, fulfillment idempotency, tenant scoping) remain a follow-up; the current suite covers pure logic only.
 
 ---
 

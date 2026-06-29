@@ -30,7 +30,9 @@ export async function markWeekCompleteAction(enrollmentId: string, weekNo: numbe
     data: { status: "AVAILABLE" },
   });
 
-  // Auto-complete enrollment when all weeks are done.
+  // Auto-complete enrollment when all weeks are done. The certificate is NOT
+  // auto-minted on self-report — a trainer/admin issues it (see
+  // issueCertificateForEnrollment) so the credential reflects real sign-off.
   const remaining = await db.moduleProgress.count({
     where: { enrollmentId, status: { not: "COMPLETED" } },
   });
@@ -39,8 +41,6 @@ export async function markWeekCompleteAction(enrollmentId: string, weekNo: numbe
       where: { id: enrollmentId },
       data: { status: "COMPLETED", completedAt: new Date() },
     });
-    const { issueCertificate } = await import("@/lib/certificate");
-    await issueCertificate(enrollmentId);
   }
 
   revalidatePath("/portal");

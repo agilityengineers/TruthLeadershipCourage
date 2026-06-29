@@ -11,6 +11,7 @@ import { PillarBadge } from "@/components/brand/pillar-badge";
 import { LabelCaps } from "@/components/brand/primitives";
 import { initials, formatDate, cn } from "@/lib/utils";
 import { computeProgress } from "@/components/trainer/progress-util";
+import { IssueCertificateButton } from "@/components/trainer/issue-certificate-button";
 import { Check, Lock } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -32,6 +33,7 @@ export default async function ParticipantDetailPage({
       user: { include: { company: true } },
       cohort: true,
       moduleProgress: { orderBy: { weekNo: "asc" }, include: { module: true } },
+      certificate: true,
     },
   });
 
@@ -67,6 +69,25 @@ export default async function ParticipantDetailPage({
           <Progress value={stats.pct} height={10} />
         </div>
       </Card>
+
+      {enrollment.status === "COMPLETED" && (
+        <Card className="flex flex-wrap items-center justify-between gap-3 p-6">
+          <div className="min-w-0">
+            <LabelCaps className="mb-1">Completion certificate</LabelCaps>
+            {enrollment.certificate ? (
+              <p className="text-[13px] text-muted">
+                Issued {formatDate(enrollment.certificate.issuedAt)} · Serial{" "}
+                <span className="font-semibold text-ink">{enrollment.certificate.serial}</span>
+              </p>
+            ) : (
+              <p className="text-[13px] text-muted">
+                This participant has completed all weeks. Issue their certificate when ready.
+              </p>
+            )}
+          </div>
+          {!enrollment.certificate && <IssueCertificateButton enrollmentId={enrollment.id} />}
+        </Card>
+      )}
 
       <Card className="p-6">
         <LabelCaps className="mb-4">Week-by-week progress</LabelCaps>
