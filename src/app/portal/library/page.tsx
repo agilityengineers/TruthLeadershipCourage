@@ -67,16 +67,28 @@ export default async function LibraryPage() {
         <Card className="p-6">
           <h4 className="mb-3 font-display text-[16px] text-ink">Files</h4>
           <div className="flex flex-col gap-2">
-            {resources.map((r) => (
-              <a
-                key={r.id}
-                href={r.fileKey ?? "#"}
-                className="flex items-center justify-between rounded-[10px] border border-hair-2 px-4 py-2.5 text-[13px] hover:bg-soft-1"
-              >
-                <span className="font-medium text-ink">{r.title}</span>
-                <span className="text-[11px] uppercase tracking-label text-muted-3">{r.type}</span>
-              </a>
-            ))}
+            {resources.map((r) =>
+              r.fileKey ? (
+                <a
+                  key={r.id}
+                  href={r.fileKey}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex items-center justify-between rounded-[10px] border border-hair-2 px-4 py-2.5 text-[13px] hover:bg-soft-1"
+                >
+                  <span className="font-medium text-ink">{r.title}</span>
+                  <span className="text-[11px] uppercase tracking-label text-muted-3">{r.type}</span>
+                </a>
+              ) : (
+                <div
+                  key={r.id}
+                  className="flex items-center justify-between rounded-[10px] border border-hair-2 px-4 py-2.5 text-[13px] opacity-60"
+                >
+                  <span className="font-medium text-ink">{r.title}</span>
+                  <span className="text-[11px] uppercase tracking-label text-muted-3">Coming soon</span>
+                </div>
+              ),
+            )}
           </div>
         </Card>
       )}

@@ -5,6 +5,38 @@
 
 ---
 
+## 0. Remediation Status — updated 2026-06-29
+
+A first remediation pass landed on this branch after the audit. Decisions taken:
+**deploy target = Autoscale**; **payment trigger = deferred ("decide later")**.
+
+**Verified locally:** `npm run typecheck`, `npx next lint`, and `npm run build` all pass; the
+new `prisma/migrations/0_init` applies cleanly to a fresh database via `prisma migrate deploy`.
+
+**Fixed in this PR**
+- **A1** — `.replit` (Autoscale) + `replit.nix` created.
+- **C1** — Initial Prisma migration baseline (`prisma/migrations/0_init`) generated; `.replit` build runs `prisma migrate deploy`.
+- **C2** — `.env.example` documents the **pooled** `DATABASE_URL` requirement for Autoscale.
+- **E1** — Stripe webhook now **requires** a valid signature; unsigned `JSON.parse` fallback is dev-only and refused in production.
+- **E2** — ThriveCart webhook now requires the shared secret whenever one is configured (presence-gating removed); required in production.
+- **E4** — Demo logins on `/login` are hidden outside development.
+- **F2** — `fulfillEnrollment` fires the welcome email + notification only on the first `PENDING→ACTIVE` transition (idempotent under webhook retries).
+- **G1** — Added `app/error.tsx`, `app/global-error.tsx`, `app/not-found.tsx`, `app/loading.tsx`.
+- **G2** — Webhook handlers no longer echo internal error text; they log server-side and return generic 500s.
+- **H1/H2/H3** — Fixed the dead "Open digital workbook" button, the `href="#"` join-session and library links, and the workbook "available here" copy.
+- **I1** — Module-progress seeding uses a single `createMany`.
+- **K1** — ESLint installed/configured (`eslint-config-next`); `npm run lint` and build-time lint are green.
+
+**Deferred / still open** (by your decision or out-of-scope for this pass)
+- **F1 (payment trigger)** — left as-is per "decide later"; still the key revenue gap (§5/§7 Q1).
+- **C2 (pooling) operational** — you must set a pooled `DATABASE_URL` in Replit Secrets.
+- **C3 / B1 (secrets & seed)** — operational: set Secrets; do **not** seed demo data/passwords into prod.
+- **D1 / E3 (rate limiting)** — needs a shared store (Redis/Upstash) to be effective on Autoscale; not added without sign-off (new infra/dependency).
+- **D2 / D3 (completion gating, PENDING access)** — awaiting policy answers (§7 Q2/Q3).
+- **J1 (tests)** — not added in this pass.
+
+---
+
 ## 1. Executive Summary
 
 **Verdict: NOT READY for Replit production deploy — 6 Blockers, 9 High, 11 Medium, several Low.**

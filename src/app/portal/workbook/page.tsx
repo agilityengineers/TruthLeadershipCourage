@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { requireRole } from "@/lib/session";
 import { getParticipantContext } from "@/server/portal-data";
 import { Card } from "@/components/ui/card";
@@ -49,15 +50,20 @@ export default async function WorkbookPage() {
           )}
         </div>
         <div className="mt-5">
-          <Button variant="outline">Open digital workbook</Button>
+          <Button asChild variant="outline">
+            <Link href="/portal/materials">Open digital workbook</Link>
+          </Button>
         </div>
       </Card>
 
       <Card className="p-5">
         <LabelCaps className="mb-3">Digital version</LabelCaps>
         <p className="text-[13px] leading-relaxed text-muted">
-          The full digital workbook is always available here — even before your physical copy
-          arrives, and permanently after the program ends.
+          The full digital workbook lives in your{" "}
+          <Link href="/portal/materials" className="font-semibold text-eq underline-offset-2 hover:underline">
+            materials
+          </Link>{" "}
+          — available even before your physical copy arrives, and permanently after the program ends.
         </p>
       </Card>
     </div>

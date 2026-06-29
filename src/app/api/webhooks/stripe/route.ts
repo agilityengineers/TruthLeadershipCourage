@@ -17,11 +17,21 @@ export async function POST(req: Request) {
   const secret = process.env.STRIPE_WEBHOOK_SECRET;
   const body = await req.text();
 
+  // Signature verification is mandatory. The unsigned JSON.parse fallback exists
+  // ONLY for local/dev when no webhook secret is set — never in production,
+  // otherwise anyone could POST a fake "completed" event and fulfill for free.
   let event;
-  try {
-    event = secret && sig ? stripe.webhooks.constructEvent(body, sig, secret) : JSON.parse(body);
-  } catch (err) {
-    return new Response(`Webhook signature error: ${(err as Error).message}`, { status: 400 });
+  if (secret) {
+    if (!sig) return new Response("Missing stripe-signature header", { status: 400 });
+    try {
+      event = stripe.webhooks.constructEvent(body, sig, secret);
+    } catch (err) {
+      return new Response(`Webhook signature error: ${(err as Error).message}`, { status: 400 });
+    }
+  } else if (process.env.NODE_ENV === "production") {
+    return new Response("Webhook secret not configured", { status: 503 });
+  } else {
+    event = JSON.parse(body);
   }
 
   try {
@@ -52,7 +62,8 @@ export async function POST(req: Request) {
       }
     }
   } catch (err) {
-    return new Response(`Handler error: ${(err as Error).message}`, { status: 500 });
+    console.error("[stripe webhook] handler error", err);
+    return new Response("Handler error", { status: 500 });
   }
 
   return Response.json({ received: true });

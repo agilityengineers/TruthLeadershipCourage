@@ -21,6 +21,11 @@ export async function fulfillEnrollment(opts: {
   });
   if (!enrollment) throw new Error("Enrollment not found");
 
+  // Webhooks are delivered at-least-once. The DB writes below are all idempotent,
+  // but the welcome email + notification are user-facing side effects — fire them
+  // ONLY on the first PENDING→ACTIVE transition so retries don't double-send.
+  const alreadyFulfilled = enrollment.status === "ACTIVE" || enrollment.status === "COMPLETED";
+
   await db.$transaction(async (tx) => {
     // Payment → PAID (create if somehow missing).
     if (enrollment.payment) {
@@ -74,39 +79,42 @@ export async function fulfillEnrollment(opts: {
         where: { programId: enrollment.cohort.programId },
         orderBy: { order: "asc" },
       });
-      for (let w = 1; w <= 24; w++) {
-        await tx.moduleProgress.create({
-          data: {
+      await tx.moduleProgress.createMany({
+        data: Array.from({ length: 24 }, (_unused, i) => {
+          const w = i + 1;
+          return {
             enrollmentId: enrollment.id,
             weekNo: w,
             moduleId: modules[(w - 1) % Math.max(modules.length, 1)]?.id,
-            status: w === 1 ? "AVAILABLE" : "LOCKED",
-          },
-        });
-      }
+            status: w === 1 ? ("AVAILABLE" as const) : ("LOCKED" as const),
+          };
+        }),
+      });
     }
   });
 
-  // Wire chat: add to cohort channel; create 1:1 with the trainer.
+  // Wire chat: add to cohort channel; create 1:1 with the trainer. Idempotent.
   await ensureChatThreads(enrollment.cohortId, enrollment.userId, enrollment.cohort.trainerId);
 
-  // Welcome email.
-  await sendEmail({
-    to: enrollment.user.email,
-    subject: renderTemplate("Welcome to TLC — {{cohortName}}", { cohortName: enrollment.cohort.name }),
-    html: renderTemplate(
-      "<p>Welcome {{firstName}} — and thank you for answering the call.</p><p>Your seat in {{cohortName}} is confirmed. Your workbook ships before kickoff, and your portal is ready.</p>",
-      { firstName: enrollment.user.name?.split(" ")[0] ?? "there", cohortName: enrollment.cohort.name },
-    ),
-  });
+  // User-facing side effects only on first fulfillment (see alreadyFulfilled).
+  if (!alreadyFulfilled) {
+    await sendEmail({
+      to: enrollment.user.email,
+      subject: renderTemplate("Welcome to TLC — {{cohortName}}", { cohortName: enrollment.cohort.name }),
+      html: renderTemplate(
+        "<p>Welcome {{firstName}} — and thank you for answering the call.</p><p>Your seat in {{cohortName}} is confirmed. Your workbook ships before kickoff, and your portal is ready.</p>",
+        { firstName: enrollment.user.name?.split(" ")[0] ?? "there", cohortName: enrollment.cohort.name },
+      ),
+    });
 
-  await notify({
-    userId: enrollment.userId,
-    type: "ENROLLMENT",
-    title: `You're enrolled in ${enrollment.cohort.name}`,
-    body: "Your portal is ready. Welcome to TLC.",
-    href: "/portal",
-  });
+    await notify({
+      userId: enrollment.userId,
+      type: "ENROLLMENT",
+      title: `You're enrolled in ${enrollment.cohort.name}`,
+      body: "Your portal is ready. Welcome to TLC.",
+      href: "/portal",
+    });
+  }
 
   await audit({
     actorId: enrollment.userId,
