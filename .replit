@@ -1,32 +1,20 @@
-# Replit configuration for the TLC Leadership Platform (Next.js 15 + Prisma).
-# Deployment target: Autoscale. Because Autoscale runs multiple stateless
-# instances, DATABASE_URL MUST point at a POOLED Postgres connection
-# (e.g. Neon pooled endpoint or PgBouncer, ?pgbouncer=true&connection_limit=1)
-# or instances will exhaust the database's connection slots. See .env.example.
-
-modules = ["nodejs-20", "postgresql-16"]
-
-# Local workspace dev server (the "Run" button). Binds all interfaces so the
-# Replit webview can reach it.
-run = "npm run dev"
-
-[nix]
-channel = "stable-24_05"
-
-# Next.js reads PORT and binds 0.0.0.0 by default; we pass them explicitly too.
-[env]
-PORT = "3000"
-HOST = "0.0.0.0"
-NEXT_TELEMETRY_DISABLED = "1"
-
-[[ports]]
-localPort = 3000
-externalPort = 80
+modules = ["nodejs-24"]
 
 [deployment]
+router = "application"
 deploymentTarget = "autoscale"
-# Build: install, apply DB migrations, then build. DATABASE_URL (and other
-# Secrets) must be configured in the Deployment's Secrets for migrate deploy
-# to reach the production database.
-build = ["sh", "-c", "npm ci && npx prisma migrate deploy && npm run build"]
-run = ["sh", "-c", "npm run start -- -p $PORT -H 0.0.0.0"]
+
+[deployment.postBuild]
+args = ["pnpm", "store", "prune"]
+env = { "CI" = "true" }
+
+[workflows]
+runButton = "Project"
+
+[agent]
+stack = "PNPM_WORKSPACE"
+expertMode = true
+
+[postMerge]
+path = "scripts/post-merge.sh"
+timeoutMs = 20000
