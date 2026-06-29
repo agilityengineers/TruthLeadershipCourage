@@ -10,14 +10,21 @@ export async function markWeekCompleteAction(enrollmentId: string, weekNo: numbe
   const enr = await db.enrollment.findUnique({ where: { id: enrollmentId } });
   if (!enr) throw new Error("Enrollment not found");
   // Participants may only act on their own enrollment; admins may act on any.
-  if (enr.userId !== principal.id && principal.role !== "ADMIN" && principal.role !== "SUPER_ADMIN") {
+  const isStaff = principal.role === "ADMIN" || principal.role === "SUPER_ADMIN";
+  if (enr.userId !== principal.id && !isStaff) {
     throw new Error("Forbidden");
   }
 
-  await db.moduleProgress.updateMany({
-    where: { enrollmentId, weekNo },
+  // A participant may only complete a week that is currently AVAILABLE — this
+  // enforces the sequential unlock and rejects forged/out-of-order or
+  // already-completed weeks sent straight to the action. Staff may override.
+  const completed = await db.moduleProgress.updateMany({
+    where: { enrollmentId, weekNo, ...(isStaff ? {} : { status: "AVAILABLE" }) },
     data: { status: "COMPLETED", completedAt: new Date() },
   });
+  if (completed.count === 0) {
+    throw new Error("That week isn't available to complete yet.");
+  }
   await db.moduleProgress.updateMany({
     where: { enrollmentId, weekNo: weekNo + 1, status: "LOCKED" },
     data: { status: "AVAILABLE" },
