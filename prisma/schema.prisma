@@ -1,0 +1,703 @@
+// TLC Leadership Platform — data model
+// Series architecture: Program (TLC) -> many Cohorts. Everything that varies
+// (dates, price, capacity, sessions, trainer) is data on a Cohort.
+// Multi-tenant: Company is the tenant; all participant/viewer data is scoped to it.
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ───────────────────────── Identity, tenancy & RBAC ─────────────────────────
+
+enum Role {
+  PARTICIPANT
+  COMPANY_VIEWER
+  TRAINER
+  ADMIN
+  SUPER_ADMIN
+}
+
+enum CompanyStatus {
+  ACTIVE
+  PROSPECT
+  ARCHIVED
+}
+
+model Company {
+  id           String        @id @default(cuid())
+  name         String
+  slug         String        @unique
+  logoUrl      String?
+  billingEmail String?
+  status       CompanyStatus @default(ACTIVE)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  users        User[]
+  memberships  Membership[]
+  seats        Seat[]
+  enrollments  Enrollment[]
+  payments     Payment[]
+  cohorts      Cohort[] // private company cohorts
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String?
+  image        String?
+  passwordHash String?
+  role         Role     @default(PARTICIPANT)
+  status       String   @default("active") // active | invited | suspended
+  companyId    String?
+  company      Company? @relation(fields: [companyId], references: [id])
+  title        String? // job title
+  phone        String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  memberships        Membership[]
+  enrollments        Enrollment[]
+  trainerCohorts     Cohort[]            @relation("CohortTrainer")
+  assessmentResponses AssessmentResponse[]
+  sentMessages       Message[]           @relation("MessageSender")
+  threadMemberships  ThreadMember[]
+  notifications      Notification[]
+  uploadedResources  Resource[]          @relation("ResourceUploader")
+  bookingsAsTrainer  CoachingBooking[]   @relation("CoachTrainer")
+  consents           ConsentRecord[]
+  auditLogs          AuditLog[]
+  accounts           Account[]
+  sessions           Session[]
+
+  @@index([companyId])
+  @@index([role])
+}
+
+// A role grant, optionally scoped to a company (e.g. a read-only viewer for one company).
+model Membership {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  companyId String?
+  company   Company? @relation(fields: [companyId], references: [id])
+  role      Role
+  createdAt DateTime @default(now())
+
+  @@unique([userId, companyId, role])
+  @@index([companyId])
+}
+
+// ───────────────────────── Auth.js (NextAuth) tables ─────────────────────────
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ───────────────────────── Program / series ─────────────────────────
+
+enum Pillar {
+  EQ
+  IQ
+  MQ
+}
+
+model Program {
+  id          String   @id @default(cuid())
+  name        String // "TLC"
+  slug        String   @unique
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  cohorts    Cohort[]
+  modules    Module[]
+  assessment Assessment?
+  resources  Resource[]
+}
+
+enum CohortStatus {
+  DRAFT
+  ENROLLING
+  RUNNING
+  COMPLETED
+  ARCHIVED
+}
+
+model Cohort {
+  id          String       @id @default(cuid())
+  programId   String
+  program     Program      @relation(fields: [programId], references: [id])
+  name        String // "Fall 2026"
+  slug        String       @unique
+  startDate   DateTime
+  endDate     DateTime
+  sessionDay  String? // "Thursday"
+  sessionTime String? // "9:00–11:00 AM"
+  timezone    String       @default("America/Los_Angeles")
+  price       Int          @default(550000) // cents
+  currency    String       @default("usd")
+  capacity    Int          @default(0)
+  status      CohortStatus @default(DRAFT)
+  isPrivate   Boolean      @default(false)
+  trainerId   String?
+  trainer     User?        @relation("CohortTrainer", fields: [trainerId], references: [id])
+  companyId   String? // set => private single-company cohort
+  company     Company?     @relation(fields: [companyId], references: [id])
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  enrollments Enrollment[]
+  events      Event[]
+  seats       Seat[]
+  resources   Resource[]
+  threads     Thread[]
+  waitlist    WaitlistEntry[]
+  campaigns   EmailCampaign[]
+
+  @@index([programId])
+  @@index([trainerId])
+  @@index([companyId])
+}
+
+model Module {
+  id        String  @id @default(cuid())
+  programId String
+  program   Program @relation(fields: [programId], references: [id])
+  pillar    Pillar
+  order     Int
+  weekNo    Int? // mapped week for during-phase materials
+  title     String
+  summary   String?
+
+  resources Resource[]
+  events    Event[]
+  progress  ModuleProgress[]
+
+  @@index([programId])
+}
+
+enum EventType {
+  KICKOFF
+  WEEKLY_SESSION
+  COACHING_1ON1
+}
+
+model Event {
+  id        String    @id @default(cuid())
+  cohortId  String
+  cohort    Cohort    @relation(fields: [cohortId], references: [id], onDelete: Cascade)
+  moduleId  String?
+  module    Module?   @relation(fields: [moduleId], references: [id])
+  type      EventType @default(WEEKLY_SESSION)
+  title     String
+  startAt   DateTime
+  endAt     DateTime
+  joinUrl   String?
+  location  String?
+  status    String    @default("scheduled") // scheduled | completed | cancelled
+  weekNo    Int?
+  createdAt DateTime  @default(now())
+
+  bookings CoachingBooking[]
+
+  @@index([cohortId])
+}
+
+enum ResourceType {
+  PDF
+  MP4
+  LINK
+  WORKBOOK
+}
+
+enum ResourceStatus {
+  DRAFT
+  PUBLISHED
+}
+
+model Resource {
+  id           String         @id @default(cuid())
+  programId    String?
+  program      Program?       @relation(fields: [programId], references: [id])
+  cohortId     String?
+  cohort       Cohort?        @relation(fields: [cohortId], references: [id])
+  moduleId     String?
+  module       Module?        @relation(fields: [moduleId], references: [id])
+  type         ResourceType
+  status       ResourceStatus @default(DRAFT)
+  title        String
+  description  String?
+  fileKey      String? // storage key / URL
+  printReady   Boolean        @default(false)
+  uploadedById String?
+  uploadedBy   User?          @relation("ResourceUploader", fields: [uploadedById], references: [id])
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  @@index([cohortId])
+  @@index([programId])
+  @@index([moduleId])
+}
+
+// ───────────────────────── Assessment ─────────────────────────
+
+model Assessment {
+  id        String   @id @default(cuid())
+  programId String   @unique
+  program   Program  @relation(fields: [programId], references: [id])
+  title     String   @default("Leadership Assessment")
+  createdAt DateTime @default(now())
+
+  questions Question[]
+  responses AssessmentResponse[]
+}
+
+model Question {
+  id           String     @id @default(cuid())
+  assessmentId String
+  assessment   Assessment @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+  order        Int
+  theme        String // "Self-leadership"
+  pillar       Pillar
+  color        String // hex matched to pillar
+  prompt       String
+  benefit      String // mirrored back on low scores
+  active       Boolean    @default(true)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  answers AnswerItem[]
+
+  @@index([assessmentId])
+}
+
+model AssessmentResponse {
+  id           String     @id @default(cuid())
+  assessmentId String
+  assessment   Assessment @relation(fields: [assessmentId], references: [id])
+  userId       String?
+  user         User?      @relation(fields: [userId], references: [id])
+  leadEmail    String? // pre-account capture
+  leadName     String?
+  snapshot     Json? // computed { growth:[], strengths:[] }
+  completedAt  DateTime?
+  createdAt    DateTime   @default(now())
+
+  answers AnswerItem[]
+
+  @@index([assessmentId])
+  @@index([userId])
+}
+
+model AnswerItem {
+  id         String             @id @default(cuid())
+  responseId String
+  response   AssessmentResponse @relation(fields: [responseId], references: [id], onDelete: Cascade)
+  questionId String
+  question   Question           @relation(fields: [questionId], references: [id])
+  value      Int // 1..4
+
+  @@unique([responseId, questionId])
+}
+
+// ───────────────────────── Enrollment, seats, payments ─────────────────────────
+
+enum SeatStatus {
+  AVAILABLE
+  ASSIGNED
+  CONSUMED
+}
+
+model Seat {
+  id             String     @id @default(cuid())
+  cohortId       String
+  cohort         Cohort     @relation(fields: [cohortId], references: [id], onDelete: Cascade)
+  companyId      String?
+  company        Company?   @relation(fields: [companyId], references: [id])
+  status         SeatStatus @default(AVAILABLE)
+  assignedUserId String?
+  purchasedById  String?
+  createdAt      DateTime   @default(now())
+
+  enrollment Enrollment?
+
+  @@index([cohortId])
+  @@index([companyId])
+}
+
+enum EnrollmentStatus {
+  PENDING
+  ACTIVE
+  COMPLETED
+  WITHDRAWN
+  WAITLISTED
+}
+
+model Enrollment {
+  id              String           @id @default(cuid())
+  userId          String
+  user            User             @relation(fields: [userId], references: [id])
+  cohortId        String
+  cohort          Cohort           @relation(fields: [cohortId], references: [id])
+  companyId       String?
+  company         Company?         @relation(fields: [companyId], references: [id])
+  seatId          String?          @unique
+  seat            Seat?            @relation(fields: [seatId], references: [id])
+  status          EnrollmentStatus @default(PENDING)
+  shippingAddress Json?
+  enrolledAt      DateTime?
+  completedAt     DateTime?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  payment        Payment?
+  shipment       Shipment?
+  certificate    Certificate?
+  moduleProgress ModuleProgress[]
+  bookings       CoachingBooking[]
+
+  @@unique([userId, cohortId])
+  @@index([cohortId])
+  @@index([companyId])
+}
+
+enum PaymentProcessor {
+  STRIPE
+  THRIVECART
+  MANUAL
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  REFUNDED
+  PARTIALLY_REFUNDED
+  FAILED
+}
+
+model Payment {
+  id           String           @id @default(cuid())
+  enrollmentId String?          @unique
+  enrollment   Enrollment?      @relation(fields: [enrollmentId], references: [id])
+  companyId    String?
+  company      Company?         @relation(fields: [companyId], references: [id])
+  processor    PaymentProcessor @default(STRIPE)
+  externalId   String? // stripe session/payment id, thrivecart id
+  amount       Int // cents
+  currency     String           @default("usd")
+  status       PaymentStatus    @default(PENDING)
+  couponId     String?
+  coupon       Coupon?          @relation(fields: [couponId], references: [id])
+  raw          Json?
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+
+  refunds Refund[]
+
+  @@index([companyId])
+  @@index([externalId])
+}
+
+enum CouponType {
+  PERCENT
+  FIXED
+}
+
+model Coupon {
+  id              String     @id @default(cuid())
+  code            String     @unique
+  type            CouponType
+  value           Int // percent (0-100) or cents
+  maxRedemptions  Int?
+  redeemedCount   Int        @default(0)
+  cohortId        String?
+  expiresAt       DateTime?
+  active          Boolean    @default(true)
+  createdAt       DateTime   @default(now())
+
+  payments Payment[]
+}
+
+model Refund {
+  id            String   @id @default(cuid())
+  paymentId     String
+  payment       Payment  @relation(fields: [paymentId], references: [id])
+  amount        Int // cents
+  reason        String?
+  status        String   @default("pending") // pending | processed | failed
+  externalId    String?
+  processedById String?
+  createdAt     DateTime @default(now())
+
+  @@index([paymentId])
+}
+
+enum ShipmentStatus {
+  PENDING
+  PRINTING
+  SHIPPED
+  DELIVERED
+}
+
+model Shipment {
+  id           String         @id @default(cuid())
+  enrollmentId String         @unique
+  enrollment   Enrollment     @relation(fields: [enrollmentId], references: [id])
+  status       ShipmentStatus @default(PENDING)
+  carrier      String?
+  tracking     String?
+  address      Json?
+  shippedAt    DateTime?
+  deliveredAt  DateTime?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+}
+
+enum WaitlistStatus {
+  WAITING
+  OFFERED
+  CONVERTED
+  EXPIRED
+}
+
+model WaitlistEntry {
+  id        String         @id @default(cuid())
+  cohortId  String
+  cohort    Cohort         @relation(fields: [cohortId], references: [id])
+  userId    String?
+  email     String
+  name      String?
+  position  Int
+  status    WaitlistStatus @default(WAITING)
+  createdAt DateTime       @default(now())
+
+  @@index([cohortId])
+}
+
+// ───────────────────────── Progress, coaching, completion ─────────────────────────
+
+enum ProgressStatus {
+  LOCKED
+  AVAILABLE
+  COMPLETED
+}
+
+model ModuleProgress {
+  id           String         @id @default(cuid())
+  enrollmentId String
+  enrollment   Enrollment     @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  moduleId     String?
+  module       Module?        @relation(fields: [moduleId], references: [id])
+  weekNo       Int
+  status       ProgressStatus @default(LOCKED)
+  completedAt  DateTime?
+
+  @@unique([enrollmentId, weekNo])
+  @@index([enrollmentId])
+}
+
+enum BookingStatus {
+  SCHEDULED
+  RESCHEDULED
+  COMPLETED
+  CANCELLED
+}
+
+model CoachingBooking {
+  id           String        @id @default(cuid())
+  enrollmentId String
+  enrollment   Enrollment    @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  trainerId    String?
+  trainer      User?         @relation("CoachTrainer", fields: [trainerId], references: [id])
+  eventId      String?
+  event        Event?        @relation(fields: [eventId], references: [id])
+  slot         DateTime
+  status       BookingStatus @default(SCHEDULED)
+  notes        String?
+  sequence     Int           @default(1) // 1st or 2nd 1:1
+  createdAt    DateTime      @default(now())
+
+  @@index([enrollmentId])
+  @@index([trainerId])
+}
+
+model Certificate {
+  id           String     @id @default(cuid())
+  enrollmentId String     @unique
+  enrollment   Enrollment @relation(fields: [enrollmentId], references: [id])
+  serial       String     @unique
+  pdfKey       String?
+  issuedAt     DateTime   @default(now())
+}
+
+// ───────────────────────── Communications ─────────────────────────
+
+enum ThreadType {
+  DIRECT // participant <-> assigned trainer
+  COHORT_CHANNEL // one per cohort
+}
+
+model Thread {
+  id        String     @id @default(cuid())
+  type      ThreadType
+  cohortId  String?
+  cohort    Cohort?    @relation(fields: [cohortId], references: [id])
+  title     String?
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  members  ThreadMember[]
+  messages Message[]
+
+  @@index([cohortId])
+}
+
+model ThreadMember {
+  id         String   @id @default(cuid())
+  threadId   String
+  thread     Thread   @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lastReadAt DateTime?
+
+  @@unique([threadId, userId])
+  @@index([userId])
+}
+
+model Message {
+  id          String   @id @default(cuid())
+  threadId    String
+  thread      Thread   @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  senderId    String
+  sender      User     @relation("MessageSender", fields: [senderId], references: [id])
+  body        String
+  attachments Json?
+  createdAt   DateTime @default(now())
+
+  @@index([threadId])
+}
+
+enum EmailScope {
+  SYSTEM
+  ADMIN
+  TRAINER
+}
+
+model EmailTemplate {
+  id        String     @id @default(cuid())
+  name      String
+  subject   String
+  html      String     @db.Text
+  variables Json?
+  scope     EmailScope @default(ADMIN)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  campaigns EmailCampaign[]
+}
+
+model EmailCampaign {
+  id          String         @id @default(cuid())
+  templateId  String?
+  template    EmailTemplate? @relation(fields: [templateId], references: [id])
+  subject     String
+  html        String         @db.Text
+  segment     Json // { type: cohort|company|individual, ids:[] }
+  cohortId    String?
+  cohort      Cohort?        @relation(fields: [cohortId], references: [id])
+  sentById    String?
+  status      String         @default("draft") // draft | sending | sent | failed
+  recipients  Int            @default(0)
+  sentAt      DateTime?
+  createdAt   DateTime       @default(now())
+}
+
+enum NotificationType {
+  NEW_MATERIAL
+  NEW_MESSAGE
+  UPCOMING_SESSION
+  SHIPMENT_UPDATE
+  ENROLLMENT
+  GENERIC
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      NotificationType @default(GENERIC)
+  title     String
+  body      String?
+  href      String?
+  channel   String           @default("in_app") // in_app | email
+  readAt    DateTime?
+  createdAt DateTime         @default(now())
+
+  @@index([userId])
+}
+
+// ───────────────────────── Governance (GDPR / audit) ─────────────────────────
+
+model ConsentRecord {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String // marketing | terms | privacy
+  grantedAt DateTime?
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  actorId   String?
+  actor     User?    @relation(fields: [actorId], references: [id])
+  action    String
+  entity    String
+  entityId  String?
+  meta      Json?
+  ip        String?
+  createdAt DateTime @default(now())
+
+  @@index([actorId])
+  @@index([entity])
+}
