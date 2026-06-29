@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "TLC Leadership Platform"
+version = "1.0.0"
+id = "artifacts/tlc-platform"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 25305
+
+[services.development]
+run = "pnpm --filter @workspace/tlc-platform run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/tlc-platform", "run", "build" ]
+publicDir = "artifacts/tlc-platform/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "25305"
+BASE_PATH = "/"
