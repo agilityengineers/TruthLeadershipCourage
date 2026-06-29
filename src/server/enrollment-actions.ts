@@ -5,6 +5,7 @@ import bcrypt from "bcryptjs";
 import { db } from "@/lib/db";
 import { audit } from "@/lib/audit";
 import { evaluateCoupon } from "@/lib/coupon";
+import { rateLimit, clientIp } from "@/lib/rate-limit";
 
 const enrollSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -34,6 +35,12 @@ export type EnrollResult =
  * is at capacity the prospect is added to the waitlist instead.
  */
 export async function createEnrollment(input: z.infer<typeof enrollSchema>): Promise<EnrollResult> {
+  // Unauthenticated + creates users/seats/payments → throttle per IP against spam.
+  const ip = await clientIp();
+  if (!rateLimit(`enroll:${ip}`, { limit: 8, windowMs: 60 * 60_000 }).ok) {
+    return { ok: false, error: "Too many enrollment attempts. Please try again later." };
+  }
+
   const parsed = enrollSchema.safeParse(input);
   if (!parsed.success) {
     return { ok: false, error: parsed.error.issues[0]?.message ?? "Invalid form" };

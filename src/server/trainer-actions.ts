@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import { requirePrincipal } from "@/lib/session";
 import { audit } from "@/lib/audit";
+import { issueCertificate } from "@/lib/certificate";
 import type { Principal } from "@/lib/scope";
 import type { EventType, ResourceStatus, ResourceType } from "@prisma/client";
 
@@ -150,4 +151,36 @@ export async function createEvent(input: CreateEventInput) {
   revalidatePath("/trainer/events");
   revalidatePath("/trainer");
   return { ok: true, id: event.id };
+}
+
+/**
+ * Issue a completion certificate for an enrollment that has finished all weeks.
+ * Trainer (own cohort) / admin only. Idempotent — returns the existing serial if
+ * already issued.
+ */
+export async function issueCertificateForEnrollment(enrollmentId: string) {
+  const principal = await requireTrainer();
+  const enrollment = await db.enrollment.findUnique({
+    where: { id: enrollmentId },
+    select: { id: true, cohortId: true, status: true, certificate: { select: { id: true } } },
+  });
+  if (!enrollment) return { ok: false as const, error: "Enrollment not found" };
+  await assertOwnsCohort(principal, enrollment.cohortId);
+  if (enrollment.status !== "COMPLETED") {
+    return { ok: false as const, error: "Participant has not completed all weeks yet." };
+  }
+
+  const cert = await issueCertificate(enrollmentId);
+
+  await audit({
+    actorId: principal.id,
+    action: "certificate.issue",
+    entity: "Certificate",
+    entityId: cert.id,
+    meta: { enrollmentId },
+  });
+
+  revalidatePath(`/trainer/participants/${enrollmentId}`);
+  revalidatePath("/portal/certificate");
+  return { ok: true as const, serial: cert.serial };
 }

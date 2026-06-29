@@ -1,10 +1,14 @@
 import { db } from "@/lib/db";
 import { derivePhase, currentWeek, progressPct, type Phase } from "@/lib/cohort";
 
-/** The participant's primary (most recent active) enrollment with everything the portal needs. */
+/**
+ * The participant's primary (most recent active) enrollment with everything the
+ * portal needs. PENDING (unpaid) enrollments are intentionally excluded so the
+ * paid portal does not unlock before fulfillment marks the enrollment ACTIVE.
+ */
 export async function getParticipantContext(userId: string) {
   const enrollment = await db.enrollment.findFirst({
-    where: { userId, status: { in: ["ACTIVE", "PENDING", "COMPLETED"] } },
+    where: { userId, status: { in: ["ACTIVE", "COMPLETED"] } },
     orderBy: { createdAt: "desc" },
     include: {
       user: true,

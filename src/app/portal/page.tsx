@@ -233,9 +233,15 @@ function DuringPhase({
               {enr.cohort.sessionDay} · {enr.cohort.sessionTime}
             </div>
             <div className="mb-4 text-[12.5px] text-[#bcc6e6]">{mod?.title ?? "Session"} · with {enr.cohort.trainer?.name ?? "Tri"}</div>
-            <Button asChild variant="light" className="w-full font-bold">
-              <a href={liveEvent?.joinUrl ?? "#"} target="_blank" rel="noreferrer">Join session</a>
-            </Button>
+            {liveEvent?.joinUrl ? (
+              <Button asChild variant="light" className="w-full font-bold">
+                <a href={liveEvent.joinUrl} target="_blank" rel="noreferrer">Join session</a>
+              </Button>
+            ) : (
+              <Button variant="light" className="w-full font-bold" disabled>
+                Join link coming soon
+              </Button>
+            )}
           </div>
           <Card className="p-[18px]">
             <LabelCaps className="mb-3">Workbook</LabelCaps>

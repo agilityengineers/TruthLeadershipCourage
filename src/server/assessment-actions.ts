@@ -3,6 +3,7 @@
 import { z } from "zod";
 import { db } from "@/lib/db";
 import { computeSnapshot, type QuestionLite } from "@/lib/assessment";
+import { rateLimit, clientIp } from "@/lib/rate-limit";
 
 const submitSchema = z.object({
   answers: z.record(z.string(), z.number().min(1).max(4)),
@@ -16,6 +17,13 @@ const submitSchema = z.object({
  * Pre-account (lead) responses are keyed by email and linked to a User later.
  */
 export async function submitAssessment(input: z.infer<typeof submitSchema>) {
+  // Unauthenticated + writes a response row → throttle per IP. The caller
+  // degrades gracefully (results still render from client-side computation).
+  const ip = await clientIp();
+  if (!rateLimit(`assessment:${ip}`, { limit: 20, windowMs: 60 * 60_000 }).ok) {
+    throw new Error("Too many submissions from this network. Please try again shortly.");
+  }
+
   const { answers, leadEmail, leadName } = submitSchema.parse(input);
 
   const assessment = await db.assessment.findFirst({

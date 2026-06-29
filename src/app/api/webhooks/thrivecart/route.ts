@@ -20,9 +20,15 @@ export async function POST(req: Request) {
     form.forEach((v, k) => (data[k] = String(v)));
   }
 
-  // Optional shared-secret check.
-  if (secret && data["thrivecart_secret"] && data["thrivecart_secret"] !== secret) {
-    return new Response("Invalid secret", { status: 401 });
+  // Shared-secret check. When a secret is configured we require it to match —
+  // gating on the field's *presence* (the previous behavior) let a caller skip
+  // verification entirely just by omitting it. In production a secret is required.
+  if (secret) {
+    if (data["thrivecart_secret"] !== secret) {
+      return new Response("Invalid secret", { status: 401 });
+    }
+  } else if (process.env.NODE_ENV === "production") {
+    return new Response("Webhook secret not configured", { status: 503 });
   }
 
   const event = data["event"] ?? data["order_action"];
@@ -55,7 +61,8 @@ export async function POST(req: Request) {
       processor: "THRIVECART",
     });
   } catch (err) {
-    return new Response(`Handler error: ${(err as Error).message}`, { status: 500 });
+    console.error("[thrivecart webhook] handler error", err);
+    return new Response("Handler error", { status: 500 });
   }
 
   return Response.json({ received: true });
