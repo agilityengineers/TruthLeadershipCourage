@@ -1,0 +1,2 @@
+- [Git pane forces --rebase](git-pane-forces-rebase.md) — Replit Pull button hard-codes `--rebase`, overriding `pull.rebase false`; agent can't run any destructive git, user must merge+push from Shell.
+- [TLC platform notes](tlc-platform.md) — migrated Next.js→Vite/React app at `artifacts/tlc-platform`; rebase/merge keeps stripping its workflow config, re-register after.
