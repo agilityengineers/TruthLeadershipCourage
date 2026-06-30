@@ -140,7 +140,7 @@ export function AssessmentFlow({ questions }: { questions: QuestionLite[] }) {
               )}
             </div>
             <p className="mt-[18px] text-center text-[12.5px] text-[#a2a6b8]">
-              Takes about 4 minutes · no account required to start
+              Takes about 2 minutes · no account required to start
             </p>
           </>
         ) : (
@@ -229,7 +229,7 @@ function ResultsScreen({
         {saving && <span className="text-[12px] text-muted-3">Saving your snapshot…</span>}
       </div>
       <p className="mt-4 text-[12.5px] text-[#a2a6b8]">
-        Next, you'll confirm your seat in the Fall 2026 cohort and complete enrollment.
+        Next, you'll book a fit conversation and, if it's a match, confirm your seat in an upcoming cohort.
       </p>
     </div>
   );

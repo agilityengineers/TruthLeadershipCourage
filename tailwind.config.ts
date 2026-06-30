@@ -73,8 +73,12 @@ const config: Config = {
         },
       },
       fontFamily: {
-        display: ["var(--font-newsreader)", "Georgia", "serif"],
-        sans: ["var(--font-public-sans)", "system-ui", "sans-serif"],
+        // Header titles → Aptos (Inter fallback until Aptos files are added)
+        display: ["var(--font-aptos)", "system-ui", "sans-serif"],
+        // Body → Montserrat
+        sans: ["var(--font-montserrat)", "system-ui", "sans-serif"],
+        // Subtitles / eyebrows → Roboto
+        eyebrow: ["var(--font-roboto)", "system-ui", "sans-serif"],
       },
       borderRadius: {
         lg: "var(--radius)",
