@@ -61,7 +61,7 @@ import CompanyPeople from "@/app/company/people/page";
 
 const queryClient = new QueryClient();
 
-type LayoutComp = (props: { children: React.ReactNode }) => JSX.Element;
+type LayoutComp = (props: { children: React.ReactNode }) => React.JSX.Element;
 
 function Protected({
   roles,
@@ -80,7 +80,7 @@ function Protected({
   return <Layout>{children}</Layout>;
 }
 
-type RouteDef = [string, () => JSX.Element];
+type RouteDef = [string, () => React.JSX.Element];
 
 function group(roles: Role[], Layout: LayoutComp, routes: RouteDef[]) {
   return routes.map(([path, Page]) => (
