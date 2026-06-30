@@ -56,12 +56,12 @@
   .section-y {
     @apply py-[clamp(56px,7vw,96px)];
   }
-  /* Uppercase eyebrow label */
+  /* Uppercase eyebrow label — Roboto (subtitle font) */
   .eyebrow {
-    @apply text-[11.5px] font-semibold uppercase tracking-eyebrow;
+    @apply font-eyebrow text-[11.5px] font-semibold uppercase tracking-eyebrow;
   }
   .label-caps {
-    @apply text-[11px] font-semibold uppercase tracking-label text-muted-3;
+    @apply font-eyebrow text-[11px] font-semibold uppercase tracking-label text-muted-3;
   }
   /* Hover-lift card (method cards) */
   .lift {

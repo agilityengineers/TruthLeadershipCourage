@@ -1,19 +1,36 @@
 import type { Metadata } from "next";
-import { Newsreader, Public_Sans } from "next/font/google";
+import { Inter, Montserrat, Roboto } from "next/font/google";
 import "./globals.css";
 
-const newsreader = Newsreader({
+/**
+ * TLC brand type system (per Tri's font direction):
+ *   • Header titles → Aptos
+ *   • Body          → Montserrat
+ *   • Subtitles     → Roboto
+ *
+ * Aptos is a licensed Microsoft font and is not available on Google Fonts, so we
+ * render header titles in Inter (a close humanist-sans stand-in) for now. To use
+ * the real Aptos, add the font files under src/app/fonts and swap this for
+ * next/font/local — only this block changes; the --font-aptos variable stays.
+ */
+const aptos = Inter({
   subsets: ["latin"],
-  weight: ["400", "500", "600"],
-  style: ["normal", "italic"],
-  variable: "--font-newsreader",
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-aptos",
   display: "swap",
 });
 
-const publicSans = Public_Sans({
+const montserrat = Montserrat({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
-  variable: "--font-public-sans",
+  variable: "--font-montserrat",
+  display: "swap",
+});
+
+const roboto = Roboto({
+  subsets: ["latin"],
+  weight: ["400", "500", "700"],
+  variable: "--font-roboto",
   display: "swap",
 });
 
@@ -27,14 +44,14 @@ export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"),
   openGraph: {
     title: "TLC — Truth Leadership Courage",
-    description: "A practical leadership operating system. Fall 2026 cohort enrolling.",
+    description: "A practical leadership operating system. Enrolling now.",
     type: "website",
   },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${newsreader.variable} ${publicSans.variable}`}>
+    <html lang="en" className={`${aptos.variable} ${montserrat.variable} ${roboto.variable}`}>
       <body className="min-h-screen bg-page text-ink antialiased">{children}</body>
     </html>
   );
