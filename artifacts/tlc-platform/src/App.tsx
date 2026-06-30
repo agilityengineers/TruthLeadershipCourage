@@ -21,6 +21,7 @@ import AssessmentPage from "@/app/assessment/page";
 import EnrollPage from "@/app/enroll/page";
 import EnrollConfirmationPage from "@/app/enroll/confirmation/page";
 import BookACallPage from "@/app/book-a-call/page";
+import OrganizationsPage from "@/app/organizations/page";
 import AppNotFound from "@/app/not-found";
 
 // Portal pages
@@ -109,6 +110,7 @@ function Router() {
       <Route path="/enroll" component={EnrollPage} />
       <Route path="/enroll/confirmation" component={EnrollConfirmationPage} />
       <Route path="/book-a-call" component={BookACallPage} />
+      <Route path="/organizations" component={OrganizationsPage} />
 
       {/* Portal */}
       {group(PARTICIPANT_ROLES, PortalLayout, [

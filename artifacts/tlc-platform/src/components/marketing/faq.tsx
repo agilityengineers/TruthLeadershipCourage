@@ -8,19 +8,19 @@ import {
 const ITEMS = [
   {
     q: "What is the time commitment?",
-    a: "Weekly live virtual sessions on Thursdays, 9–11 AM PST, across six months — plus a 10-week independent intersession and two private 1:1 coaching sessions.",
+    a: "Live virtual sessions of about two hours a week across six months — built around a working leader's schedule — plus an independent intersession and two private 1:1 coaching sessions.",
   },
   {
     q: "Who is this for?",
-    a: "Advancing leaders on the path to the C-Suite who want to lead through people — not around them. Cohorts can also be run privately for a single company's team.",
+    a: "Advancing leaders on the path to the C-Suite who want to lead through people — not around them. Cohorts can also be run privately for a single company's leadership team.",
   },
   {
-    q: "What's included?",
-    a: "All weekly training and materials, a shipped physical workbook plus digital versions, two 1:1 coaching sessions, and lifetime access to the resource library after you complete.",
+    q: "I've done leadership training before. How is this different?",
+    a: "Most training adds tools that fade under pressure. TLC builds the leader underneath the tools — the 77% of how you show up that no tactic alone can produce — so it holds in real moments, not just in the room.",
   },
   {
     q: "What happens after I start the assessment?",
-    a: "You'll see your personalized leadership snapshot and how TLC maps to it, then a short path to reserve your seat in the cohort and complete enrollment.",
+    a: "You'll see your personalized leadership snapshot and how TLC maps to it, then a short path to book a fit conversation and, if it's a match, reserve your seat in an upcoming cohort.",
   },
 ];
 

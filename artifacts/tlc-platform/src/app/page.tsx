@@ -1,5 +1,6 @@
 import { Link } from "wouter";
 import { LandingNav } from "@/components/marketing/landing-nav";
+import { LeadershipModel } from "@/components/marketing/leadership-model";
 import { FAQ } from "@/components/marketing/faq";
 import { Eyebrow } from "@/components/brand/primitives";
 import { Button } from "@/components/ui/button";
@@ -12,15 +13,15 @@ const CHALLENGES = [
 ];
 
 const STEPS = [
-  ["Step 01", "Take the assessment", "A 4-minute leadership diagnostic. We learn exactly where you're stretched today."],
-  ["Step 02", "Join the cohort", "Get matched into the Fall 2026 cohort with your workbook and live weekly sessions."],
-  ["Step 03", "Lead differently", "Six months later, lead from a grounded place — and grow the leaders around you."],
+  ["Step 01", "Take the assessment", "Five honest questions, two minutes. See exactly where you're stretched today."],
+  ["Step 02", "Book a fit conversation", "We talk, leader to leader. Tri tells you honestly if TLC is the answer — or if something else fits better."],
+  ["Step 03", "Begin with your cohort", "Six months later, lead from a grounded place — and grow the leaders around you."],
 ];
 
 const METHOD = [
-  { eyebrow: "EQ · EMOTIONAL", title: "Build the Leader", body: "Self-awareness and self-trust. Lead from a steady, grounded place.", bg: "#024794", sub: "#d4e0f4" },
-  { eyebrow: "IQ · INTELLECTUAL", title: "Build the Team", body: "Trust, accountability, and execution that holds through people.", bg: "#262161", sub: "#cfd2ea" },
-  { eyebrow: "MQ™ · MENTORSHIP", title: "Build Future Leaders", body: "Mentor and grow the next generation. An employee-centered culture.", bg: "#662d91", sub: "#e4d3ef" },
+  { eyebrow: "EQ", title: "Build the Leader", body: "The inner foundation. Self-awareness and the steadiness to lead from your best self under pressure.", bg: "#024794", sub: "#d4e0f4" },
+  { eyebrow: "IQ", title: "Build the Team", body: "Clarity, trust, accountability, and hard conversations handled with care. Because the relationship is the leadership.", bg: "#262161", sub: "#cfd2ea" },
+  { eyebrow: "MQ™", title: "Build Future Leaders", body: "Seeing potential before people see it in themselves, and growing leaders beyond you. The mark of a great leader is the leaders they raise.", bg: "#662d91", sub: "#e4d3ef" },
 ];
 
 const OUTCOMES = [
@@ -33,16 +34,16 @@ const OUTCOMES = [
 ];
 
 const GLANCE = [
-  ["Duration", "Aug 2026 – Feb 2027", "Six months"],
-  ["Sessions", "Thursdays, 9–11 PST", "Live virtual · weekly"],
-  ["Coaching", "2 private 1:1s", "+ physical workbook shipped"],
-  ["Format", "Cohort · limited seats", "Session 1 · intersession · Session 2"],
+  ["Duration", "Six months", "Session 1 · intersession · Session 2"],
+  ["Sessions", "Two hours a week", "Live virtual · small cohort"],
+  ["Coaching", "2 private 1:1s", "With Tri, focused on you"],
+  ["Investment", "$5,500", "Seats limited by design"],
 ];
 
 const STORIES = [
-  ["It has made a more compassionate and visionary mentor out of me — and fueled growth in all spheres of my life.", "B. Hatchel", "Supervisor, American Airlines"],
-  ["I witnessed remarkable enhancements in conflict resolution — both at work and in my personal life.", "J. DeLeon", "Quality Director, Earthlab Botanicals"],
-  ["Tri has a unique ability to truly listen, then ask the right questions to help me find the right solution.", "J. Fisher", "CEO, Capital Financial Consultants Group"],
+  ["She helped me move past my own limiting beliefs and build a grounded, centered worldview. It's made me a better leader, mentor, spouse, and father.", "S. Mirsky", "Managing Partner"],
+  ["Before, we'd be more reactive. Now, with this leadership model, I stop and plan.", "Katie Dahmer", "COO"],
+  ["Tri's gift is to truly listen, then ask the right questions so I find the solution myself. Seven years in, the impact on my business and personal life has been remarkable.", "Jeff F.", "CEO"],
 ];
 
 export default function LandingPage() {
@@ -54,17 +55,18 @@ export default function LandingPage() {
       <section className="shell grid items-center gap-[clamp(28px,5vw,60px)] py-[clamp(40px,6vw,76px)] pb-10 lg:grid-cols-[1.04fr_.96fr]">
         <div>
           <Eyebrow color="#662d91" rule className="mb-[22px]">
-            An Invitation · Fall 2026 Cohort
+            An Invitation to Lead
           </Eyebrow>
           <h1 className="mb-5 text-[clamp(38px,5vw,58px)] leading-[1.04] text-ink">
-            Grow into your best as a leader —<br />
-            and become a leader <em className="italic text-eq">worth following.</em>
+            Become a leader{" "}
+            <em className="italic text-eq">worth following.</em>
           </h1>
           <p className="mb-[30px] max-w-[30em] text-[18px] leading-[1.55] text-[#4c5066]">
-            The workplace asks more of you than answers — faster pace, more complexity, higher
-            stakes. TLC is a practical leadership operating system that builds the clarity, trust,
-            and accountability so execution holds <em className="italic text-indigo">through</em>{" "}
-            your people, not around them.
+            You've done the trainings, read the books, collected the frameworks. So why does it
+            still come apart in the moment that matters? By one well-known measure, only about 23%
+            of how well you lead is what you <em className="italic text-indigo">do</em>. The other
+            77% is who you <em className="italic text-indigo">are</em> — and that's the part TLC
+            works on.
           </p>
           <div className="mb-6 flex flex-wrap items-center gap-3.5">
             <Button asChild size="lg">
@@ -75,7 +77,7 @@ export default function LandingPage() {
             </Button>
           </div>
           <div className="text-[13px] font-medium leading-[1.5] text-[#8a8fa3]">
-            Free · 4 minutes · no card required
+            Free · 2 minutes · no card required
           </div>
         </div>
         <div className="relative">
@@ -89,7 +91,7 @@ export default function LandingPage() {
           <div className="absolute -left-4 bottom-6 flex items-center gap-4 rounded-[14px] bg-white px-[18px] py-4 shadow-float">
             <Stat value="6 mo" label="PROGRAM" color="#024794" />
             <span className="h-[34px] w-px bg-[#ececf2]" />
-            <Stat value="Thu" label="9–11 PST" color="#262161" />
+            <Stat value="2 hrs" label="WEEKLY" color="#262161" />
             <span className="h-[34px] w-px bg-[#ececf2]" />
             <Stat value="EQ·IQ·MQ" label="METHOD" color="#662d91" />
           </div>
@@ -112,13 +114,15 @@ export default function LandingPage() {
 
       {/* Problem */}
       <section id="why" className="shell section-y">
-        <Eyebrow className="mb-3.5">The challenge</Eyebrow>
+        <Eyebrow className="mb-3.5">Why training doesn't stick</Eyebrow>
         <h2 className="mb-2 max-w-[16em] text-[clamp(28px,3.4vw,40px)] leading-[1.1] text-ink">
-          The role changed. <em className="italic text-mq">The playbook didn't.</em>
+          New apps. <em className="italic text-mq">Same operating system.</em>
         </h2>
         <p className="mb-10 max-w-[40em] text-[17px] leading-[1.55] text-muted">
-          The world does not slow down for leaders. Most were promoted for being excellent at the
-          work — then handed a role that asks for something else entirely.
+          You took the notes and walked out knowing exactly what a good leader does. Then a hard
+          moment came, and almost none of it showed up. Under pressure, you don't reach for what you
+          learned — you reach for how you think. Every tactic is an app running on something deeper:
+          your operating system. TLC works there.
         </p>
         <div className="grid grid-cols-1 gap-[18px] sm:grid-cols-2 lg:grid-cols-4">
           {CHALLENGES.map(([n, title, body]) => (
@@ -208,27 +212,45 @@ export default function LandingPage() {
               </div>
             ))}
           </div>
-          <div className="mb-[30px] text-center">
-            <h3 className="text-[23px] text-ink">
-              Built on the <em className="italic text-mq">MQ™</em> method — EQ · IQ · MQ™
+          <div className="mb-[34px] text-center">
+            <Eyebrow color="#024794" className="mb-3.5 justify-center">
+              The operating system
+            </Eyebrow>
+            <h3 className="text-[clamp(24px,3vw,34px)] leading-[1.12] text-ink">
+              Three intelligences. <em className="italic text-mq">One operating system.</em>
             </h3>
           </div>
-          <div className="grid grid-cols-1 gap-[18px] md:grid-cols-3">
-            {METHOD.map((m) => (
-              <div
-                key={m.title}
-                className="lift rounded-[16px] p-[26px] text-white"
-                style={{ background: m.bg }}
-              >
-                <div className="mb-1.5 text-[12px] font-semibold uppercase tracking-label opacity-85">
-                  {m.eyebrow}
+          <div className="grid items-center gap-[clamp(30px,5vw,56px)] lg:grid-cols-[1fr_.92fr]">
+            <LeadershipModel className="mx-auto w-full max-w-[460px]" />
+            <div>
+              <div className="mb-7 rounded-[16px] border border-hair-2 bg-white p-[26px] shadow-card">
+                <div className="font-display text-[18px] leading-[1.42] text-ink">
+                  Build the Leader <span className="text-eq">+</span> Build the Team{" "}
+                  <span className="text-iq">+</span> Build Future Leaders
                 </div>
-                <h4 className="mb-2.5 text-[24px] text-white">{m.title}</h4>
-                <p className="text-[14px] leading-[1.55]" style={{ color: m.sub }}>
-                  {m.body}
-                </p>
+                <div className="mt-2 font-display text-[18px] leading-[1.42] text-mq">
+                  = consistency that scales, and a culture that compounds
+                </div>
+                <div className="label-caps mt-3.5">EQ + IQ + MQ™</div>
               </div>
-            ))}
+              <div className="grid gap-[18px]">
+                {METHOD.map((m) => (
+                  <div key={m.title} className="flex gap-3.5">
+                    <span
+                      className="mt-[6px] h-3 w-3 shrink-0 rounded-full"
+                      style={{ background: m.bg }}
+                    />
+                    <div>
+                      <h4 className="mb-0.5 text-[17px] text-ink">
+                        {m.title}{" "}
+                        <span className="label-caps inline-block">· {m.eyebrow}</span>
+                      </h4>
+                      <p className="text-[14px] leading-[1.5] text-[#62657a]">{m.body}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -268,7 +290,7 @@ export default function LandingPage() {
             ))}
           </div>
           <p className="mt-4 text-[13px] text-muted-2">
-            Investment: <span className="font-semibold text-ink">$5,500</span> · seats are limited.
+            Next cohort dates are shared on your fit conversation — seats are limited by design.
           </p>
         </div>
       </div>
@@ -303,7 +325,7 @@ export default function LandingPage() {
               Here's to <em className="italic text-sky">answering the call.</em>
             </h2>
             <p className="mb-[30px] max-w-[26em] text-[17px] leading-[1.55] text-[#cdd6ee]">
-              The Fall 2026 cohort is opening a limited number of seats. Start with the 4-minute
+              We're opening a limited number of seats in the next cohort. Start with the two-minute
               assessment — and see exactly how TLC meets you where you are.
             </p>
             <div className="flex flex-wrap gap-3.5">
@@ -326,8 +348,11 @@ export default function LandingPage() {
       {/* Footer */}
       <footer className="border-t border-[#eef0f5] bg-white">
         <div className="shell flex flex-wrap items-center gap-3.5 py-[34px]">
-          <img src="/brand/wisdomtri-logo.jpg" alt="" width={30} height={30} className="h-[30px] w-[30px] object-contain" />
+          <img src="/brand/wisdomtri-logo.jpg" alt="" width={40} height={40} className="h-10 w-10 object-contain" />
           <span className="text-[14px] font-semibold text-indigo">The Wisdom Tri</span>
+          <Link href="/organizations" className="text-[13px] font-semibold text-eq hover:underline">
+            Leading a team? See TLC for Organizations →
+          </Link>
           <span className="ml-auto text-[13px] leading-[1.5] text-muted-2">
             thewisdomtri.com&nbsp;·&nbsp;tri.nguyen@thewisdomtri.com
           </span>

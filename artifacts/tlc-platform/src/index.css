@@ -58,6 +58,7 @@
 
   --font-sans: var(--app-font-sans);
   --font-display: var(--app-font-display);
+  --font-eyebrow: var(--app-font-eyebrow);
   --font-serif: var(--app-font-display);
   --font-mono: var(--app-font-mono);
 
@@ -165,8 +166,9 @@
   --chart-4: 197 50% 81%; /* sky */
   --chart-5: 152 64% 30%; /* success */
 
-  --app-font-sans: 'Public Sans', system-ui, sans-serif;
-  --app-font-display: 'Newsreader', Georgia, serif;
+  --app-font-sans: 'Montserrat', system-ui, sans-serif;
+  --app-font-display: 'Aptos', 'Inter', system-ui, sans-serif;
+  --app-font-eyebrow: 'Roboto', system-ui, sans-serif;
   --app-font-mono: Menlo, monospace;
   --radius: 0.625rem; /* 10px */
   --tracking-normal: 0em;
@@ -226,12 +228,14 @@
   }
   /* Uppercase eyebrow label */
   .eyebrow {
+    font-family: var(--app-font-eyebrow);
     font-size: 11.5px;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.16em;
   }
   .label-caps {
+    font-family: var(--app-font-eyebrow);
     font-size: 11px;
     font-weight: 600;
     text-transform: uppercase;

@@ -10,8 +10,8 @@ export default function BookACallPage() {
         Let's talk about your leadership.
       </h1>
       <p className="mt-3 max-w-[34em] text-[16px] leading-relaxed text-muted">
-        Book a 15-minute call with Tri to see whether the Fall 2026 cohort is the right fit. Most
-        leaders start with the 4-minute assessment first.
+        Book a 15-minute fit conversation with Tri to see whether TLC is the right fit for you or
+        your team. Most leaders start with the two-minute assessment first.
       </p>
       <div className="mt-7 flex flex-wrap items-center justify-center gap-3.5">
         <Button asChild size="lg">

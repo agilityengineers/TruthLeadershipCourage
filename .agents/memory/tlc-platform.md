@@ -17,3 +17,14 @@ then `restart_workflow("artifacts/tlc-platform: web")`. This recreates the workf
 baseline; its update commits (font/copy refresh, new `src/app/organizations/page.tsx`) are in the
 old Next.js structure at repo root, NOT in `artifacts/tlc-platform`. Merging syncs git history but
 those content changes must be PORTED into the migrated Vite app to actually appear in the preview.
+
+**Porting old Next.js content into the Vite app — conventions.** When a PR's content was written
+against the pre-migration `src/...` Next.js tree, port it by adapting: `next/image` → plain `<img>`
+(drop `priority`); `next/link` → `wouter` `Link`; `export const metadata`/page `<title>` → edit
+`artifacts/tlc-platform/index.html`; `next/font` → load fonts via the Google Fonts `<link>` in
+`index.html` plus CSS tokens in `index.css` (Tailwind v4 `@theme`, e.g. `--app-font-display`,
+`--app-font-eyebrow`). New routes go in `App.tsx` as `<Route>` + a file under `src/app/.../page.tsx`.
+If a file was deleted by an earlier `git rm` during a merge, recover its post-PR content with
+`git show <commit>:<oldpath>`. Cross-page nav anchors: on landing use bare `#hash` (scroll in place);
+off-landing use `${import.meta.env.BASE_URL}#hash` so it routes home then scrolls (base-path safe).
+**Why:** keeps the preview faithful to the PR while respecting Vite/wouter conventions and base path.
