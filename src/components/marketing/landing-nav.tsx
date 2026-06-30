@@ -3,10 +3,10 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
 const NAV = [
-  { label: "Why TLC", href: "#why" },
-  { label: "The Program", href: "#program" },
-  { label: "About Tri", href: "#guide" },
-  { label: "Stories", href: "#stories" },
+  { label: "TLC for Leaders", href: "/" },
+  { label: "TLC for Organizations", href: "/organizations" },
+  { label: "About Tri", href: "/#guide" },
+  { label: "Stories", href: "/#stories" },
 ];
 
 export function LandingNav() {
@@ -17,9 +17,9 @@ export function LandingNav() {
           <Image
             src="/brand/wisdomtri-logo.jpg"
             alt="The Wisdom Tri"
-            width={102}
-            height={102}
-            className="h-[68px] w-[68px] object-contain lg:h-[88px] lg:w-[88px]"
+            width={132}
+            height={132}
+            className="h-[88px] w-[88px] object-contain lg:h-[112px] lg:w-[112px]"
             priority
           />
         </Link>
