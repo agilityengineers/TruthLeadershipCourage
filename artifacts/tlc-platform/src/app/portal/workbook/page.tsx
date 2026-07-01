@@ -1,6 +1,6 @@
 import { Link } from "wouter";
 import { requireRole } from "@/lib/session";
-import { getParticipantContext } from "@/server/portal-data";
+import { useGetParticipantContext } from "@workspace/api-client-react";
 import { Card } from "@/components/ui/card";
 import { Stepper, type Step } from "@/components/brand/stepper";
 import { LabelCaps } from "@/components/brand/primitives";
@@ -8,8 +8,8 @@ import { Button } from "@/components/ui/button";
 import { BookOpen } from "lucide-react";
 
 export default function WorkbookPage() {
-  const principal = requireRole("PARTICIPANT", "ADMIN");
-  const enr = getParticipantContext(principal.id);
+  requireRole("PARTICIPANT", "ADMIN");
+  const { data: enr } = useGetParticipantContext();
   if (!enr) return <Card className="p-8 text-muted">No active enrollment.</Card>;
 
   const s = enr.shipment?.status ?? "PENDING";

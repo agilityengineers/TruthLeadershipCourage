@@ -1,5 +1,5 @@
-import { db } from "@/lib/db";
 import { requireRole } from "@/lib/session";
+import { useGetAdminResourcesData } from "@workspace/api-client-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { LabelCaps } from "@/components/brand/primitives";
@@ -7,17 +7,9 @@ import { formatDate } from "@/lib/utils";
 
 export default function AdminResourcesPage() {
   requireRole("ADMIN");
-  const resources = db.resource.findMany({
-    orderBy: { createdAt: "desc" },
-    take: 40,
-    include: { cohort: true, module: true },
-  });
-  const events = db.event.findMany({
-    where: { startAt: { gte: new Date() } },
-    orderBy: { startAt: "asc" },
-    take: 12,
-    include: { cohort: true },
-  });
+  const { data } = useGetAdminResourcesData();
+  const resources = data?.resources ?? [];
+  const events = data?.events ?? [];
 
   return (
     <div className="flex flex-col gap-5">
@@ -36,7 +28,7 @@ export default function AdminResourcesPage() {
                   {r.type}
                 </span>
                 <span className="min-w-0 flex-1 truncate text-[13px] font-semibold text-ink">{r.title}</span>
-                <span className="text-[11.5px] text-muted-3">{r.cohort?.name ?? "Program"}</span>
+                <span className="text-[11.5px] text-muted-3">{r.cohortName ?? "Program"}</span>
                 <Badge variant={r.status === "PUBLISHED" ? "success" : "warning"} size="sm">
                   {r.status}
                 </Badge>
@@ -61,7 +53,7 @@ export default function AdminResourcesPage() {
                 </div>
                 <div className="min-w-0">
                   <div className="truncate text-[13px] font-semibold text-ink">{e.title}</div>
-                  <div className="text-[11.5px] text-muted-2">{e.cohort.name}</div>
+                  <div className="text-[11.5px] text-muted-2">{e.cohortName}</div>
                 </div>
               </div>
             ))}

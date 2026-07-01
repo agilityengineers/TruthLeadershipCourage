@@ -1,5 +1,7 @@
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
+import { useCreateCompany, useCloneCohort, usePurchaseSeats } from "@workspace/api-client-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,14 +13,17 @@ import {
   DialogDescription,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { createCompany, cloneCohort, purchaseSeats } from "@/server/admin-actions";
 
-export function AddCompanyDialog() {
-  const [, force] = useState(0);
-  const bump = () => force((n) => n + 1);
+export function AddCompanyDialog({
+  cohorts: _cohorts,
+}: {
+  cohorts: { id: string; name: string }[];
+}) {
+  const qc = useQueryClient();
+  const createCompany = useCreateCompany();
   const [open, setOpen] = useState(false);
-  const [pending, start] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const pending = createCompany.isPending;
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -31,20 +36,20 @@ export function AddCompanyDialog() {
           <DialogDescription>Create a new corporate client (tenant).</DialogDescription>
         </DialogHeader>
         <form
-          onSubmit={(e) => {
+          onSubmit={async (e) => {
             e.preventDefault();
             setError(null);
             const fd = new FormData(e.currentTarget);
-            start(async () => {
-              const res = await createCompany({
+            const res = await createCompany.mutateAsync({
+              data: {
                 name: String(fd.get("name")),
                 billingEmail: String(fd.get("billingEmail") || ""),
-              });
-              if (!res.ok) return;
-              setOpen(false);
-              toast.success("Company created");
-              bump();
+              },
             });
+            if (!res.ok) return;
+            setOpen(false);
+            toast.success("Company created");
+            qc.invalidateQueries();
           }}
           className="flex flex-col gap-4"
         >
@@ -70,10 +75,10 @@ export function CloneCohortDialog({
 }: {
   cohorts: { id: string; name: string }[];
 }) {
-  const [, force] = useState(0);
-  const bump = () => force((n) => n + 1);
+  const qc = useQueryClient();
+  const cloneCohort = useCloneCohort();
   const [open, setOpen] = useState(false);
-  const [pending, start] = useTransition();
+  const pending = cloneCohort.isPending;
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -88,19 +93,19 @@ export function CloneCohortDialog({
           </DialogDescription>
         </DialogHeader>
         <form
-          onSubmit={(e) => {
+          onSubmit={async (e) => {
             e.preventDefault();
             const fd = new FormData(e.currentTarget);
-            start(async () => {
-              await cloneCohort({
+            await cloneCohort.mutateAsync({
+              data: {
                 sourceId: String(fd.get("sourceId")),
                 name: String(fd.get("name")),
                 startDate: String(fd.get("startDate")),
-              });
-              setOpen(false);
-              toast.success("Cohort created");
-              bump();
+              },
             });
+            setOpen(false);
+            toast.success("Cohort created");
+            qc.invalidateQueries();
           }}
           className="flex flex-col gap-4"
         >
@@ -145,10 +150,10 @@ export function PurchaseSeatsDialog({
   companyId: string;
   cohorts: { id: string; name: string }[];
 }) {
-  const [, force] = useState(0);
-  const bump = () => force((n) => n + 1);
+  const qc = useQueryClient();
+  const purchaseSeats = usePurchaseSeats();
   const [open, setOpen] = useState(false);
-  const [pending, start] = useTransition();
+  const pending = purchaseSeats.isPending;
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -163,19 +168,19 @@ export function PurchaseSeatsDialog({
           </DialogDescription>
         </DialogHeader>
         <form
-          onSubmit={(e) => {
+          onSubmit={async (e) => {
             e.preventDefault();
             const fd = new FormData(e.currentTarget);
-            start(async () => {
-              await purchaseSeats({
+            await purchaseSeats.mutateAsync({
+              data: {
                 companyId,
                 cohortId: String(fd.get("cohortId")),
                 quantity: Number(fd.get("quantity")),
-              });
-              setOpen(false);
-              toast.success("Seats purchased");
-              bump();
+              },
             });
+            setOpen(false);
+            toast.success("Seats purchased");
+            qc.invalidateQueries();
           }}
           className="flex flex-col gap-4"
         >

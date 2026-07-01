@@ -1,5 +1,6 @@
 import { requireRole } from "@/lib/session";
-import { getParticipantContext, deriveJourney } from "@/server/portal-data";
+import { useGetParticipantContext } from "@workspace/api-client-react";
+import { deriveJourney } from "@/lib/cohort";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { LabelCaps } from "@/components/brand/primitives";
@@ -8,8 +9,8 @@ import { cn } from "@/lib/utils";
 import { Check, Lock } from "lucide-react";
 
 export default function ProgressPage() {
-  const principal = requireRole("PARTICIPANT", "ADMIN");
-  const enr = getParticipantContext(principal.id);
+  requireRole("PARTICIPANT", "ADMIN");
+  const { data: enr } = useGetParticipantContext();
   if (!enr) return <Card className="p-8 text-muted">No active enrollment.</Card>;
   const journey = deriveJourney(enr);
 

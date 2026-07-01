@@ -1,5 +1,5 @@
-import { db } from "@/lib/db";
 import { requireRole } from "@/lib/session";
+import { useListCohorts } from "@workspace/api-client-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { formatDate, formatPrice } from "@/lib/utils";
@@ -15,14 +15,8 @@ const STATUS_VARIANT: Record<string, "success" | "default" | "warning" | "neutra
 
 export default function CohortsPage() {
   requireRole("ADMIN");
-  const cohorts = db.cohort.findMany({
-    orderBy: { startDate: "desc" },
-    include: {
-      trainer: true,
-      company: true,
-      _count: { select: { enrollments: true } },
-    },
-  });
+  const { data } = useListCohorts();
+  const cohorts = data ?? [];
 
   return (
     <div className="flex flex-col gap-5">
@@ -58,12 +52,12 @@ export default function CohortsPage() {
               {formatDate(c.startDate, { month: "short", year: "numeric" })} –{" "}
               {formatDate(c.endDate, { month: "short", year: "numeric" })}
             </span>
-            <span className="text-[12.5px] text-muted">{c.trainer?.name ?? "—"}</span>
+            <span className="text-[12.5px] text-muted">{c.trainerName ?? "—"}</span>
             <span className="text-[12.5px] font-semibold text-ink">
               {c.price > 0 ? formatPrice(c.price, c.currency) : "—"}
             </span>
             <span className="text-[12.5px] text-ink">
-              {c._count.enrollments}
+              {c.enrollmentCount}
               {c.capacity > 0 ? ` / ${c.capacity}` : ""}
             </span>
             <span>

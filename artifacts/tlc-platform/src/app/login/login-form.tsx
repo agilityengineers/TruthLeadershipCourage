@@ -1,28 +1,39 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
-import { loginAction } from "@/server/auth-actions";
+import { useLogin } from "@workspace/api-client-react";
+import { setSession } from "@/lib/session";
+import { homeForRole } from "@/lib/rbac";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 export function LoginForm({ callbackUrl }: { callbackUrl?: string }) {
   const [, navigate] = useLocation();
-  const [state, setState] = useState<{ error: string | null }>({ error: null });
-  const [pending, setPending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const login = useLogin();
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    setPending(true);
+    setError(null);
     const fd = new FormData(e.currentTarget);
-    const email = String(fd.get("email") ?? "");
+    const email = String(fd.get("email") ?? "").toLowerCase();
     const password = String(fd.get("password") ?? "");
-    const res = loginAction(email, password);
-    if (res.error) {
-      setState({ error: res.error });
-      setPending(false);
-      return;
+    try {
+      const res = await login.mutateAsync({ data: { email, password } });
+      setSession(
+        {
+          id: res.user.id,
+          role: res.user.role,
+          companyId: res.user.companyId ?? null,
+          name: res.user.name ?? null,
+          email: res.user.email,
+        },
+        res.token,
+      );
+      navigate(callbackUrl || homeForRole(res.user.role));
+    } catch {
+      setError("Invalid email or password.");
     }
-    navigate(callbackUrl || res.redirectTo || "/portal");
   }
 
   return (
@@ -36,13 +47,13 @@ export function LoginForm({ callbackUrl }: { callbackUrl?: string }) {
         <Label htmlFor="password">Password</Label>
         <Input id="password" name="password" type="password" autoComplete="current-password" required />
       </div>
-      {state?.error && (
+      {error && (
         <p role="alert" className="text-[13px] font-medium text-danger">
-          {state.error}
+          {error}
         </p>
       )}
-      <Button type="submit" size="lg" className="w-full" disabled={pending}>
-        {pending ? "Signing in…" : "Sign in"}
+      <Button type="submit" size="lg" className="w-full" disabled={login.isPending}>
+        {login.isPending ? "Signing in…" : "Sign in"}
       </Button>
     </form>
   );

@@ -1,12 +1,12 @@
 import { requireRole } from "@/lib/session";
-import { db } from "@/lib/db";
+import { useGetMe } from "@workspace/api-client-react";
 import { initials } from "@/lib/utils";
 import { DashboardShell, type NavItem } from "@/components/brand/dashboard-shell";
 import { NotificationBellServer } from "@/components/notifications/bell-server";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const principal = requireRole("ADMIN");
-  const user = db.user.findUnique({ where: { id: principal.id } });
+  const { data: user } = useGetMe();
 
   const nav: NavItem[] = [
     { label: "Overview", href: "/admin" },

@@ -1,5 +1,5 @@
-import { db } from "@/lib/db";
 import { requireRole } from "@/lib/session";
+import { useListParticipants } from "@workspace/api-client-react";
 import { Card } from "@/components/ui/card";
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -7,16 +7,8 @@ import { initials } from "@/lib/utils";
 
 export default function AdminParticipantsPage() {
   requireRole("ADMIN");
-  const enrollments = db.enrollment.findMany({
-    orderBy: { createdAt: "desc" },
-    take: 100,
-    include: {
-      user: true,
-      company: true,
-      cohort: true,
-      moduleProgress: true,
-    },
-  });
+  const { data } = useListParticipants();
+  const enrollments = data ?? [];
 
   return (
     <div className="flex flex-col gap-5">
@@ -34,7 +26,7 @@ export default function AdminParticipantsPage() {
           <span>Status</span>
         </div>
         {enrollments.map((e) => {
-          const done = e.moduleProgress.filter((m) => m.status === "COMPLETED").length;
+          const done = e.completedCount;
           const pct = Math.round((done / 24) * 100);
           return (
             <div
@@ -42,14 +34,14 @@ export default function AdminParticipantsPage() {
               className="grid grid-cols-[1.6fr_1fr_1fr_1.2fr_0.8fr] items-center border-b border-[#f1f3f8] px-5 py-3 last:border-0"
             >
               <span className="flex items-center gap-2.5">
-                <Avatar label={initials(e.user.name)} size={30} />
+                <Avatar label={initials(e.userName)} size={30} />
                 <span className="min-w-0">
-                  <span className="block truncate text-[13px] font-semibold text-ink">{e.user.name}</span>
-                  <span className="block truncate text-[11.5px] text-muted-2">{e.user.email}</span>
+                  <span className="block truncate text-[13px] font-semibold text-ink">{e.userName}</span>
+                  <span className="block truncate text-[11.5px] text-muted-2">{e.userEmail}</span>
                 </span>
               </span>
-              <span className="text-[12.5px] text-muted">{e.company?.name ?? "Independent"}</span>
-              <span className="text-[12.5px] text-muted">{e.cohort.name}</span>
+              <span className="text-[12.5px] text-muted">{e.companyName ?? "Independent"}</span>
+              <span className="text-[12.5px] text-muted">{e.cohortName}</span>
               <span className="flex items-center gap-2">
                 <span className="h-1.5 w-[110px] overflow-hidden rounded-pill bg-[#e3e7f1]">
                   <span

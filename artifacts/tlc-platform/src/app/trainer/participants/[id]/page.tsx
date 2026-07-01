@@ -1,8 +1,7 @@
 import { Link, useParams } from "wouter";
 import NotFound from "@/pages/not-found";
 import { requireRole } from "@/lib/session";
-import { db } from "@/lib/db";
-import { enrollmentScope } from "@/lib/scope";
+import { useGetTrainerParticipant } from "@workspace/api-client-react";
 import { currentWeek } from "@/lib/cohort";
 import { Card } from "@/components/ui/card";
 import { Avatar } from "@/components/ui/avatar";
@@ -18,23 +17,14 @@ const TOTAL_WEEKS = 24;
 
 export default function ParticipantDetailPage() {
   const { id } = useParams();
-  const principal = requireRole("TRAINER", "ADMIN");
+  requireRole("TRAINER", "ADMIN");
 
-  // Tenant-safe: enforce the enrollment is within the trainer's scope.
-  const enrollment = db.enrollment.findFirst({
-    where: { AND: [{ id }, enrollmentScope(principal)] },
-    include: {
-      user: { include: { company: true } },
-      cohort: true,
-      moduleProgress: { orderBy: { weekNo: "asc" }, include: { module: true } },
-      certificate: true,
-    },
-  });
+  const { data: enrollment } = useGetTrainerParticipant(id ?? "");
 
   if (!enrollment) return <NotFound />;
 
   const completed = enrollment.moduleProgress.filter((m) => m.status === "COMPLETED").length;
-  const week = currentWeek(enrollment.cohort.startDate, TOTAL_WEEKS);
+  const week = currentWeek(enrollment.cohort.startDate ?? new Date().toISOString(), TOTAL_WEEKS);
   const stats = computeProgress(completed, week, TOTAL_WEEKS, enrollment.status === "COMPLETED");
   const name = enrollment.user.name ?? enrollment.user.email;
 
@@ -49,7 +39,7 @@ export default function ParticipantDetailPage() {
         <div className="min-w-0">
           <h2 className="font-display text-[22px] text-ink">{name}</h2>
           <div className="text-[13px] text-muted-2">
-            {enrollment.user.email} · {enrollment.user.company?.name ?? "Independent"} ·{" "}
+            {enrollment.user.email} · {enrollment.companyName ?? "Independent"} ·{" "}
             {enrollment.cohort.name}
           </div>
         </div>

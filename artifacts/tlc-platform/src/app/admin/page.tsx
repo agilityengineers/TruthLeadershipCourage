@@ -1,6 +1,6 @@
 import { Link } from "wouter";
-import { db } from "@/lib/db";
 import { requireRole } from "@/lib/session";
+import { useGetAdminOverview } from "@workspace/api-client-react";
 import { Card } from "@/components/ui/card";
 import { KpiTile, LabelCaps } from "@/components/brand/primitives";
 import { Avatar } from "@/components/ui/avatar";
@@ -16,28 +16,16 @@ const TIERS = [
 export default function AdminOverview() {
   requireRole("ADMIN");
 
-  const activeCohorts = db.cohort.count({ where: { status: "RUNNING" } });
-  const companyCount = db.company.count({ where: { status: "ACTIVE" } });
-  const enrolledCount = db.enrollment.count({ where: { status: { in: ["ACTIVE", "COMPLETED"] } } });
-  const trainerCount = db.user.count({ where: { role: "TRAINER" } });
-  const companies = db.company.findMany({
-    take: 5,
-    orderBy: { createdAt: "asc" },
-    include: {
-      seats: true,
-      enrollments: { include: { cohort: true } },
-      users: { where: { role: "COMPANY_VIEWER" } },
-    },
-  });
-  const runningCohorts = db.cohort.findMany({
-    where: { status: { in: ["RUNNING", "ENROLLING"] } },
-    orderBy: { startDate: "asc" },
-    include: { _count: { select: { enrollments: true } } },
-  });
-  const trainers = db.user.findMany({
-    where: { role: "TRAINER" },
-    include: { trainerCohorts: { include: { _count: { select: { enrollments: true } } } } },
-  });
+  const { data } = useGetAdminOverview();
+  if (!data) return <></>;
+
+  const activeCohorts = data.kpis.activeCohorts;
+  const companyCount = data.kpis.companyCount;
+  const enrolledCount = data.kpis.enrolledCount;
+  const trainerCount = data.kpis.trainerCount;
+  const companies = data.companies;
+  const runningCohorts = data.runningCohorts;
+  const trainers = data.trainers;
 
   return (
     <div className="flex flex-col gap-5">
@@ -86,8 +74,7 @@ export default function AdminOverview() {
             <span>Viewers</span>
           </div>
           {companies.map((c) => {
-            const cohortName = c.enrollments[0]?.cohort.name ?? "—";
-            const assigned = c.seats.filter((s) => s.status !== "AVAILABLE").length;
+            const cohortName = c.cohortName ?? "—";
             return (
               <div
                 key={c.id}
@@ -101,9 +88,9 @@ export default function AdminOverview() {
                 </span>
                 <span className="text-[12.5px] text-muted">{cohortName}</span>
                 <span className="text-[12.5px] font-semibold text-ink">
-                  {assigned} / {c.seats.length || c.enrollments.length}
+                  {c.seatsAssigned} / {c.seatsTotal}
                 </span>
-                <span className="text-[12.5px] text-muted">{c.users.length}</span>
+                <span className="text-[12.5px] text-muted">{c.viewers}</span>
               </div>
             );
           })}
@@ -117,7 +104,7 @@ export default function AdminOverview() {
             <div className="flex flex-col gap-3">
               {runningCohorts.map((c) => {
                 const pct =
-                  c.capacity > 0 ? Math.min(100, Math.round((c._count.enrollments / c.capacity) * 100)) : 0;
+                  c.capacity > 0 ? Math.min(100, Math.round((c.enrollmentCount / c.capacity) * 100)) : 0;
                 const barColor =
                   c.status === "ENROLLING" ? "#662d91" : c.isPrivate ? "#262161" : "#024794";
                 return (
@@ -125,7 +112,7 @@ export default function AdminOverview() {
                     <div className="mb-1.5 flex items-baseline justify-between">
                       <span className="text-[13px] font-semibold text-ink">{c.name}</span>
                       <span className="text-[11px] text-muted-2">
-                        {c.status === "ENROLLING" ? "Enrolling" : `Running`} · {c._count.enrollments} seats
+                        {c.status === "ENROLLING" ? "Enrolling" : `Running`} · {c.enrollmentCount} seats
                       </span>
                     </div>
                     <div className="h-1.5 overflow-hidden rounded-pill bg-[#e3e7f1]">
@@ -142,14 +129,14 @@ export default function AdminOverview() {
             <LabelCaps className="mb-3.5">Trainers</LabelCaps>
             <div className="flex flex-col gap-3">
               {trainers.map((t) => {
-                const participants = t.trainerCohorts.reduce((a, c) => a + c._count.enrollments, 0);
+                const participants = t.cohorts.reduce((a, c) => a + c.enrollmentCount, 0);
                 return (
                   <div key={t.id} className="flex items-center gap-2.5">
                     <Avatar label={initials(t.name)} size={30} style={{ background: "#662d91", color: "#fff" }} />
                     <div className="flex-1">
                       <div className="text-[12.5px] font-semibold text-ink">{t.name}</div>
                       <div className="text-[11px] text-muted-2">
-                        {t.trainerCohorts.length} cohort{t.trainerCohorts.length === 1 ? "" : "s"} · {participants} participants
+                        {t.cohorts.length} cohort{t.cohorts.length === 1 ? "" : "s"} · {participants} participants
                       </div>
                     </div>
                   </div>

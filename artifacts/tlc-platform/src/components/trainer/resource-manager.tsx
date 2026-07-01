@@ -1,5 +1,7 @@
 import * as React from "react";
 import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
+import { useCreateResource, useSetResourceStatus } from "@workspace/api-client-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,25 +17,23 @@ import {
   DialogClose,
 } from "@/components/ui/dialog";
 import { LabelCaps } from "@/components/brand/primitives";
-import { createResource, setResourceStatus } from "@/server/trainer-actions";
-import type { ResourceStatus, ResourceType } from "@/data/types";
 
 type ResourceRow = {
   id: string;
   title: string;
-  type: ResourceType;
-  status: ResourceStatus;
+  type: string;
+  status: string;
   moduleTitle: string | null;
   cohortName: string;
   printReady: boolean;
 };
 
 type CohortOpt = { id: string; name: string };
-type ModuleOpt = { id: string; title: string; pillar: string; weekNo: number | null };
+type ModuleOpt = { id: string; title: string; pillar?: string; weekNo?: number | null };
 
-const TYPE_OPTIONS: ResourceType[] = ["PDF", "MP4", "LINK"];
+const TYPE_OPTIONS: string[] = ["PDF", "MP4", "LINK"];
 
-function typeChip(type: ResourceType, draft: boolean) {
+function typeChip(type: string, draft: boolean) {
   if (type === "MP4") return { bg: "#f3eefb", fg: "#662d91" };
   if (draft) return { bg: "#fbf3df", fg: "#b8860b" };
   return { bg: "#eef2fb", fg: "#024794" };
@@ -48,8 +48,9 @@ export function ResourceManager({
   cohorts: CohortOpt[];
   modules: ModuleOpt[];
 }) {
-  const [, force] = React.useState(0);
-  const bump = () => force((n) => n + 1);
+  const qc = useQueryClient();
+  const createResource = useCreateResource();
+  const setResourceStatus = useSetResourceStatus();
   const [open, setOpen] = React.useState(false);
   const [pending, setPending] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
@@ -60,18 +61,20 @@ export function ResourceManager({
     const form = new FormData(e.currentTarget);
     setPending(true);
     try {
-      await createResource({
-        cohortId: String(form.get("cohortId")),
-        title: String(form.get("title")),
-        type: String(form.get("type")) as ResourceType,
-        moduleId: (form.get("moduleId") as string) || null,
-        fileKey: (form.get("fileKey") as string) || null,
-        description: (form.get("description") as string) || null,
-        printReady: form.get("printReady") === "on",
+      await createResource.mutateAsync({
+        data: {
+          cohortId: String(form.get("cohortId")),
+          title: String(form.get("title")),
+          type: String(form.get("type")),
+          moduleId: (form.get("moduleId") as string) || null,
+          fileKey: (form.get("fileKey") as string) || null,
+          description: (form.get("description") as string) || null,
+          printReady: form.get("printReady") === "on",
+        },
       });
       setOpen(false);
       toast.success("Resource created");
-      bump();
+      qc.invalidateQueries();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
@@ -79,12 +82,15 @@ export function ResourceManager({
     }
   }
 
-  async function toggleStatus(id: string, current: ResourceStatus) {
+  async function toggleStatus(id: string, current: string) {
     setPending(true);
     try {
-      await setResourceStatus(id, current === "PUBLISHED" ? "DRAFT" : "PUBLISHED");
+      await setResourceStatus.mutateAsync({
+        id,
+        data: { status: current === "PUBLISHED" ? "DRAFT" : "PUBLISHED" },
+      });
       toast.success("Resource updated");
-      bump();
+      qc.invalidateQueries();
     } finally {
       setPending(false);
     }

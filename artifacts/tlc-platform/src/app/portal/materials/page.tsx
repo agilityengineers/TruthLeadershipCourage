@@ -1,23 +1,12 @@
 import { requireRole } from "@/lib/session";
-import { getParticipantContext } from "@/server/portal-data";
-import { db } from "@/lib/db";
+import { useGetPortalMaterials } from "@workspace/api-client-react";
 import { Card } from "@/components/ui/card";
 import { PillarBadge } from "@/components/brand/pillar-badge";
 import { FileText, Film, LinkIcon, Printer, Download } from "lucide-react";
 
 export default function MaterialsPage() {
-  const principal = requireRole("PARTICIPANT", "ADMIN");
-  const enr = getParticipantContext(principal.id);
-  if (!enr) return <Card className="p-8 text-muted">No active enrollment.</Card>;
-
-  const resources = db.resource.findMany({
-    where: {
-      status: "PUBLISHED",
-      OR: [{ cohortId: enr.cohortId }, { programId: enr.cohort.programId }],
-    },
-    orderBy: [{ moduleId: "asc" }, { createdAt: "asc" }],
-    include: { module: true },
-  });
+  requireRole("PARTICIPANT", "ADMIN");
+  const { data: resources = [] } = useGetPortalMaterials();
 
   return (
     <div className="flex flex-col gap-5">

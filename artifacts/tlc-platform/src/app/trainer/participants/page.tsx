@@ -1,40 +1,27 @@
 import { Link } from "wouter";
 import { requireRole } from "@/lib/session";
-import { db } from "@/lib/db";
-import { enrollmentScope } from "@/lib/scope";
-import { currentWeek } from "@/lib/cohort";
+import { useListTrainerParticipants } from "@workspace/api-client-react";
 import { Card } from "@/components/ui/card";
 import { Avatar } from "@/components/ui/avatar";
-import { initials, formatDate } from "@/lib/utils";
+import { initials } from "@/lib/utils";
 import { computeProgress, avatarPalette } from "@/components/trainer/progress-util";
 
 const TOTAL_WEEKS = 24;
 
 export default function TrainerParticipantsPage() {
-  const principal = requireRole("TRAINER", "ADMIN");
+  requireRole("TRAINER", "ADMIN");
 
-  // Tenant-safe: only enrollments in the trainer's cohorts (admins unrestricted).
-  const enrollments = db.enrollment.findMany({
-    where: enrollmentScope(principal),
-    include: {
-      user: { include: { company: true } },
-      cohort: true,
-      moduleProgress: true,
-    },
-    orderBy: [{ cohort: { startDate: "asc" } }, { createdAt: "asc" }],
-  });
+  const { data } = useListTrainerParticipants();
+  const participants = data ?? [];
 
-  const rows = enrollments.map((e, i) => {
-    const completed = e.moduleProgress.filter((m) => m.status === "COMPLETED").length;
-    const week = currentWeek(e.cohort.startDate, TOTAL_WEEKS);
-    const stats = computeProgress(completed, week, TOTAL_WEEKS, e.status === "COMPLETED");
+  const rows = participants.map((p, i) => {
+    const stats = computeProgress(p.completedCount, TOTAL_WEEKS, TOTAL_WEEKS, p.status === "COMPLETED");
     return {
-      id: e.id,
-      name: e.user.name ?? e.user.email,
-      email: e.user.email,
-      company: e.user.company?.name ?? "Independent",
-      cohort: e.cohort.name,
-      lastActivity: e.updatedAt,
+      id: p.id,
+      name: p.name,
+      email: p.email ?? "",
+      company: p.company,
+      cohort: p.cohortName ?? "—",
       palette: avatarPalette(i),
       ...stats,
     };
@@ -104,9 +91,7 @@ export default function TrainerParticipantsPage() {
                     {r.behind ? "Behind" : "On track"}
                   </span>
                 </td>
-                <td className="px-5 py-3 text-[12px] text-muted-3">
-                  {formatDate(r.lastActivity, { month: "short", day: "numeric" })}
-                </td>
+                <td className="px-5 py-3 text-[12px] text-muted-3">—</td>
               </tr>
             ))}
             {rows.length === 0 && (

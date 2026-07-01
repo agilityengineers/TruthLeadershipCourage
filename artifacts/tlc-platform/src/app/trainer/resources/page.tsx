@@ -1,43 +1,28 @@
 import { requireRole } from "@/lib/session";
-import { db } from "@/lib/db";
-import { cohortScope } from "@/lib/scope";
+import { useGetTrainerResourcesData } from "@workspace/api-client-react";
 import { ResourceManager } from "@/components/trainer/resource-manager";
 
 export default function TrainerResourcesPage() {
-  const principal = requireRole("TRAINER", "ADMIN");
+  requireRole("TRAINER", "ADMIN");
 
-  const cohorts = db.cohort.findMany({
-    where: cohortScope(principal),
-    orderBy: { startDate: "asc" },
-    select: { id: true, name: true },
-  });
-  const cohortIds = cohorts.map((c) => c.id);
+  const { data } = useGetTrainerResourcesData();
+  const cohorts = data?.cohorts ?? [];
+  const resources = data?.resources ?? [];
+  const modules = data?.modules ?? [];
 
-  const resources = db.resource.findMany({
-    where: { cohortId: { in: cohortIds } },
-    orderBy: { createdAt: "desc" },
-    include: { module: true, cohort: { select: { name: true } } },
-  });
-
-  // Modules available for tagging (program-level; shared across cohorts).
-  const modules = db.module.findMany({
-    orderBy: { order: "asc" },
-    select: { id: true, title: true, pillar: true, weekNo: true },
-  });
-
-  const data = resources.map((r) => ({
+  const rows = resources.map((r) => ({
     id: r.id,
     title: r.title,
     type: r.type,
     status: r.status,
     moduleTitle: r.module?.title ?? null,
-    cohortName: r.cohort?.name ?? "—",
+    cohortName: r.cohortName ?? "—",
     printReady: r.printReady,
   }));
 
   return (
     <ResourceManager
-      resources={data}
+      resources={rows}
       cohorts={cohorts}
       modules={modules}
     />

@@ -1,11 +1,11 @@
 import { requireRole } from "@/lib/session";
-import { getParticipantContext } from "@/server/portal-data";
+import { useGetParticipantContext } from "@workspace/api-client-react";
 import { formatDate } from "@/lib/utils";
 import { PrintButton } from "@/components/print-button";
 
 export default function CertificatePage() {
-  const principal = requireRole("PARTICIPANT", "ADMIN");
-  const enr = getParticipantContext(principal.id);
+  requireRole("PARTICIPANT", "ADMIN");
+  const { data: enr } = useGetParticipantContext();
   const cert = enr?.certificate;
 
   if (!enr || !cert) {

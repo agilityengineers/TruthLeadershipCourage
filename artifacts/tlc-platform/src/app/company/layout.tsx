@@ -1,5 +1,5 @@
 import { requireRole } from "@/lib/session";
-import { db } from "@/lib/db";
+import { useGetMe } from "@workspace/api-client-react";
 import { initials } from "@/lib/utils";
 import { DashboardShell, type NavItem } from "@/components/brand/dashboard-shell";
 import { NotificationBellServer } from "@/components/notifications/bell-server";
@@ -7,10 +7,7 @@ import { NotificationBellServer } from "@/components/notifications/bell-server";
 /** Tier 3 — Company Viewer (read-only). Client managers watch their people. */
 export default function CompanyLayout({ children }: { children: React.ReactNode }) {
   const principal = requireRole("COMPANY_VIEWER", "ADMIN");
-  const user = db.user.findUnique({
-    where: { id: principal.id },
-    include: { company: true },
-  });
+  const { data: user } = useGetMe();
 
   const nav: NavItem[] = [
     { label: "Overview", href: "/company" },

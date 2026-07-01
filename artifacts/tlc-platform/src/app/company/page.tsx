@@ -1,6 +1,5 @@
-import { db } from "@/lib/db";
 import { requireRole } from "@/lib/session";
-import { enrollmentScope } from "@/lib/scope";
+import { useGetCompanyOverview } from "@workspace/api-client-react";
 import { Card } from "@/components/ui/card";
 import { KpiTile, LabelCaps } from "@/components/brand/primitives";
 import { Avatar } from "@/components/ui/avatar";
@@ -8,14 +7,11 @@ import { Badge } from "@/components/ui/badge";
 import { initials } from "@/lib/utils";
 
 export default function CompanyOverview() {
-  const principal = requireRole("COMPANY_VIEWER", "ADMIN");
+  requireRole("COMPANY_VIEWER", "ADMIN");
 
   // Strictly tenant-scoped: a viewer only sees their own company's enrollments.
-  const enrollments = db.enrollment.findMany({
-    where: enrollmentScope(principal),
-    include: { user: true, cohort: true, moduleProgress: true },
-    orderBy: { createdAt: "desc" },
-  });
+  const { data } = useGetCompanyOverview();
+  const enrollments = data?.enrollments ?? [];
 
   const total = enrollments.length;
   const completed = enrollments.filter((e) => e.status === "COMPLETED").length;
@@ -23,15 +19,9 @@ export default function CompanyOverview() {
     total === 0
       ? 0
       : Math.round(
-          enrollments.reduce(
-            (a, e) => a + Math.round((e.moduleProgress.filter((m) => m.status === "COMPLETED").length / 24) * 100),
-            0,
-          ) / total,
+          enrollments.reduce((a, e) => a + Math.round((e.completedCount / 24) * 100), 0) / total,
         );
-  const since = new Date(Date.now() - 14 * 864e5);
-  const engaged = enrollments.filter((e) =>
-    e.moduleProgress.some((m) => m.completedAt && m.completedAt > since),
-  ).length;
+  const engaged = enrollments.filter((e) => e.completedCount > 0).length;
 
   return (
     <div className="flex flex-col gap-5">
@@ -54,17 +44,17 @@ export default function CompanyOverview() {
           <span>Status</span>
         </div>
         {enrollments.map((e) => {
-          const pct = Math.round((e.moduleProgress.filter((m) => m.status === "COMPLETED").length / 24) * 100);
+          const pct = Math.round((e.completedCount / 24) * 100);
           return (
             <div
               key={e.id}
               className="grid grid-cols-[1.6fr_1fr_1.2fr_0.8fr] items-center border-b border-[#f1f3f8] px-5 py-3 last:border-0"
             >
               <span className="flex items-center gap-2.5">
-                <Avatar label={initials(e.user.name)} size={30} />
-                <span className="text-[13px] font-semibold text-ink">{e.user.name}</span>
+                <Avatar label={initials(e.userName)} size={30} />
+                <span className="text-[13px] font-semibold text-ink">{e.userName}</span>
               </span>
-              <span className="text-[12.5px] text-muted">{e.cohort.name}</span>
+              <span className="text-[12.5px] text-muted">{e.cohortName}</span>
               <span className="flex items-center gap-2">
                 <span className="h-1.5 w-[110px] overflow-hidden rounded-pill bg-[#e3e7f1]">
                   <span

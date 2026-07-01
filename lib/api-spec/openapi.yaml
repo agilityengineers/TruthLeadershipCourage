@@ -3,34 +3,1643 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: TLC platform API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
-    description: Health operations
+  - name: session
+  - name: assessment
+  - name: enrollment
+  - name: portal
+  - name: progress
+  - name: chat
+  - name: notifications
+  - name: account
+  - name: coaching
+  - name: billing
+  - name: email
+  - name: fulfillment
+  - name: trainer
+  - name: admin
+  - name: company
+
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
           content:
             application/json:
+              schema: { $ref: "#/components/schemas/HealthStatus" }
+
+  # ---------------------------------------------------------------- session
+  /session/login:
+    post:
+      operationId: login
+      tags: [session]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/LoginRequest" }
+      responses:
+        "200":
+          description: Logged in
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/LoginResponse" }
+  /session/logout:
+    post:
+      operationId: logout
+      tags: [session]
+      responses:
+        "200":
+          description: Logged out
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Ok" }
+  /me:
+    get:
+      operationId: getMe
+      tags: [session]
+      responses:
+        "200":
+          description: Current user context
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/MeResponse" }
+
+  # ------------------------------------------------------------- assessment
+  /assessment:
+    get:
+      operationId: getAssessment
+      tags: [assessment]
+      responses:
+        "200":
+          description: Public assessment
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AssessmentPublic" }
+  /assessment/submit:
+    post:
+      operationId: submitAssessment
+      tags: [assessment]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/SubmitAssessmentRequest" }
+      responses:
+        "200":
+          description: Snapshot
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SubmitAssessmentResponse" }
+
+  # ------------------------------------------------------------- enrollment
+  /enroll/options:
+    get:
+      operationId: getEnrollOptions
+      tags: [enrollment]
+      responses:
+        "200":
+          description: Enroll options
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/EnrollOptions" }
+  /enrollments:
+    post:
+      operationId: createEnrollment
+      tags: [enrollment]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreateEnrollmentRequest" }
+      responses:
+        "200":
+          description: Enrollment result
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/EnrollResult" }
+  /enrollments/{id}/fulfill:
+    post:
+      operationId: fulfillEnrollment
+      tags: [fulfillment]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/FulfillRequest" }
+      responses:
+        "200":
+          description: Fulfilled
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Ok" }
+  /enrollments/{id}/complete-week:
+    post:
+      operationId: markWeekComplete
+      tags: [progress]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CompleteWeekRequest" }
+      responses:
+        "200":
+          description: Completed
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Ok" }
+
+  # ------------------------------------------------------------------ portal
+  /portal/context:
+    get:
+      operationId: getParticipantContext
+      tags: [portal]
+      responses:
+        "200":
+          description: Participant context (or null when no active enrollment)
+          content:
+            application/json:
               schema:
-                $ref: "#/components/schemas/HealthStatus"
+                oneOf:
+                  - { $ref: "#/components/schemas/ParticipantContext" }
+                  - { type: "null" }
+  /portal/materials:
+    get:
+      operationId: getPortalMaterials
+      tags: [portal]
+      responses:
+        "200":
+          description: Published materials for the participant
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/ResourceItem" }
+  /portal/library:
+    get:
+      operationId: getPortalLibrary
+      tags: [portal]
+      responses:
+        "200":
+          description: Resource library
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/LibraryResponse" }
+
+  # -------------------------------------------------------------------- chat
+  /chat/threads:
+    get:
+      operationId: listThreads
+      tags: [chat]
+      responses:
+        "200":
+          description: Threads
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/ThreadSummary" }
+  /chat/unread-count:
+    get:
+      operationId: getUnreadMessageCount
+      tags: [chat]
+      responses:
+        "200":
+          description: Unread message count
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CountResponse" }
+  /chat/threads/{id}:
+    get:
+      operationId: getThread
+      tags: [chat]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+        - { name: oversight, in: query, required: false, schema: { type: boolean } }
+      responses:
+        "200":
+          description: Thread detail (or null)
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - { $ref: "#/components/schemas/ThreadDetail" }
+                  - { type: "null" }
+  /chat/threads/{id}/messages:
+    post:
+      operationId: sendMessage
+      tags: [chat]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/SendMessageRequest" }
+      responses:
+        "200":
+          description: Sent
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SendMessageResult" }
+  /chat/threads/{id}/read:
+    post:
+      operationId: markThreadRead
+      tags: [chat]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: Marked read
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Ok" }
+
+  # ----------------------------------------------------------- notifications
+  /notifications:
+    get:
+      operationId: listNotifications
+      tags: [notifications]
+      responses:
+        "200":
+          description: Recent notifications
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/NotificationItem" }
+  /notifications/read-all:
+    post:
+      operationId: markAllNotificationsRead
+      tags: [notifications]
+      responses:
+        "200":
+          description: Marked all read
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Ok" }
+
+  # ----------------------------------------------------------------- account
+  /account/settings:
+    get:
+      operationId: getAccountSettings
+      tags: [account]
+      responses:
+        "200":
+          description: Account settings
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AccountSettings" }
+  /account/consent:
+    post:
+      operationId: setConsent
+      tags: [account]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/SetConsentRequest" }
+      responses:
+        "200":
+          description: Consent recorded
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Ok" }
+  /account/deletion-request:
+    post:
+      operationId: requestAccountDeletion
+      tags: [account]
+      responses:
+        "200":
+          description: Deletion requested
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Ok" }
+
+  # ---------------------------------------------------------------- coaching
+  /coaching/bookings/{id}/reschedule:
+    post:
+      operationId: rescheduleBooking
+      tags: [coaching]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/RescheduleRequest" }
+      responses:
+        "200":
+          description: Rescheduled
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ActionResult" }
+
+  # ----------------------------------------------------------------- billing
+  /admin/payments:
+    get:
+      operationId: listPayments
+      tags: [billing]
+      responses:
+        "200":
+          description: Payments
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/BillingPayment" }
+  /admin/payments/{id}/refund:
+    post:
+      operationId: refundPayment
+      tags: [billing]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/RefundRequest" }
+      responses:
+        "200":
+          description: Refunded
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ActionResult" }
+
+  # ------------------------------------------------------------------- email
+  /admin/communications:
+    get:
+      operationId: getCommunications
+      tags: [email]
+      responses:
+        "200":
+          description: Communications data
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CommunicationsData" }
+  /admin/email/campaigns:
+    post:
+      operationId: sendCampaign
+      tags: [email]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/SendCampaignRequest" }
+      responses:
+        "200":
+          description: Campaign result
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SendCampaignResult" }
+
+  # ----------------------------------------------------------------- trainer
+  /trainer/overview:
+    get:
+      operationId: getTrainerOverview
+      tags: [trainer]
+      responses:
+        "200":
+          description: Trainer overview
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/TrainerOverview" }
+  /trainer/participants:
+    get:
+      operationId: listTrainerParticipants
+      tags: [trainer]
+      responses:
+        "200":
+          description: Trainer participants
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/TrainerParticipantRow" }
+  /trainer/participants/{id}:
+    get:
+      operationId: getTrainerParticipant
+      tags: [trainer]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: Trainer participant detail (or null)
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - { $ref: "#/components/schemas/TrainerParticipantDetail" }
+                  - { type: "null" }
+  /trainer/events:
+    get:
+      operationId: getTrainerEventsData
+      tags: [trainer]
+      responses:
+        "200":
+          description: Trainer events data
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/TrainerEventsData" }
+    post:
+      operationId: createEvent
+      tags: [trainer]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreateEventRequest" }
+      responses:
+        "200":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/IdResult" }
+  /trainer/resources:
+    get:
+      operationId: getTrainerResourcesData
+      tags: [trainer]
+      responses:
+        "200":
+          description: Trainer resources data
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/TrainerResourcesData" }
+    post:
+      operationId: createResource
+      tags: [trainer]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreateResourceRequest" }
+      responses:
+        "200":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/IdResult" }
+  /trainer/resources/{id}/status:
+    post:
+      operationId: setResourceStatus
+      tags: [trainer]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/SetResourceStatusRequest" }
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Ok" }
+  /trainer/enrollments/{id}/certificate:
+    post:
+      operationId: issueCertificate
+      tags: [trainer]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: Certificate result
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CertificateResult" }
+
+  # ------------------------------------------------------------------- admin
+  /admin/overview:
+    get:
+      operationId: getAdminOverview
+      tags: [admin]
+      responses:
+        "200":
+          description: Admin overview
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminOverview" }
+  /admin/companies:
+    get:
+      operationId: getCompaniesData
+      tags: [admin]
+      responses:
+        "200":
+          description: Companies data
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CompaniesData" }
+    post:
+      operationId: createCompany
+      tags: [admin]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreateCompanyRequest" }
+      responses:
+        "200":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/IdResult" }
+  /admin/seats:
+    post:
+      operationId: purchaseSeats
+      tags: [admin]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/PurchaseSeatsRequest" }
+      responses:
+        "200":
+          description: Purchased
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Ok" }
+  /admin/cohorts:
+    get:
+      operationId: listCohorts
+      tags: [admin]
+      responses:
+        "200":
+          description: Cohorts
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/AdminCohortRow" }
+  /admin/cohorts/clone:
+    post:
+      operationId: cloneCohort
+      tags: [admin]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CloneCohortRequest" }
+      responses:
+        "200":
+          description: Cloned
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/IdResult" }
+  /admin/participants:
+    get:
+      operationId: listParticipants
+      tags: [admin]
+      responses:
+        "200":
+          description: Participants
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/AdminParticipantRow" }
+  /admin/trainers:
+    get:
+      operationId: listTrainers
+      tags: [admin]
+      responses:
+        "200":
+          description: Trainers
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/AdminTrainerRow" }
+  /admin/resources:
+    get:
+      operationId: getAdminResourcesData
+      tags: [admin]
+      responses:
+        "200":
+          description: Resources & events
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminResourcesData" }
+  /admin/assessment:
+    get:
+      operationId: getAdminAssessment
+      tags: [assessment]
+      responses:
+        "200":
+          description: Admin assessment
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminAssessment" }
+  /admin/assessment/questions:
+    post:
+      operationId: addQuestion
+      tags: [assessment]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AddQuestionRequest" }
+      responses:
+        "200":
+          description: Added
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Ok" }
+  /admin/assessment/questions/{id}:
+    post:
+      operationId: updateQuestion
+      tags: [assessment]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/UpdateQuestionRequest" }
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Ok" }
+    delete:
+      operationId: deleteQuestion
+      tags: [assessment]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Ok" }
+  /admin/analytics:
+    get:
+      operationId: getAnalytics
+      tags: [admin]
+      responses:
+        "200":
+          description: Analytics
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AnalyticsData" }
+
+  # ----------------------------------------------------------------- company
+  /company/overview:
+    get:
+      operationId: getCompanyOverview
+      tags: [company]
+      responses:
+        "200":
+          description: Company overview
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CompanyOverview" }
+  /company/people:
+    get:
+      operationId: listCompanyPeople
+      tags: [company]
+      responses:
+        "200":
+          description: Company people
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/CompanyPersonRow" }
+
 components:
   schemas:
     HealthStatus:
       type: object
+      required: [status]
       properties:
-        status:
-          type: string
-      required:
-        - status
+        status: { type: string }
+    Ok:
+      type: object
+      required: [ok]
+      properties:
+        ok: { type: boolean }
+    ActionResult:
+      type: object
+      required: [ok]
+      properties:
+        ok: { type: boolean }
+        error: { type: string }
+    CountResponse:
+      type: object
+      required: [count]
+      properties:
+        count: { type: integer }
+    IdResult:
+      type: object
+      required: [ok, id]
+      properties:
+        ok: { type: boolean }
+        id: { type: string }
 
+    Role:
+      type: string
+      enum: [PARTICIPANT, COMPANY_VIEWER, TRAINER, ADMIN, SUPER_ADMIN]
+
+    SessionUser:
+      type: object
+      required: [id, role, companyId, name, email]
+      properties:
+        id: { type: string }
+        role: { $ref: "#/components/schemas/Role" }
+        companyId: { type: string, nullable: true }
+        name: { type: string, nullable: true }
+        email: { type: string }
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email: { type: string }
+        password: { type: string }
+    LoginResponse:
+      type: object
+      required: [token, user]
+      properties:
+        token: { type: string }
+        user: { $ref: "#/components/schemas/SessionUser" }
+    CompanyLite:
+      type: object
+      required: [id, name]
+      properties:
+        id: { type: string }
+        name: { type: string }
+    MeResponse:
+      type: object
+      required: [id, email, role]
+      properties:
+        id: { type: string }
+        name: { type: string, nullable: true }
+        email: { type: string }
+        role: { $ref: "#/components/schemas/Role" }
+        title: { type: string, nullable: true }
+        status: { type: string, nullable: true }
+        companyId: { type: string, nullable: true }
+        company:
+          oneOf: [{ $ref: "#/components/schemas/CompanyLite" }, { type: "null" }]
+        primaryCohortName: { type: string, nullable: true }
+
+    UserLite:
+      type: object
+      required: [id, email]
+      properties:
+        id: { type: string }
+        name: { type: string, nullable: true }
+        email: { type: string }
+        image: { type: string, nullable: true }
+        title: { type: string, nullable: true }
+
+    Pillar:
+      type: string
+      enum: [EQ, IQ, MQ]
+    QuestionPublic:
+      type: object
+      required: [id, theme, pillar, prompt, benefit]
+      properties:
+        id: { type: string }
+        theme: { type: string }
+        pillar: { $ref: "#/components/schemas/Pillar" }
+        color: { type: string, nullable: true }
+        prompt: { type: string }
+        benefit: { type: string }
+    Question:
+      allOf:
+        - $ref: "#/components/schemas/QuestionPublic"
+        - type: object
+          required: [order, active]
+          properties:
+            order: { type: integer }
+            active: { type: boolean }
+    AssessmentPublic:
+      type: object
+      required: [id, title, questions]
+      properties:
+        id: { type: string }
+        title: { type: string }
+        questions:
+          type: array
+          items: { $ref: "#/components/schemas/QuestionPublic" }
+    GrowthCard:
+      type: object
+      required: [theme, benefit, pillar, color]
+      properties:
+        theme: { type: string }
+        benefit: { type: string }
+        pillar: { type: string }
+        color: { type: string }
+    Snapshot:
+      type: object
+      required: [growth, strengths]
+      properties:
+        growth:
+          type: array
+          items: { $ref: "#/components/schemas/GrowthCard" }
+        strengths:
+          type: array
+          items: { type: string }
+    SubmitAssessmentRequest:
+      type: object
+      required: [answers]
+      properties:
+        answers:
+          type: object
+          additionalProperties: { type: integer }
+        leadEmail: { type: string }
+        leadName: { type: string }
+    SubmitAssessmentResponse:
+      type: object
+      required: [responseId, snapshot]
+      properties:
+        responseId: { type: string }
+        snapshot: { $ref: "#/components/schemas/Snapshot" }
+
+    EnrollCohortOption:
+      type: object
+      required: [id, name, price, currency, seatsLeft, status]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        price: { type: integer }
+        currency: { type: string }
+        seatsLeft: { type: integer, nullable: true }
+        status: { type: string }
+    EnrollOptions:
+      type: object
+      required: [cohorts, companies]
+      properties:
+        cohorts:
+          type: array
+          items: { $ref: "#/components/schemas/EnrollCohortOption" }
+        companies:
+          type: array
+          items: { $ref: "#/components/schemas/CompanyLite" }
+    ShippingAddress:
+      type: object
+      required: [line1, city, state, postal]
+      properties:
+        line1: { type: string }
+        line2: { type: string }
+        city: { type: string }
+        state: { type: string }
+        postal: { type: string }
+        country: { type: string }
+    CreateEnrollmentRequest:
+      type: object
+      required: [name, email, cohortId, shipping]
+      properties:
+        name: { type: string }
+        email: { type: string }
+        companyId: { type: string }
+        cohortId: { type: string }
+        responseId: { type: string }
+        coupon: { type: string }
+        shipping: { $ref: "#/components/schemas/ShippingAddress" }
+    EnrollResult:
+      type: object
+      required: [ok]
+      properties:
+        ok: { type: boolean }
+        status: { type: string, enum: [ENROLLED, WAITLISTED] }
+        enrollmentId: { type: string }
+        error: { type: string }
+    FulfillRequest:
+      type: object
+      properties:
+        externalId: { type: string }
+        processor: { type: string, enum: [STRIPE, THRIVECART, MANUAL] }
+        amount: { type: integer }
+    CompleteWeekRequest:
+      type: object
+      required: [weekNo]
+      properties:
+        weekNo: { type: integer }
+
+    ModuleLite:
+      type: object
+      required: [id, title, pillar]
+      properties:
+        id: { type: string }
+        title: { type: string }
+        pillar: { $ref: "#/components/schemas/Pillar" }
+        order: { type: integer }
+        weekNo: { type: integer, nullable: true }
+        summary: { type: string, nullable: true }
+        programId: { type: string }
+    EventLite:
+      type: object
+      required: [id, cohortId, type, title, startAt, endAt]
+      properties:
+        id: { type: string }
+        cohortId: { type: string }
+        moduleId: { type: string, nullable: true }
+        type: { type: string }
+        title: { type: string }
+        startAt: { type: string, format: date-time }
+        endAt: { type: string, format: date-time }
+        joinUrl: { type: string, nullable: true }
+        location: { type: string, nullable: true }
+        status: { type: string }
+        weekNo: { type: integer, nullable: true }
+    ProgramLite:
+      type: object
+      required: [id, name, slug, modules]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        slug: { type: string }
+        modules:
+          type: array
+          items: { $ref: "#/components/schemas/ModuleLite" }
+    CohortContext:
+      type: object
+      required: [id, name, startDate, endDate, price, currency, capacity, status, isPrivate, programId, program, events]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        slug: { type: string }
+        startDate: { type: string, format: date-time }
+        endDate: { type: string, format: date-time }
+        sessionDay: { type: string, nullable: true }
+        sessionTime: { type: string, nullable: true }
+        timezone: { type: string, nullable: true }
+        price: { type: integer }
+        currency: { type: string }
+        capacity: { type: integer }
+        status: { type: string }
+        isPrivate: { type: boolean }
+        programId: { type: string }
+        program: { $ref: "#/components/schemas/ProgramLite" }
+        trainer:
+          oneOf: [{ $ref: "#/components/schemas/UserLite" }, { type: "null" }]
+        events:
+          type: array
+          items: { $ref: "#/components/schemas/EventLite" }
+    ShipmentLite:
+      type: object
+      required: [id, status]
+      properties:
+        id: { type: string }
+        status: { type: string }
+        carrier: { type: string, nullable: true }
+        tracking: { type: string, nullable: true }
+    ModuleProgressItem:
+      type: object
+      required: [id, enrollmentId, weekNo, status]
+      properties:
+        id: { type: string }
+        enrollmentId: { type: string }
+        weekNo: { type: integer }
+        moduleId: { type: string, nullable: true }
+        status: { type: string }
+        completedAt: { type: string, format: date-time, nullable: true }
+        module:
+          oneOf: [{ $ref: "#/components/schemas/ModuleLite" }, { type: "null" }]
+    BookingItem:
+      type: object
+      required: [id, slot, status]
+      properties:
+        id: { type: string }
+        slot: { type: string, format: date-time }
+        status: { type: string }
+        sequence: { type: integer, nullable: true }
+        trainer:
+          oneOf: [{ $ref: "#/components/schemas/UserLite" }, { type: "null" }]
+    CertificateLite:
+      type: object
+      required: [id, serial, issuedAt]
+      properties:
+        id: { type: string }
+        serial: { type: string }
+        issuedAt: { type: string, format: date-time }
+    ParticipantContext:
+      type: object
+      required: [id, userId, cohortId, status, user, cohort, moduleProgress, bookings]
+      properties:
+        id: { type: string }
+        userId: { type: string }
+        cohortId: { type: string }
+        companyId: { type: string, nullable: true }
+        status: { type: string }
+        shippingAddress: { type: object, additionalProperties: true, nullable: true }
+        enrolledAt: { type: string, format: date-time, nullable: true }
+        completedAt: { type: string, format: date-time, nullable: true }
+        user: { $ref: "#/components/schemas/UserLite" }
+        cohort: { $ref: "#/components/schemas/CohortContext" }
+        shipment:
+          oneOf: [{ $ref: "#/components/schemas/ShipmentLite" }, { type: "null" }]
+        moduleProgress:
+          type: array
+          items: { $ref: "#/components/schemas/ModuleProgressItem" }
+        bookings:
+          type: array
+          items: { $ref: "#/components/schemas/BookingItem" }
+        certificate:
+          oneOf: [{ $ref: "#/components/schemas/CertificateLite" }, { type: "null" }]
+    ResourceItem:
+      type: object
+      required: [id, title, type, status, printReady]
+      properties:
+        id: { type: string }
+        title: { type: string }
+        type: { type: string }
+        status: { type: string }
+        fileKey: { type: string, nullable: true }
+        url: { type: string, nullable: true }
+        description: { type: string, nullable: true }
+        printReady: { type: boolean }
+        moduleId: { type: string, nullable: true }
+        cohortId: { type: string, nullable: true }
+        programId: { type: string, nullable: true }
+        createdAt: { type: string, format: date-time }
+        module:
+          oneOf: [{ $ref: "#/components/schemas/ModuleLite" }, { type: "null" }]
+    LibraryResponse:
+      type: object
+      required: [modules, resources]
+      properties:
+        modules:
+          type: array
+          items: { $ref: "#/components/schemas/ModuleLite" }
+        resources:
+          type: array
+          items: { $ref: "#/components/schemas/ResourceItem" }
+
+    LastMessage:
+      type: object
+      required: [body, at]
+      properties:
+        body: { type: string }
+        at: { type: string, format: date-time }
+        sender: { type: string, nullable: true }
+    ThreadSummary:
+      type: object
+      required: [id, type, title]
+      properties:
+        id: { type: string }
+        type: { type: string }
+        title: { type: string }
+        lastMessage:
+          oneOf: [{ $ref: "#/components/schemas/LastMessage" }, { type: "null" }]
+        lastReadAt: { type: string, format: date-time, nullable: true }
+    MessageItem:
+      type: object
+      required: [id, body, senderId, createdAt]
+      properties:
+        id: { type: string }
+        body: { type: string }
+        senderId: { type: string }
+        senderName: { type: string, nullable: true }
+        createdAt: { type: string, format: date-time }
+    ThreadMemberLite:
+      type: object
+      required: [userId, user]
+      properties:
+        userId: { type: string }
+        user: { $ref: "#/components/schemas/UserLite" }
+    ThreadDetail:
+      type: object
+      required: [id, type, members, messages]
+      properties:
+        id: { type: string }
+        type: { type: string }
+        title: { type: string, nullable: true }
+        cohort:
+          oneOf: [{ $ref: "#/components/schemas/CompanyLite" }, { type: "null" }]
+        members:
+          type: array
+          items: { $ref: "#/components/schemas/ThreadMemberLite" }
+        messages:
+          type: array
+          items: { $ref: "#/components/schemas/MessageItem" }
+    SendMessageRequest:
+      type: object
+      required: [body]
+      properties:
+        body: { type: string }
+    SendMessageResult:
+      type: object
+      required: [ok]
+      properties:
+        ok: { type: boolean }
+        id: { type: string }
+        error: { type: string }
+
+    NotificationItem:
+      type: object
+      required: [id, title, createdAt]
+      properties:
+        id: { type: string }
+        title: { type: string }
+        body: { type: string, nullable: true }
+        href: { type: string, nullable: true }
+        readAt: { type: string, format: date-time, nullable: true }
+        createdAt: { type: string, format: date-time }
+
+    AccountUser:
+      type: object
+      required: [email]
+      properties:
+        name: { type: string, nullable: true }
+        email: { type: string }
+        status: { type: string, nullable: true }
+    AccountSettings:
+      type: object
+      required: [user, marketingGranted, deletionRequested]
+      properties:
+        user: { $ref: "#/components/schemas/AccountUser" }
+        marketingGranted: { type: boolean }
+        deletionRequested: { type: boolean }
+    SetConsentRequest:
+      type: object
+      required: [type, granted]
+      properties:
+        type: { type: string }
+        granted: { type: boolean }
+
+    RescheduleRequest:
+      type: object
+      required: [slot]
+      properties:
+        slot: { type: string }
+
+    RefundLite:
+      type: object
+      required: [id, amount]
+      properties:
+        id: { type: string }
+        amount: { type: integer }
+    BillingEnrollment:
+      type: object
+      properties:
+        user:
+          oneOf: [{ $ref: "#/components/schemas/UserLite" }, { type: "null" }]
+        cohort:
+          oneOf: [{ $ref: "#/components/schemas/CompanyLite" }, { type: "null" }]
+    BillingPayment:
+      type: object
+      required: [id, amount, currency, status, processor, createdAt, refunds]
+      properties:
+        id: { type: string }
+        amount: { type: integer }
+        currency: { type: string }
+        status: { type: string }
+        processor: { type: string }
+        createdAt: { type: string, format: date-time }
+        enrollment:
+          oneOf: [{ $ref: "#/components/schemas/BillingEnrollment" }, { type: "null" }]
+        company:
+          oneOf: [{ $ref: "#/components/schemas/CompanyLite" }, { type: "null" }]
+        refunds:
+          type: array
+          items: { $ref: "#/components/schemas/RefundLite" }
+    RefundRequest:
+      type: object
+      properties:
+        amount: { type: integer }
+        reason: { type: string }
+
+    EmailTemplateItem:
+      type: object
+      required: [id, name, subject, html]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        subject: { type: string }
+        html: { type: string }
+    CampaignItem:
+      type: object
+      required: [id, subject, status, recipients, createdAt]
+      properties:
+        id: { type: string }
+        subject: { type: string }
+        status: { type: string }
+        recipients: { type: integer }
+        createdAt: { type: string, format: date-time }
+    CommunicationsData:
+      type: object
+      required: [cohorts, companies, templates, campaigns]
+      properties:
+        cohorts:
+          type: array
+          items: { $ref: "#/components/schemas/CompanyLite" }
+        companies:
+          type: array
+          items: { $ref: "#/components/schemas/CompanyLite" }
+        templates:
+          type: array
+          items: { $ref: "#/components/schemas/EmailTemplateItem" }
+        campaigns:
+          type: array
+          items: { $ref: "#/components/schemas/CampaignItem" }
+    Segment:
+      type: object
+      required: [type, ids]
+      properties:
+        type: { type: string, enum: [cohort, company, individual, all] }
+        ids:
+          type: array
+          items: { type: string }
+    SendCampaignRequest:
+      type: object
+      required: [subject, html, segment]
+      properties:
+        subject: { type: string }
+        html: { type: string }
+        segment: { $ref: "#/components/schemas/Segment" }
+        templateId: { type: string }
+    SendCampaignResult:
+      type: object
+      required: [ok]
+      properties:
+        ok: { type: boolean }
+        recipients: { type: integer }
+        error: { type: string }
+
+    CohortLite:
+      type: object
+      required: [id, name, status]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        status: { type: string }
+        sessionDay: { type: string, nullable: true }
+        startDate: { type: string, format: date-time }
+        isPrivate: { type: boolean }
+        capacity: { type: integer }
+    TrainerParticipantRow:
+      type: object
+      required: [id, name, company, completedCount, status]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        email: { type: string }
+        company: { type: string }
+        cohortName: { type: string }
+        completedCount: { type: integer }
+        status: { type: string }
+    TrainerOverview:
+      type: object
+      required: [participants, upcoming, resources, activeCount]
+      properties:
+        cohort:
+          oneOf: [{ $ref: "#/components/schemas/CohortLite" }, { type: "null" }]
+        week: { type: integer, nullable: true }
+        activeCount: { type: integer }
+        participants:
+          type: array
+          items: { $ref: "#/components/schemas/TrainerParticipantRow" }
+        upcoming:
+          type: array
+          items: { $ref: "#/components/schemas/EventLite" }
+        resources:
+          type: array
+          items: { $ref: "#/components/schemas/ResourceItem" }
+    TrainerParticipantDetail:
+      type: object
+      required: [id, status, user, cohort, moduleProgress]
+      properties:
+        id: { type: string }
+        status: { type: string }
+        user: { $ref: "#/components/schemas/UserLite" }
+        companyName: { type: string, nullable: true }
+        cohort: { $ref: "#/components/schemas/CohortLite" }
+        moduleProgress:
+          type: array
+          items: { $ref: "#/components/schemas/ModuleProgressItem" }
+        certificate:
+          oneOf: [{ $ref: "#/components/schemas/CertificateLite" }, { type: "null" }]
+    EventWithCohort:
+      allOf:
+        - $ref: "#/components/schemas/EventLite"
+        - type: object
+          properties:
+            cohortName: { type: string }
+    ModuleOption:
+      type: object
+      required: [id, title]
+      properties:
+        id: { type: string }
+        title: { type: string }
+        pillar: { type: string }
+        weekNo: { type: integer, nullable: true }
+    TrainerEventsData:
+      type: object
+      required: [cohorts, events, modules]
+      properties:
+        cohorts:
+          type: array
+          items: { $ref: "#/components/schemas/CompanyLite" }
+        events:
+          type: array
+          items: { $ref: "#/components/schemas/EventWithCohort" }
+        modules:
+          type: array
+          items: { $ref: "#/components/schemas/ModuleOption" }
+    ResourceWithCohort:
+      allOf:
+        - $ref: "#/components/schemas/ResourceItem"
+        - type: object
+          properties:
+            cohortName: { type: string, nullable: true }
+    TrainerResourcesData:
+      type: object
+      required: [cohorts, resources, modules]
+      properties:
+        cohorts:
+          type: array
+          items: { $ref: "#/components/schemas/CompanyLite" }
+        resources:
+          type: array
+          items: { $ref: "#/components/schemas/ResourceWithCohort" }
+        modules:
+          type: array
+          items: { $ref: "#/components/schemas/ModuleOption" }
+    CreateEventRequest:
+      type: object
+      required: [cohortId, type, title, startAt, endAt]
+      properties:
+        cohortId: { type: string }
+        type: { type: string }
+        title: { type: string }
+        startAt: { type: string }
+        endAt: { type: string }
+        joinUrl: { type: string }
+        location: { type: string }
+        weekNo: { type: integer, nullable: true }
+        moduleId: { type: string }
+    CreateResourceRequest:
+      type: object
+      required: [cohortId, title, type]
+      properties:
+        cohortId: { type: string }
+        title: { type: string }
+        type: { type: string }
+        moduleId: { type: string, nullable: true }
+        fileKey: { type: string, nullable: true }
+        printReady: { type: boolean }
+        description: { type: string, nullable: true }
+    SetResourceStatusRequest:
+      type: object
+      required: [status]
+      properties:
+        status: { type: string }
+    CertificateResult:
+      type: object
+      required: [ok]
+      properties:
+        ok: { type: boolean }
+        serial: { type: string }
+        error: { type: string }
+
+    AdminKpis:
+      type: object
+      required: [activeCohorts, companyCount, enrolledCount, trainerCount]
+      properties:
+        activeCohorts: { type: integer }
+        companyCount: { type: integer }
+        enrolledCount: { type: integer }
+        trainerCount: { type: integer }
+    AdminCompanyRow:
+      type: object
+      required: [id, name, seatsAssigned, seatsTotal, viewers]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        cohortName: { type: string, nullable: true }
+        seatsAssigned: { type: integer }
+        seatsTotal: { type: integer }
+        viewers: { type: integer }
+    RunningCohortRow:
+      type: object
+      required: [id, name, status, isPrivate, capacity, enrollmentCount]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        status: { type: string }
+        isPrivate: { type: boolean }
+        capacity: { type: integer }
+        enrollmentCount: { type: integer }
+    TrainerCohortSummary:
+      type: object
+      required: [id, name, enrollmentCount]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        enrollmentCount: { type: integer }
+    AdminTrainerRow:
+      type: object
+      required: [id, name, cohorts]
+      properties:
+        id: { type: string }
+        name: { type: string, nullable: true }
+        title: { type: string, nullable: true }
+        cohorts:
+          type: array
+          items: { $ref: "#/components/schemas/TrainerCohortSummary" }
+    AdminOverview:
+      type: object
+      required: [kpis, companies, runningCohorts, trainers]
+      properties:
+        kpis: { $ref: "#/components/schemas/AdminKpis" }
+        companies:
+          type: array
+          items: { $ref: "#/components/schemas/AdminCompanyRow" }
+        runningCohorts:
+          type: array
+          items: { $ref: "#/components/schemas/RunningCohortRow" }
+        trainers:
+          type: array
+          items: { $ref: "#/components/schemas/AdminTrainerRow" }
+    CompaniesData:
+      type: object
+      required: [companies, cohorts]
+      properties:
+        companies:
+          type: array
+          items: { $ref: "#/components/schemas/AdminCompanyRow" }
+        cohorts:
+          type: array
+          items: { $ref: "#/components/schemas/CompanyLite" }
+    CreateCompanyRequest:
+      type: object
+      required: [name]
+      properties:
+        name: { type: string }
+        billingEmail: { type: string }
+    PurchaseSeatsRequest:
+      type: object
+      required: [companyId, cohortId, quantity]
+      properties:
+        companyId: { type: string }
+        cohortId: { type: string }
+        quantity: { type: integer }
+    AdminCohortRow:
+      type: object
+      required: [id, name, startDate, endDate, price, currency, capacity, status, isPrivate, enrollmentCount]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        startDate: { type: string, format: date-time }
+        endDate: { type: string, format: date-time }
+        trainerName: { type: string, nullable: true }
+        price: { type: integer }
+        currency: { type: string }
+        capacity: { type: integer }
+        status: { type: string }
+        isPrivate: { type: boolean }
+        enrollmentCount: { type: integer }
+    CloneCohortRequest:
+      type: object
+      required: [sourceId, name, startDate]
+      properties:
+        sourceId: { type: string }
+        name: { type: string }
+        startDate: { type: string }
+    AdminParticipantRow:
+      type: object
+      required: [id, userEmail, cohortName, completedCount, status]
+      properties:
+        id: { type: string }
+        userName: { type: string, nullable: true }
+        userEmail: { type: string }
+        companyName: { type: string, nullable: true }
+        cohortName: { type: string }
+        completedCount: { type: integer }
+        status: { type: string }
+    AdminResourceRow:
+      type: object
+      required: [id, title, type, status]
+      properties:
+        id: { type: string }
+        title: { type: string }
+        type: { type: string }
+        status: { type: string }
+        cohortName: { type: string, nullable: true }
+    AdminEventRow:
+      type: object
+      required: [id, title, startAt, cohortName]
+      properties:
+        id: { type: string }
+        title: { type: string }
+        startAt: { type: string, format: date-time }
+        cohortName: { type: string }
+    AdminResourcesData:
+      type: object
+      required: [resources, events]
+      properties:
+        resources:
+          type: array
+          items: { $ref: "#/components/schemas/AdminResourceRow" }
+        events:
+          type: array
+          items: { $ref: "#/components/schemas/AdminEventRow" }
+    AdminAssessment:
+      type: object
+      required: [assessmentId, responses, questions]
+      properties:
+        assessmentId: { type: string, nullable: true }
+        responses: { type: integer }
+        questions:
+          type: array
+          items: { $ref: "#/components/schemas/Question" }
+    AddQuestionRequest:
+      type: object
+      required: [theme, pillar, prompt, benefit]
+      properties:
+        theme: { type: string }
+        pillar: { $ref: "#/components/schemas/Pillar" }
+        prompt: { type: string }
+        benefit: { type: string }
+    UpdateQuestionRequest:
+      type: object
+      required: [theme, pillar, prompt, benefit]
+      properties:
+        theme: { type: string }
+        pillar: { $ref: "#/components/schemas/Pillar" }
+        prompt: { type: string }
+        benefit: { type: string }
+        active: { type: boolean }
+    CohortStat:
+      type: object
+      required: [id, name, enrolled, avgProgress, completionRate, engagement]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        enrolled: { type: integer }
+        avgProgress: { type: integer }
+        completionRate: { type: integer }
+        engagement: { type: integer }
+    CompanyStat:
+      type: object
+      required: [id, name, participants, avg]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        participants: { type: integer }
+        avg: { type: integer }
+    AnalyticsData:
+      type: object
+      required: [cohortStats, companyStats]
+      properties:
+        cohortStats:
+          type: array
+          items: { $ref: "#/components/schemas/CohortStat" }
+        companyStats:
+          type: array
+          items: { $ref: "#/components/schemas/CompanyStat" }
+
+    CompanyEnrollmentRow:
+      type: object
+      required: [id, userEmail, cohortName, completedCount, status]
+      properties:
+        id: { type: string }
+        userName: { type: string, nullable: true }
+        userEmail: { type: string }
+        cohortName: { type: string }
+        completedCount: { type: integer }
+        status: { type: string }
+    CompanyOverview:
+      type: object
+      required: [company, enrollments]
+      properties:
+        company:
+          oneOf: [{ $ref: "#/components/schemas/CompanyLite" }, { type: "null" }]
+        enrollments:
+          type: array
+          items: { $ref: "#/components/schemas/CompanyEnrollmentRow" }
+    CompanyPersonEnrollment:
+      type: object
+      required: [cohortName, completedCount, status]
+      properties:
+        cohortName: { type: string }
+        completedCount: { type: integer }
+        status: { type: string }
+    CompanyPersonRow:
+      type: object
+      required: [id, email, enrollments]
+      properties:
+        id: { type: string }
+        name: { type: string, nullable: true }
+        email: { type: string }
+        enrollments:
+          type: array
+          items: { $ref: "#/components/schemas/CompanyPersonEnrollment" }

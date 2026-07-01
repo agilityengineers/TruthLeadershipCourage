@@ -1,5 +1,6 @@
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   Dialog,
   DialogContent,
@@ -11,7 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { rescheduleBooking } from "@/server/coaching-actions";
+import { useRescheduleBooking } from "@workspace/api-client-react";
 
 export function RescheduleDialog({
   bookingId,
@@ -20,8 +21,8 @@ export function RescheduleDialog({
   bookingId: string;
   currentSlot: string;
 }) {
-  const [, force] = useState(0);
-  const bump = () => force((n) => n + 1);
+  const qc = useQueryClient();
+  const rescheduleBooking = useRescheduleBooking();
   const [open, setOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
@@ -34,11 +35,11 @@ export function RescheduleDialog({
     const fd = new FormData(e.currentTarget);
     const slot = new Date(String(fd.get("slot"))).toISOString();
     startTransition(async () => {
-      const res = await rescheduleBooking({ bookingId, slot });
-      if (!res.ok) return setError(res.error);
+      const res = await rescheduleBooking.mutateAsync({ id: bookingId, data: { slot } });
+      if (!res.ok) return setError(res.error ?? "Could not reschedule");
       setOpen(false);
       toast.success("Coaching rescheduled");
-      bump();
+      await qc.invalidateQueries();
     });
   }
 

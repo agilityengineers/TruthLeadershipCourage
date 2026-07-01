@@ -1,5 +1,5 @@
-import { db } from "@/lib/db";
 import { requireRole } from "@/lib/session";
+import { useGetCommunications } from "@workspace/api-client-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { LabelCaps } from "@/components/brand/primitives";
@@ -8,10 +8,12 @@ import { formatDate } from "@/lib/utils";
 
 export default function CommunicationsPage() {
   requireRole("ADMIN");
-  const cohorts = db.cohort.findMany({ orderBy: { startDate: "desc" }, select: { id: true, name: true } });
-  const companies = db.company.findMany({ orderBy: { name: "asc" }, select: { id: true, name: true } });
-  const templates = db.emailTemplate.findMany({ orderBy: { name: "asc" } });
-  const campaigns = db.emailCampaign.findMany({ orderBy: { createdAt: "desc" }, take: 10 });
+  const { data } = useGetCommunications();
+  if (!data) return <></>;
+  const cohorts = data.cohorts;
+  const companies = data.companies;
+  const templates = data.templates;
+  const campaigns = data.campaigns;
 
   return (
     <div className="flex flex-col gap-5">

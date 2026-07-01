@@ -1,19 +1,16 @@
 import { requireRole } from "@/lib/session";
-import { db } from "@/lib/db";
+import { useGetAccountSettings } from "@workspace/api-client-react";
 import { Card } from "@/components/ui/card";
 import { LabelCaps } from "@/components/brand/primitives";
 import { Button } from "@/components/ui/button";
 import { AccountActions } from "@/components/portal/account-actions";
 
 export default function SettingsPage() {
-  const principal = requireRole("PARTICIPANT", "ADMIN");
-  const user = db.user.findUnique({
-    where: { id: principal.id },
-    include: { consents: { orderBy: { createdAt: "desc" } } },
-  });
-
-  const marketing = user?.consents.find((c) => c.type === "marketing");
-  const marketingGranted = marketing ? Boolean(marketing.grantedAt && !marketing.revokedAt) : false;
+  requireRole("PARTICIPANT", "ADMIN");
+  const { data } = useGetAccountSettings();
+  const user = data?.user;
+  const marketingGranted = data?.marketingGranted ?? false;
+  const deletionRequested = data?.deletionRequested ?? false;
 
   return (
     <div className="mx-auto flex max-w-[680px] flex-col gap-5">
@@ -37,12 +34,12 @@ export default function SettingsPage() {
         </p>
         <div className="mb-4">
           <Button asChild variant="outline">
-            <a href="/api/me/export">Download my data (JSON)</a>
+            <a href="/api/account/export">Download my data (JSON)</a>
           </Button>
         </div>
         <AccountActions
           marketingGranted={marketingGranted}
-          deletionRequested={user?.status === "deletion_requested"}
+          deletionRequested={deletionRequested}
         />
       </Card>
     </div>

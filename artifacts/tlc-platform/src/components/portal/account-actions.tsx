@@ -1,6 +1,7 @@
-import { useState, useTransition } from "react";
+import { useTransition } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { setConsent, requestAccountDeletion } from "@/server/account-actions";
+import { useSetConsent, useRequestAccountDeletion } from "@workspace/api-client-react";
 
 export function AccountActions({
   marketingGranted,
@@ -9,8 +10,9 @@ export function AccountActions({
   marketingGranted: boolean;
   deletionRequested: boolean;
 }) {
-  const [, force] = useState(0);
-  const bump = () => force((n) => n + 1);
+  const qc = useQueryClient();
+  const setConsent = useSetConsent();
+  const requestAccountDeletion = useRequestAccountDeletion();
   const [pending, start] = useTransition();
 
   return (
@@ -21,8 +23,8 @@ export function AccountActions({
           defaultChecked={marketingGranted}
           onChange={(e) =>
             start(async () => {
-              await setConsent("marketing", e.target.checked);
-              bump();
+              await setConsent.mutateAsync({ data: { type: "marketing", granted: e.target.checked } });
+              await qc.invalidateQueries();
             })
           }
         />
@@ -41,8 +43,8 @@ export function AccountActions({
             onClick={() => {
               if (!confirm("Request erasure of your account and personal data?")) return;
               start(async () => {
-                await requestAccountDeletion();
-                bump();
+                await requestAccountDeletion.mutateAsync(undefined);
+                await qc.invalidateQueries();
               });
             }}
           >

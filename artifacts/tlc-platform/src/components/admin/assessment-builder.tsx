@@ -1,5 +1,7 @@
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
+import { useAddQuestion, useUpdateQuestion, useDeleteQuestion } from "@workspace/api-client-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,7 +15,6 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { addQuestion, updateQuestion, deleteQuestion } from "@/server/admin-assessment-actions";
 
 type Q = {
   id: string;
@@ -28,19 +29,20 @@ const PILLARS: Array<"EQ" | "IQ" | "MQ"> = ["EQ", "IQ", "MQ"];
 const blank = { id: "", theme: "", pillar: "IQ" as const, prompt: "", benefit: "", active: true };
 
 export function AssessmentBuilder({ questions }: { questions: Q[] }) {
-  const [, force] = useState(0);
-  const bump = () => force((n) => n + 1);
+  const qc = useQueryClient();
+  const addQuestion = useAddQuestion();
+  const updateQuestion = useUpdateQuestion();
+  const deleteQuestion = useDeleteQuestion();
   const [editing, setEditing] = useState<Q | null>(null);
   const [creating, setCreating] = useState(false);
-  const [pending, startTransition] = useTransition();
+  const pending =
+    addQuestion.isPending || updateQuestion.isPending || deleteQuestion.isPending;
 
-  function onDelete(id: string) {
+  async function onDelete(id: string) {
     if (!confirm("Delete this question? The live assessment updates immediately.")) return;
-    startTransition(async () => {
-      await deleteQuestion(id);
-      toast.success("Question deleted");
-      bump();
-    });
+    await deleteQuestion.mutateAsync({ id });
+    toast.success("Question deleted");
+    qc.invalidateQueries();
   }
 
   return (
@@ -97,14 +99,19 @@ export function AssessmentBuilder({ questions }: { questions: Q[] }) {
         onOpenChange={setCreating}
         title="Add question"
         initial={blank}
-        onSave={(data) =>
-          startTransition(async () => {
-            await addQuestion(data);
-            setCreating(false);
-            toast.success("Question added");
-            bump();
-          })
-        }
+        onSave={async (data) => {
+          await addQuestion.mutateAsync({
+            data: {
+              theme: data.theme,
+              pillar: data.pillar,
+              prompt: data.prompt,
+              benefit: data.benefit,
+            },
+          });
+          setCreating(false);
+          toast.success("Question added");
+          qc.invalidateQueries();
+        }}
         pending={pending}
       />
 
@@ -116,14 +123,21 @@ export function AssessmentBuilder({ questions }: { questions: Q[] }) {
           title="Edit question"
           initial={editing}
           showActive
-          onSave={(data) =>
-            startTransition(async () => {
-              await updateQuestion({ id: editing.id, ...data });
-              setEditing(null);
-              toast.success("Question updated");
-              bump();
-            })
-          }
+          onSave={async (data) => {
+            await updateQuestion.mutateAsync({
+              id: editing.id,
+              data: {
+                theme: data.theme,
+                pillar: data.pillar,
+                prompt: data.prompt,
+                benefit: data.benefit,
+                active: data.active,
+              },
+            });
+            setEditing(null);
+            toast.success("Question updated");
+            qc.invalidateQueries();
+          }}
           pending={pending}
         />
       )}

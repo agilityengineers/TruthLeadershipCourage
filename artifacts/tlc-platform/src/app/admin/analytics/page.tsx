@@ -1,70 +1,14 @@
-import { db } from "@/lib/db";
 import { requireRole } from "@/lib/session";
+import { useGetAnalytics } from "@workspace/api-client-react";
 import { Card } from "@/components/ui/card";
 import { LabelCaps } from "@/components/brand/primitives";
-
-function pct(n: number, d: number) {
-  return d > 0 ? Math.round((n / d) * 100) : 0;
-}
 
 export default function AnalyticsPage() {
   requireRole("ADMIN");
 
-  const cohorts = db.cohort.findMany({
-    where: { status: { in: ["RUNNING", "COMPLETED", "ENROLLING"] } },
-    include: {
-      enrollments: { include: { moduleProgress: true, company: true } },
-    },
-    orderBy: { startDate: "desc" },
-  });
-
-  // Per-cohort completion + engagement.
-  const cohortStats = cohorts.map((c) => {
-    const enrs = c.enrollments;
-    const avgProgress =
-      enrs.length === 0
-        ? 0
-        : Math.round(
-            enrs.reduce(
-              (a, e) => a + pct(e.moduleProgress.filter((m) => m.status === "COMPLETED").length, 24),
-              0,
-            ) / enrs.length,
-          );
-    const completed = enrs.filter((e) => e.status === "COMPLETED").length;
-    // Engagement proxy: participants who completed a module in the last 14 days.
-    const since = new Date(Date.now() - 14 * 864e5);
-    const engaged = enrs.filter((e) =>
-      e.moduleProgress.some((m) => m.completedAt && m.completedAt > since),
-    ).length;
-    return {
-      id: c.id,
-      name: c.name,
-      enrolled: enrs.length,
-      avgProgress,
-      completionRate: pct(completed, enrs.length),
-      engagement: pct(engaged, enrs.length),
-    };
-  });
-
-  // Company-level rollups (Tier-3 viewers see these for their own company).
-  const companies = db.company.findMany({
-    include: { enrollments: { include: { moduleProgress: true } } },
-  });
-  const companyStats = companies
-    .map((co) => {
-      const enrs = co.enrollments;
-      const avg =
-        enrs.length === 0
-          ? 0
-          : Math.round(
-              enrs.reduce(
-                (a, e) => a + pct(e.moduleProgress.filter((m) => m.status === "COMPLETED").length, 24),
-                0,
-              ) / enrs.length,
-            );
-      return { id: co.id, name: co.name, participants: enrs.length, avg };
-    })
-    .filter((s) => s.participants > 0);
+  const { data } = useGetAnalytics();
+  const cohortStats = data?.cohortStats ?? [];
+  const companyStats = data?.companyStats ?? [];
 
   return (
     <div className="flex flex-col gap-5">

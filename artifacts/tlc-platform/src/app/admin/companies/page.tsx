@@ -1,19 +1,14 @@
-import { db } from "@/lib/db";
 import { requireRole } from "@/lib/session";
+import { useGetCompaniesData } from "@workspace/api-client-react";
 import { Card } from "@/components/ui/card";
 import { AddCompanyDialog, PurchaseSeatsDialog } from "@/components/admin/admin-dialogs";
 
 export default function CompaniesPage() {
   requireRole("ADMIN");
-  const companies = db.company.findMany({
-    orderBy: { name: "asc" },
-    include: {
-      seats: true,
-      enrollments: { include: { cohort: true } },
-      users: true,
-    },
-  });
-  const cohorts = db.cohort.findMany({ where: { status: { in: ["ENROLLING", "RUNNING"] } }, select: { id: true, name: true } });
+  const { data } = useGetCompaniesData();
+  if (!data) return <></>;
+  const companies = data.companies;
+  const cohorts = data.cohorts;
 
   return (
     <div className="flex flex-col gap-5">
@@ -22,7 +17,7 @@ export default function CompaniesPage() {
           <h2 className="font-display text-[22px] text-ink">Companies</h2>
           <p className="text-[13px] text-muted-2">{companies.length} corporate clients (tenants).</p>
         </div>
-        <AddCompanyDialog />
+        <AddCompanyDialog cohorts={cohorts} />
       </div>
 
       <Card className="overflow-hidden p-0">
@@ -34,9 +29,7 @@ export default function CompaniesPage() {
           <span>Actions</span>
         </div>
         {companies.map((c) => {
-          const assigned = c.seats.filter((s) => s.status !== "AVAILABLE").length;
-          const viewers = c.users.filter((u) => u.role === "COMPANY_VIEWER").length;
-          const cohortName = c.enrollments[0]?.cohort.name ?? "—";
+          const cohortName = c.cohortName ?? "—";
           return (
             <div
               key={c.id}
@@ -50,9 +43,9 @@ export default function CompaniesPage() {
               </span>
               <span className="text-[12.5px] text-muted">{cohortName}</span>
               <span className="text-[12.5px] font-semibold text-ink">
-                {assigned} / {c.seats.length || c.enrollments.length}
+                {c.seatsAssigned} / {c.seatsTotal}
               </span>
-              <span className="text-[12.5px] text-muted">{viewers}</span>
+              <span className="text-[12.5px] text-muted">{c.viewers}</span>
               <PurchaseSeatsDialog companyId={c.id} cohorts={cohorts} />
             </div>
           );

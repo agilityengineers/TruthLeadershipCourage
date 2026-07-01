@@ -1,12 +1,8 @@
-import { db } from "@/lib/db";
+import { useListNotifications } from "@workspace/api-client-react";
 import { NotificationBell } from "./bell";
 
-/** Server wrapper: loads recent notifications for a user and renders the bell. */
-export function NotificationBellServer({ userId }: { userId: string }) {
-  const notifications = db.notification.findMany({
-    where: { userId },
-    orderBy: { createdAt: "desc" },
-    take: 15,
-  });
-  return <NotificationBell notifications={notifications} />;
+/** Loads recent notifications for the current user and renders the bell. */
+export function NotificationBellServer({ userId: _userId }: { userId?: string }) {
+  const { data } = useListNotifications();
+  return <NotificationBell notifications={data ?? []} />;
 }

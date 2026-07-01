@@ -1,8 +1,6 @@
 import { Link } from "wouter";
 import { requireRole } from "@/lib/session";
-import { db } from "@/lib/db";
-import { cohortScope } from "@/lib/scope";
-import { currentWeek } from "@/lib/cohort";
+import { useGetTrainerOverview } from "@workspace/api-client-react";
 import { Card } from "@/components/ui/card";
 import { Avatar } from "@/components/ui/avatar";
 import { KpiTile, LabelCaps } from "@/components/brand/primitives";
@@ -12,67 +10,36 @@ import { computeProgress, avatarPalette } from "@/components/trainer/progress-ut
 const TOTAL_WEEKS = 24;
 
 export default function TrainerOverviewPage() {
-  const principal = requireRole("TRAINER", "ADMIN");
+  requireRole("TRAINER", "ADMIN");
 
-  // Primary running cohort for the trainer (admins see all via cohortScope).
-  const cohort =
-    db.cohort.findFirst({
-      where: { AND: [cohortScope(principal), { status: "RUNNING" }] },
-      orderBy: { startDate: "asc" },
-    }) ??
-    db.cohort.findFirst({
-      where: cohortScope(principal),
-      orderBy: { startDate: "asc" },
-    });
+  const { data } = useGetTrainerOverview();
+  const cohort = data?.cohort ?? null;
 
   if (!cohort) {
     return <Card className="p-8 text-muted">No cohorts assigned yet.</Card>;
   }
 
-  const week = currentWeek(cohort.startDate, TOTAL_WEEKS);
+  const week = data?.week ?? 0;
+  const participants = data?.participants ?? [];
+  const activeCount = data?.activeCount ?? 0;
+  const upcoming = data?.upcoming ?? [];
+  const resources = data?.resources ?? [];
 
-  const enrollments = db.enrollment.findMany({
-    where: { cohortId: cohort.id },
-    include: {
-      user: { include: { company: true } },
-      moduleProgress: true,
-    },
-    orderBy: { createdAt: "asc" },
-  });
-
-  const activeCount = enrollments.filter((e) => e.status === "ACTIVE").length;
-
-  const rows = enrollments.map((e) => {
-    const completed = e.moduleProgress.filter((m) => m.status === "COMPLETED").length;
-    const stats = computeProgress(completed, week, TOTAL_WEEKS, e.status === "COMPLETED");
+  const rows = participants.map((p) => {
+    const stats = computeProgress(p.completedCount, week, TOTAL_WEEKS, p.status === "COMPLETED");
     return {
-      id: e.id,
-      name: e.user.name ?? e.user.email,
-      company: e.user.company?.name ?? "Independent",
+      id: p.id,
+      name: p.name,
+      company: p.company,
       ...stats,
     };
   });
 
   const avgCompletion =
-    enrollments.length === 0
+    rows.length === 0
       ? 0
       : Math.round(rows.reduce((sum, r) => sum + r.pct, 0) / rows.length);
   const needNudge = rows.filter((r) => r.behind).length;
-
-  // Upcoming events: next ~3 weekly sessions + coaching.
-  const upcoming = db.event.findMany({
-    where: { cohortId: cohort.id, startAt: { gte: new Date() } },
-    orderBy: { startAt: "asc" },
-    take: 3,
-  });
-
-  // Recent resources for this cohort.
-  const resources = db.resource.findMany({
-    where: { cohortId: cohort.id },
-    orderBy: { createdAt: "desc" },
-    take: 4,
-    include: { module: true },
-  });
 
   return (
     <div className="flex flex-col gap-5">
@@ -94,7 +61,7 @@ export default function TrainerOverviewPage() {
           <div className="flex flex-wrap items-center justify-between gap-2.5 border-b border-hair-3 px-5 py-[18px]">
             <h4 className="font-display text-[17px] text-ink">Participants &amp; progress</h4>
             <span className="text-[12px] font-medium text-muted-3">
-              {enrollments.length} enrolled
+              {participants.length} enrolled
             </span>
           </div>
           <table className="w-full border-collapse text-left">
