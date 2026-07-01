@@ -1,5 +1,5 @@
 import { Link, useSearch } from "wouter";
-import { db } from "@/lib/db";
+import { useGetEnrollOptions } from "@workspace/api-client-react";
 import { formatPrice } from "@/lib/utils";
 import { EnrollForm } from "./enroll-form";
 
@@ -7,17 +7,9 @@ export default function EnrollPage() {
   const params = new URLSearchParams(useSearch());
   const response = params.get("response") ?? undefined;
 
-  // Public cohorts open for enrollment (enrolling first, then running).
-  const cohorts = db.cohort.findMany({
-    where: { isPrivate: false, status: { in: ["ENROLLING", "RUNNING"] } },
-    orderBy: [{ status: "asc" }, { startDate: "asc" }],
-    include: { _count: { select: { enrollments: true } } },
-  });
-  const companies = db.company.findMany({
-    where: { status: "ACTIVE" },
-    orderBy: { name: "asc" },
-    select: { id: true, name: true },
-  });
+  const { data } = useGetEnrollOptions();
+  const cohorts = data?.cohorts ?? [];
+  const companies = data?.companies ?? [];
 
   const primary = cohorts[0];
 
@@ -54,18 +46,7 @@ export default function EnrollPage() {
           {cohorts.length === 0 ? (
             <p className="mt-6 text-muted">No cohorts are open for enrollment right now.</p>
           ) : (
-            <EnrollForm
-              responseId={response}
-              cohorts={cohorts.map((c) => ({
-                id: c.id,
-                name: c.name,
-                price: c.price,
-                currency: c.currency,
-                seatsLeft: c.capacity > 0 ? Math.max(0, c.capacity - c._count.enrollments) : null,
-                status: c.status,
-              }))}
-              companies={companies}
-            />
+            <EnrollForm responseId={response} cohorts={cohorts} companies={companies} />
           )}
         </div>
         <p className="mt-4 text-center text-[12.5px] text-[#a2a6b8]">

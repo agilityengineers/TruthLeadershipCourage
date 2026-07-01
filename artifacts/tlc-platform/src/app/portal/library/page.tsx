@@ -1,6 +1,5 @@
 import { requireRole } from "@/lib/session";
-import { getParticipantContext } from "@/server/portal-data";
-import { db } from "@/lib/db";
+import { useGetPortalLibrary } from "@workspace/api-client-react";
 import { Card } from "@/components/ui/card";
 import { PillarBadge } from "@/components/brand/pillar-badge";
 
@@ -11,20 +10,15 @@ const PILLAR_ICON: Record<string, string> = {
 };
 
 export default function LibraryPage() {
-  const principal = requireRole("PARTICIPANT", "ADMIN");
-  const enr = getParticipantContext(principal.id);
-  if (!enr) return <Card className="p-8 text-muted">No active enrollment.</Card>;
+  requireRole("PARTICIPANT", "ADMIN");
+  const { data } = useGetPortalLibrary();
+  const modules = data?.modules ?? [];
+  const resources = data?.resources ?? [];
 
   // Library = all published program resources, grouped by pillar. Stays
   // accessible permanently (no phase gating).
-  const modules = enr.cohort.program.modules;
   const byPillar: Record<string, typeof modules> = { EQ: [], IQ: [], MQ: [] };
   for (const m of modules) byPillar[m.pillar]?.push(m);
-
-  const resources = db.resource.findMany({
-    where: { status: "PUBLISHED", programId: enr.cohort.programId },
-    include: { module: true },
-  });
 
   return (
     <div className="flex flex-col gap-5">

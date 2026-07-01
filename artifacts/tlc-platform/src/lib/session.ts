@@ -1,22 +1,23 @@
 import type { Role } from "@/data/types";
 import type { Principal } from "./scope";
 import { can, type Capability, homeForRole } from "./rbac";
-import { store } from "@/data/store";
 
 /**
- * Client-side session. The original app used NextAuth (server). In this
- * migrated SPA we persist the chosen demo user in localStorage and expose
- * synchronous guards. Route-level access control lives in <RequireRole> in
- * App.tsx, so these guards normally just return the current principal.
+ * Client-side session. The server validates the email + shared demo password
+ * and returns a bearer token; we persist the returned user + token in
+ * localStorage. The token is attached to every API request (see
+ * `setAuthTokenGetter` in main.tsx). Route-level guards read the cached user
+ * synchronously so <RequireRole> in App.tsx stays simple.
  */
 
 const KEY = "tlc.session";
+const TOKEN_KEY = "tlc.token";
 
 export type SessionUser = {
   id: string;
   role: Role;
   companyId: string | null;
-  name: string;
+  name: string | null;
   email: string;
 };
 
@@ -35,13 +36,20 @@ export function getSessionUser(): SessionUser | null {
   }
 }
 
-export function setSession(user: SessionUser) {
+export function getToken(): string | null {
+  if (typeof window === "undefined") return null;
+  return window.localStorage.getItem(TOKEN_KEY);
+}
+
+export function setSession(user: SessionUser, token: string) {
   window.localStorage.setItem(KEY, JSON.stringify(user));
+  window.localStorage.setItem(TOKEN_KEY, token);
   window.dispatchEvent(new Event("tlc:session"));
 }
 
 export function clearSession() {
   window.localStorage.removeItem(KEY);
+  window.localStorage.removeItem(TOKEN_KEY);
   window.dispatchEvent(new Event("tlc:session"));
 }
 
@@ -49,27 +57,6 @@ export function getPrincipal(): Principal | null {
   const u = getSessionUser();
   if (!u) return null;
   return { id: u.id, role: u.role, companyId: u.companyId ?? null };
-}
-
-/** Demo credential login: any seeded user with the shared demo password. */
-export function login(email: string, password: string): { ok: boolean; error?: string; user?: SessionUser } {
-  const found = store.user.find((u) => String(u.email).toLowerCase() === email.toLowerCase());
-  if (!found || password !== "password123") {
-    return { ok: false, error: "Invalid email or password." };
-  }
-  const user: SessionUser = {
-    id: found.id,
-    role: found.role,
-    companyId: found.companyId ?? null,
-    name: found.name,
-    email: found.email,
-  };
-  setSession(user);
-  return { ok: true, user };
-}
-
-export function logout() {
-  clearSession();
 }
 
 /** Require an authenticated principal; bounce to /login otherwise. */

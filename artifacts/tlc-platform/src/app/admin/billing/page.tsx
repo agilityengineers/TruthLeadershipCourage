@@ -1,5 +1,5 @@
-import { db } from "@/lib/db";
 import { requireRole } from "@/lib/session";
+import { useListPayments } from "@workspace/api-client-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { KpiTile } from "@/components/brand/primitives";
@@ -16,15 +16,8 @@ const PAY_VARIANT: Record<string, "success" | "warning" | "danger" | "neutral"> 
 
 export default function BillingPage() {
   requireRole("ADMIN");
-  const payments = db.payment.findMany({
-    orderBy: { createdAt: "desc" },
-    take: 100,
-    include: {
-      enrollment: { include: { user: true, cohort: true } },
-      company: true,
-      refunds: true,
-    },
-  });
+  const { data } = useListPayments();
+  const payments = data ?? [];
 
   const collected = payments.filter((p) => p.status === "PAID").reduce((a, p) => a + p.amount, 0);
   const pending = payments.filter((p) => p.status === "PENDING").reduce((a, p) => a + p.amount, 0);
@@ -63,13 +56,13 @@ export default function BillingPage() {
           >
             <span className="min-w-0">
               <span className="block truncate text-[13px] font-semibold text-ink">
-                {p.enrollment?.user.name ?? p.company?.name ?? "—"}
+                {p.enrollment?.user?.name ?? p.company?.name ?? "—"}
               </span>
               <span className="block text-[11px] text-muted-3">
                 {formatDate(p.createdAt)}
               </span>
             </span>
-            <span className="text-[12.5px] text-muted">{p.enrollment?.cohort.name ?? "—"}</span>
+            <span className="text-[12.5px] text-muted">{p.enrollment?.cohort?.name ?? "—"}</span>
             <span className="text-[12.5px] font-semibold text-ink">{formatPrice(p.amount, p.currency)}</span>
             <span className="text-[12px] text-muted">{p.processor}</span>
             <span>

@@ -1,21 +1,15 @@
-import { db } from "@/lib/db";
 import { requireRole } from "@/lib/session";
+import { useGetAdminAssessment } from "@workspace/api-client-react";
 import { Card } from "@/components/ui/card";
 import { LabelCaps } from "@/components/brand/primitives";
 import { AssessmentBuilder } from "@/components/admin/assessment-builder";
 
 export default function AdminAssessmentPage() {
   requireRole("ADMIN");
-  const assessment = db.assessment.findFirst({
-    where: { program: { slug: "tlc" } },
-    include: { questions: { orderBy: { order: "asc" } } },
-  });
+  const { data } = useGetAdminAssessment();
+  const responses = data?.responses ?? 0;
 
-  const responses = db.assessmentResponse.count({
-    where: { assessmentId: assessment?.id, completedAt: { not: null } },
-  });
-
-  const questions = (assessment?.questions ?? []).map((q) => ({
+  const questions = (data?.questions ?? []).map((q) => ({
     id: q.id,
     theme: q.theme,
     pillar: q.pillar as "EQ" | "IQ" | "MQ",

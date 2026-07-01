@@ -1,5 +1,7 @@
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
+import { useRefundPayment } from "@workspace/api-client-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,14 +13,13 @@ import {
   DialogDescription,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { refundPayment } from "@/server/billing-actions";
 
 export function RefundButton({ paymentId, maxAmount }: { paymentId: string; maxAmount: number }) {
-  const [, force] = useState(0);
-  const bump = () => force((n) => n + 1);
+  const qc = useQueryClient();
+  const refundPayment = useRefundPayment();
   const [open, setOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [pending, start] = useTransition();
+  const pending = refundPayment.isPending;
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -34,22 +35,22 @@ export function RefundButton({ paymentId, maxAmount }: { paymentId: string; maxA
           </DialogDescription>
         </DialogHeader>
         <form
-          onSubmit={(e) => {
+          onSubmit={async (e) => {
             e.preventDefault();
             setError(null);
             const fd = new FormData(e.currentTarget);
             const dollars = Number(fd.get("amount"));
-            start(async () => {
-              const res = await refundPayment({
-                paymentId,
+            const res = await refundPayment.mutateAsync({
+              id: paymentId,
+              data: {
                 amount: dollars ? Math.round(dollars * 100) : undefined,
                 reason: String(fd.get("reason") || ""),
-              });
-              if (!res.ok) return setError(res.error);
-              setOpen(false);
-              toast.success("Refund issued");
-              bump();
+              },
             });
+            if (!res.ok) return setError(res.error ?? null);
+            setOpen(false);
+            toast.success("Refund issued");
+            qc.invalidateQueries();
           }}
           className="flex flex-col gap-4"
         >

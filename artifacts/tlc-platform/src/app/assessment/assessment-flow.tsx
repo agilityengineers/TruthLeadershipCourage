@@ -1,8 +1,8 @@
-import { useMemo, useState, useTransition } from "react";
+import { useMemo, useState } from "react";
 import { Link } from "wouter";
 import { SCALE, computeSnapshot, type QuestionLite } from "@/lib/assessment";
 import { PILLAR_LABEL } from "@/lib/utils";
-import { submitAssessment } from "@/server/assessment-actions";
+import { useSubmitAssessment } from "@workspace/api-client-react";
 import { cn } from "@/lib/utils";
 
 export function AssessmentFlow({ questions }: { questions: QuestionLite[] }) {
@@ -10,7 +10,8 @@ export function AssessmentFlow({ questions }: { questions: QuestionLite[] }) {
   const [step, setStep] = useState(0); // 0..total-1 = questions, total = results
   const [answers, setAnswers] = useState<Record<string, number>>({});
   const [responseId, setResponseId] = useState<string | null>(null);
-  const [pending, startTransition] = useTransition();
+  const submitAssessment = useSubmitAssessment();
+  const pending = submitAssessment.isPending;
 
   const isResults = step >= total;
   const current = questions[Math.min(step, total - 1)];
@@ -34,14 +35,14 @@ export function AssessmentFlow({ questions }: { questions: QuestionLite[] }) {
       // Last question → persist and show results.
       setStep(total);
       toTop();
-      startTransition(async () => {
+      void (async () => {
         try {
-          const res = await submitAssessment({ answers: next });
+          const res = await submitAssessment.mutateAsync({ data: { answers: next } });
           setResponseId(res.responseId);
         } catch {
           /* results still render from client-side computation */
         }
-      });
+      })();
     }
   }
 

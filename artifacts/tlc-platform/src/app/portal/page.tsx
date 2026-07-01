@@ -1,10 +1,13 @@
-import { useState } from "react";
 import { Link, useSearch } from "wouter";
 import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
 import { requireRole } from "@/lib/session";
-import { getParticipantContext, deriveJourney } from "@/server/portal-data";
-import { markWeekCompleteAction } from "@/server/progress-actions";
-import { derivePhase, type Phase } from "@/lib/cohort";
+import {
+  useGetParticipantContext,
+  useMarkWeekComplete,
+  type ParticipantContext,
+} from "@workspace/api-client-react";
+import { derivePhase, deriveJourney, type Phase } from "@/lib/cohort";
 import { daysUntil, formatDate, PILLAR_LABEL } from "@/lib/utils";
 import { PhaseToggle } from "@/components/portal/phase-toggle";
 import { Stepper, type Step } from "@/components/brand/stepper";
@@ -15,8 +18,9 @@ import { Button } from "@/components/ui/button";
 import { Check } from "lucide-react";
 
 export default function PortalHome() {
-  const principal = requireRole("PARTICIPANT", "ADMIN");
-  const enr = getParticipantContext(principal.id);
+  requireRole("PARTICIPANT", "ADMIN");
+  const { data: enr } = useGetParticipantContext();
+  const sp = new URLSearchParams(useSearch()).get("phase") ?? undefined;
 
   if (!enr) {
     return (
@@ -29,7 +33,6 @@ export default function PortalHome() {
     );
   }
 
-  const sp = new URLSearchParams(useSearch()).get("phase") ?? undefined;
   const override = (["before", "during", "after"].includes(sp ?? "") ? sp : undefined) as
     | Phase
     | undefined;
@@ -65,7 +68,7 @@ export default function PortalHome() {
 
 /* ───────────────────────── BEFORE ───────────────────────── */
 
-function BeforePhase({ enr }: { enr: NonNullable<Awaited<ReturnType<typeof getParticipantContext>>> }) {
+function BeforePhase({ enr }: { enr: ParticipantContext }) {
   const days = daysUntil(enr.cohort.startDate);
   const shipStatus = enr.shipment?.status ?? "PENDING";
   const steps: Step[] = [
@@ -91,7 +94,7 @@ function BeforePhase({ enr }: { enr: NonNullable<Awaited<ReturnType<typeof getPa
             Your cohort begins in <em className="italic text-sky">{days} days.</em>
           </h3>
           <p className="mb-5 text-[14.5px] leading-relaxed text-[#cdd6ee]">
-            First live session: {formatDate(enr.cohort.startDate, { weekday: "long", month: "long", day: "numeric", year: "numeric" })} · {enr.cohort.sessionTime} {enr.cohort.timezone.includes("Los") ? "PST" : ""}. We'll send your join link and reminders as it gets closer.
+            First live session: {formatDate(enr.cohort.startDate, { weekday: "long", month: "long", day: "numeric", year: "numeric" })} · {enr.cohort.sessionTime} {enr.cohort.timezone?.includes("Los") ? "PST" : ""}. We'll send your join link and reminders as it gets closer.
           </p>
           <div className="flex gap-7">
             <StatBlock value={formatDate(enr.cohort.startDate, { month: "short", day: "numeric" })} label="KICKOFF" />
@@ -147,7 +150,7 @@ function DuringPhase({
   enr,
   journey,
 }: {
-  enr: NonNullable<Awaited<ReturnType<typeof getParticipantContext>>>;
+  enr: ParticipantContext;
   journey: ReturnType<typeof deriveJourney>;
 }) {
   const week = journey.week;
@@ -158,12 +161,12 @@ function DuringPhase({
   const nextCoaching = enr.bookings.find((b) => b.status !== "COMPLETED");
   const liveEvent = enr.cohort.events.find((e) => e.weekNo === week && e.type === "WEEKLY_SESSION");
 
-  const [, force] = useState(0);
-  const bump = () => force((n) => n + 1);
+  const qc = useQueryClient();
+  const markWeek = useMarkWeekComplete();
   const markWeekComplete = async () => {
-    await markWeekCompleteAction(enr.id, week);
+    await markWeek.mutateAsync({ id: enr.id, data: { weekNo: week } });
+    await qc.invalidateQueries();
     toast.success("Week marked complete");
-    bump();
   };
 
   return (
@@ -277,7 +280,7 @@ function DuringPhase({
 
 /* ───────────────────────── AFTER ───────────────────────── */
 
-function AfterPhase({ enr }: { enr: NonNullable<Awaited<ReturnType<typeof getParticipantContext>>> }) {
+function AfterPhase({ enr }: { enr: ParticipantContext }) {
   const libraryTiles = [
     { icon: "selfdiscovery.png", title: "EQ · Build the Leader", sub: "8 modules · workbook · recordings" },
     { icon: "trust.png", title: "IQ · Build the Team", sub: "10 modules · workbook · recordings" },

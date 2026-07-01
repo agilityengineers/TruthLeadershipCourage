@@ -1,33 +1,14 @@
 import { requireRole } from "@/lib/session";
-import { db } from "@/lib/db";
-import { unreadCount } from "@/lib/notifications";
+import { useGetMe, useGetUnreadMessageCount } from "@workspace/api-client-react";
 import { initials } from "@/lib/utils";
 import { DashboardShell, type NavItem } from "@/components/brand/dashboard-shell";
 import { NotificationBellServer } from "@/components/notifications/bell-server";
 
 export default function PortalLayout({ children }: { children: React.ReactNode }) {
   const principal = requireRole("PARTICIPANT", "ADMIN");
-  const user = db.user.findUnique({
-    where: { id: principal.id },
-    include: { enrollments: { include: { cohort: true }, orderBy: { createdAt: "desc" }, take: 1 } },
-  });
-
-  // Unread direct/cohort messages → Messages badge.
-  const myThreads = db.threadMember.findMany({
-    where: { userId: principal.id },
-    select: { threadId: true, lastReadAt: true },
-  });
-  let unreadMessages = 0;
-  for (const t of myThreads) {
-    unreadMessages += db.message.count({
-      where: {
-        threadId: t.threadId,
-        senderId: { not: principal.id },
-        createdAt: t.lastReadAt ? { gt: t.lastReadAt } : undefined,
-      },
-    });
-  }
-  unreadCount(principal.id); // (in-app notifications also tracked)
+  const { data: user } = useGetMe();
+  const { data: unread } = useGetUnreadMessageCount();
+  const unreadMessages = unread?.count ?? 0;
 
   const nav: NavItem[] = [
     { label: "Home", href: "/portal" },
@@ -41,7 +22,7 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
     { label: "Account & Privacy", href: "/portal/settings" },
   ];
 
-  const cohortName = user?.enrollments[0]?.cohort.name ?? "TLC Program";
+  const cohortName = user?.primaryCohortName ?? "TLC Program";
 
   return (
     <DashboardShell

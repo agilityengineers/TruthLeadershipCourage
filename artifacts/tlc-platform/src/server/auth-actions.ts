@@ -1,18 +1,12 @@
-import { login, logout } from "@/lib/session";
-import { homeForRole } from "@/lib/rbac";
+import { clearSession } from "@/lib/session";
 
 /**
- * Client auth actions (migrated from NextAuth server actions). The login page
- * calls `loginAction(email, password)` and navigates to the returned `redirectTo`.
+ * Client auth actions. Login now happens via the generated `useLogin` mutation
+ * in the login form (which persists the session token). These helpers cover the
+ * remaining auth surface.
  */
-export function loginAction(email: string, password: string): { error: string | null; redirectTo?: string } {
-  const result = login(String(email ?? "").toLowerCase(), String(password ?? ""));
-  if (!result.ok) return { error: result.error ?? "Invalid email or password." };
-  return { error: null, redirectTo: homeForRole(result.user!.role) };
-}
-
 export function logoutAction() {
-  logout();
+  clearSession();
 }
 
 /** Corporate SSO is not available in the demo build. */

@@ -1,19 +1,20 @@
-import { useEffect, useRef, useState, useTransition } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "wouter";
+import { useQueryClient } from "@tanstack/react-query";
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { initials, cn, formatDate } from "@/lib/utils";
-import { sendMessage } from "@/server/chat-actions";
+import { useSendMessage } from "@workspace/api-client-react";
 import { Hash, MessageSquare } from "lucide-react";
 
 type ThreadSummary = {
   id: string;
   type: string;
   title: string;
-  lastMessage: { body: string; at: Date; sender: string | null } | null;
+  lastMessage?: { body: string; at: string; sender?: string | null } | null;
 };
 
-type Msg = { id: string; body: string; senderId: string; senderName: string | null; createdAt: Date };
+type Msg = { id: string; body: string; senderId: string; senderName: string | null; createdAt: string };
 
 export function ChatView({
   threads,
@@ -30,11 +31,11 @@ export function ChatView({
   basePath: string;
   readOnly?: boolean;
 }) {
-  const [, force] = useState(0);
-  const bump = () => force((n) => n + 1);
-  const [pending, start] = useTransition();
+  const qc = useQueryClient();
+  const sendMessage = useSendMessage();
   const [draft, setDraft] = useState("");
   const endRef = useRef<HTMLDivElement>(null);
+  const pending = sendMessage.isPending;
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ block: "end" });
@@ -45,10 +46,10 @@ export function ChatView({
     if (!draft.trim() || !active) return;
     const body = draft;
     setDraft("");
-    start(async () => {
-      await sendMessage({ threadId: active.id, body });
-      bump();
-    });
+    (async () => {
+      await sendMessage.mutateAsync({ id: active.id, data: { body } });
+      await qc.invalidateQueries();
+    })();
   }
 
   return (

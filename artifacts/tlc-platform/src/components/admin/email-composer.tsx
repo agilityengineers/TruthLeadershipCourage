@@ -1,11 +1,12 @@
-import { useState, useTransition } from "react";
+import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { useSendCampaign } from "@workspace/api-client-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { LabelCaps } from "@/components/brand/primitives";
-import { sendCampaign } from "@/server/email-actions";
 
 type Opt = { id: string; name: string };
 type Template = { id: string; name: string; subject: string; html: string };
@@ -21,15 +22,15 @@ export function EmailComposer({
   templates: Template[];
   trainerMode?: boolean;
 }) {
-  const [, force] = useState(0);
-  const bump = () => force((n) => n + 1);
+  const qc = useQueryClient();
+  const sendCampaign = useSendCampaign();
   const [segType, setSegType] = useState<"cohort" | "company" | "individual" | "all">("cohort");
   const [segId, setSegId] = useState(cohorts[0]?.id ?? "");
   const [subject, setSubject] = useState("");
   const [html, setHtml] = useState("");
   const [templateId, setTemplateId] = useState("");
   const [msg, setMsg] = useState<string | null>(null);
-  const [pending, startT] = useTransition();
+  const pending = sendCampaign.isPending;
 
   const segOptions = segType === "cohort" ? cohorts : segType === "company" ? companies : [];
 
@@ -42,11 +43,11 @@ export function EmailComposer({
     }
   }
 
-  function submit(e: React.FormEvent) {
+  async function submit(e: React.FormEvent) {
     e.preventDefault();
     setMsg(null);
-    startT(async () => {
-      const res = await sendCampaign({
+    const res = await sendCampaign.mutateAsync({
+      data: {
         subject,
         html,
         templateId: templateId || undefined,
@@ -54,13 +55,13 @@ export function EmailComposer({
           type: segType,
           ids: segType === "all" ? [] : [segId].filter(Boolean),
         },
-      });
-      if (!res.ok) return setMsg(res.error);
-      setMsg(`Sent to ${res.recipients} recipient${res.recipients === 1 ? "" : "s"}.`);
-      setSubject("");
-      setHtml("");
-      bump();
+      },
     });
+    if (!res.ok) return setMsg(res.error ?? null);
+    setMsg(`Sent to ${res.recipients} recipient${res.recipients === 1 ? "" : "s"}.`);
+    setSubject("");
+    setHtml("");
+    qc.invalidateQueries();
   }
 
   const types: Array<typeof segType> = trainerMode ? ["cohort"] : ["cohort", "company", "individual", "all"];

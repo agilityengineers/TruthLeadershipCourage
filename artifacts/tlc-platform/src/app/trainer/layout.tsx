@@ -1,8 +1,10 @@
 import { Link } from "wouter";
 import { requireRole } from "@/lib/session";
-import { db } from "@/lib/db";
-import { cohortScope } from "@/lib/scope";
-import { currentWeek } from "@/lib/cohort";
+import {
+  useGetMe,
+  useGetTrainerOverview,
+  useGetUnreadMessageCount,
+} from "@workspace/api-client-react";
 import { initials } from "@/lib/utils";
 import { DashboardShell, type NavItem } from "@/components/brand/dashboard-shell";
 import { Button } from "@/components/ui/button";
@@ -11,34 +13,13 @@ import { NotificationBellServer } from "@/components/notifications/bell-server";
 export default function TrainerLayout({ children }: { children: React.ReactNode }) {
   const principal = requireRole("TRAINER", "ADMIN");
 
-  const user = db.user.findUnique({ where: { id: principal.id } });
+  const { data: user } = useGetMe();
+  const { data: overview } = useGetTrainerOverview();
+  const { data: unread } = useGetUnreadMessageCount();
 
-  // Primary running cohort (for the topbar context line).
-  const cohort =
-    db.cohort.findFirst({
-      where: { AND: [cohortScope(principal), { status: "RUNNING" }] },
-      orderBy: { startDate: "asc" },
-    }) ??
-    db.cohort.findFirst({
-      where: cohortScope(principal),
-      orderBy: { startDate: "asc" },
-    });
-
-  // Unread direct/cohort messages → Messages badge (same approach as the portal layout).
-  const myThreads = db.threadMember.findMany({
-    where: { userId: principal.id },
-    select: { threadId: true, lastReadAt: true },
-  });
-  let unreadMessages = 0;
-  for (const t of myThreads) {
-    unreadMessages += db.message.count({
-      where: {
-        threadId: t.threadId,
-        senderId: { not: principal.id },
-        createdAt: t.lastReadAt ? { gt: t.lastReadAt } : undefined,
-      },
-    });
-  }
+  const cohort = overview?.cohort ?? null;
+  const week = overview?.week ?? null;
+  const unreadMessages = unread?.count ?? 0;
 
   const nav: NavItem[] = [
     { label: "Cohort Overview", href: "/trainer" },
@@ -47,8 +28,6 @@ export default function TrainerLayout({ children }: { children: React.ReactNode 
     { label: "Events & Sessions", href: "/trainer/events" },
     { label: "Messages", href: "/trainer/messages", badge: unreadMessages || undefined },
   ];
-
-  const week = cohort ? currentWeek(cohort.startDate, 24) : null;
 
   return (
     <DashboardShell

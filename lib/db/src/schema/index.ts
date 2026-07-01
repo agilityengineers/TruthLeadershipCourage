@@ -1,20 +1,36 @@
-// Export your models here. Add one export per file
-// export * from "./posts";
-//
-// Each model/table should ideally be split into different files.
-// Each model/table should define a Drizzle table, insert schema, and types:
-//
-//   import { pgTable, text, serial } from "drizzle-orm/pg-core";
-//   import { createInsertSchema } from "drizzle-zod";
-//   import { z } from "zod/v4";
-//
-//   export const postsTable = pgTable("posts", {
-//     id: serial("id").primaryKey(),
-//     title: text("title").notNull(),
-//   });
-//
-//   export const insertPostSchema = createInsertSchema(postsTable).omit({ id: true });
-//   export type InsertPost = z.infer<typeof insertPostSchema>;
-//   export type Post = typeof postsTable.$inferSelect;
-
-export {}
+// TLC platform schema. One model per file. Each file exports its Drizzle table,
+// relations, drizzle-zod insert/select schemas, and inferred types.
+export * from "./_shared";
+export * from "./company";
+export * from "./user";
+export * from "./membership";
+export * from "./program";
+export * from "./cohort";
+export * from "./module";
+export * from "./event";
+export * from "./resource";
+export * from "./assessment";
+export * from "./question";
+export * from "./assessmentResponse";
+export * from "./answerItem";
+export * from "./seat";
+export * from "./enrollment";
+export * from "./payment";
+export * from "./coupon";
+export * from "./refund";
+export * from "./shipment";
+export * from "./moduleProgress";
+export * from "./coachingBooking";
+export * from "./certificate";
+export * from "./thread";
+export * from "./threadMember";
+export * from "./message";
+export * from "./emailTemplate";
+export * from "./emailCampaign";
+export * from "./notification";
+export * from "./waitlistEntry";
+export * from "./consentRecord";
+export * from "./auditLog";
+export * from "./account";
+export * from "./session";
+export * from "./verificationToken";

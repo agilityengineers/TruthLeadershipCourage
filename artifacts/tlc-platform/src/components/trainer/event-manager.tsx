@@ -1,5 +1,7 @@
 import * as React from "react";
 import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
+import { useCreateEvent } from "@workspace/api-client-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,13 +16,11 @@ import {
   DialogClose,
 } from "@/components/ui/dialog";
 import { LabelCaps } from "@/components/brand/primitives";
-import { createEvent } from "@/server/trainer-actions";
-import type { EventType } from "@/data/types";
 
 type EventRow = {
   id: string;
   title: string;
-  type: EventType;
+  type: string;
   startAt: string;
   endAt: string;
   joinUrl: string | null;
@@ -29,15 +29,15 @@ type EventRow = {
 };
 
 type CohortOpt = { id: string; name: string };
-type ModuleOpt = { id: string; title: string; weekNo: number | null };
+type ModuleOpt = { id: string; title: string; weekNo?: number | null };
 
-const TYPE_OPTIONS: { value: EventType; label: string }[] = [
+const TYPE_OPTIONS: { value: string; label: string }[] = [
   { value: "WEEKLY_SESSION", label: "Weekly session" },
   { value: "COACHING_1ON1", label: "1:1 coaching" },
   { value: "KICKOFF", label: "Kickoff" },
 ];
 
-const TYPE_LABEL: Record<EventType, string> = {
+const TYPE_LABEL: Record<string, string> = {
   WEEKLY_SESSION: "Weekly session",
   COACHING_1ON1: "1:1 coaching",
   KICKOFF: "Kickoff",
@@ -56,8 +56,8 @@ export function EventManager({
   cohorts: CohortOpt[];
   modules: ModuleOpt[];
 }) {
-  const [, force] = React.useState(0);
-  const bump = () => force((n) => n + 1);
+  const qc = useQueryClient();
+  const createEvent = useCreateEvent();
   const [open, setOpen] = React.useState(false);
   const [pending, setPending] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
@@ -69,19 +69,21 @@ export function EventManager({
     const weekRaw = String(form.get("weekNo") ?? "").trim();
     setPending(true);
     try {
-      await createEvent({
-        cohortId: String(form.get("cohortId")),
-        type: String(form.get("type")) as EventType,
-        title: String(form.get("title")),
-        startAt: String(form.get("startAt")),
-        endAt: String(form.get("endAt")),
-        joinUrl: (form.get("joinUrl") as string) || null,
-        weekNo: weekRaw ? Number(weekRaw) : null,
-        moduleId: (form.get("moduleId") as string) || null,
+      await createEvent.mutateAsync({
+        data: {
+          cohortId: String(form.get("cohortId")),
+          type: String(form.get("type")),
+          title: String(form.get("title")),
+          startAt: String(form.get("startAt")),
+          endAt: String(form.get("endAt")),
+          joinUrl: (form.get("joinUrl") as string) || undefined,
+          weekNo: weekRaw ? Number(weekRaw) : null,
+          moduleId: (form.get("moduleId") as string) || undefined,
+        },
       });
       setOpen(false);
       toast.success("Event created");
-      bump();
+      qc.invalidateQueries();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
@@ -229,7 +231,7 @@ function EventList({
 }: {
   title: string;
   events: EventRow[];
-  typeLabel: Record<EventType, string>;
+  typeLabel: Record<string, string>;
   fmt: (iso: string, opts: Intl.DateTimeFormatOptions) => string;
   emptyText: string;
   muted?: boolean;

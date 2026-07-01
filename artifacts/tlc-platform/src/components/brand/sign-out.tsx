@@ -1,15 +1,22 @@
 import { LogOut } from "lucide-react";
 import { useLocation } from "wouter";
+import { useLogout } from "@workspace/api-client-react";
 import { logoutAction } from "@/server/auth-actions";
 
 export function SignOut() {
   const [, navigate] = useLocation();
+  const logout = useLogout();
   return (
     <form
       onSubmit={(e) => {
         e.preventDefault();
-        logoutAction();
-        navigate("/login");
+        // Best-effort server session revoke, then clear the local session.
+        logout.mutate(undefined, {
+          onSettled: () => {
+            logoutAction();
+            navigate("/login");
+          },
+        });
       }}
     >
       <button

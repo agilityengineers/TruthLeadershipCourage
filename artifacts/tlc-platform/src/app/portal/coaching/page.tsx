@@ -1,5 +1,5 @@
 import { requireRole } from "@/lib/session";
-import { getParticipantContext } from "@/server/portal-data";
+import { useGetParticipantContext } from "@workspace/api-client-react";
 import { formatDate } from "@/lib/utils";
 import { Card } from "@/components/ui/card";
 import { LabelCaps } from "@/components/brand/primitives";
@@ -8,8 +8,8 @@ import { RescheduleDialog } from "@/components/portal/reschedule-dialog";
 import { CalendarPlus, Download } from "lucide-react";
 
 export default function CoachingPage() {
-  const principal = requireRole("PARTICIPANT", "ADMIN");
-  const enr = getParticipantContext(principal.id);
+  requireRole("PARTICIPANT", "ADMIN");
+  const { data: enr } = useGetParticipantContext();
   if (!enr) return <Card className="p-8 text-muted">No active enrollment.</Card>;
 
   const weekly = enr.cohort.events.filter((e) => e.type === "WEEKLY_SESSION").slice(0, 6);
@@ -50,7 +50,7 @@ export default function CoachingPage() {
                     <span className="capitalize">{b.status.toLowerCase()}</span>
                   </div>
                 </div>
-                <RescheduleDialog bookingId={b.id} currentSlot={b.slot.toISOString()} />
+                <RescheduleDialog bookingId={b.id} currentSlot={b.slot} />
               </div>
             ))}
           </div>

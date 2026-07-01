@@ -1,45 +1,53 @@
-# [Project name]
+# TLC — Truth · Leadership · Courage
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+The Wisdom Tri's flagship six-month leadership program platform: a participant
+portal, trainer workspace, admin console, and company-viewer dashboard, backed by
+a persistent Postgres database through a typed REST API.
 
 ## Run & Operate
 
-- `pnpm --filter @workspace/api-server run dev` — run the API server (port 5000)
+- `pnpm --filter @workspace/api-server run dev` — run the API server (binds `PORT`, default 8080)
+- `pnpm --filter @workspace/tlc-platform run dev` — run the web app (Vite; proxies `/api` → API server)
+- `pnpm --filter @workspace/db run push` — push the Drizzle schema to Postgres
+- `pnpm --filter @workspace/db run seed` — seed demo content (idempotent; safe to re-run)
+- `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks (`@workspace/api-client-react`) and Zod schemas (`@workspace/api-zod`) from `lib/api-spec/openapi.yaml`
 - `pnpm run typecheck` — full typecheck across all packages
-- `pnpm run build` — typecheck + build all packages
-- `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
-- `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
-- Required env: `DATABASE_URL` — Postgres connection string
+- Required env: `DATABASE_URL` — Postgres connection string. For the Vite dev proxy set `API_PROXY_TARGET` (defaults to `http://localhost:8080`).
+
+### Demo logins (shared password: `password123`)
+
+- `admin@thewisdomtri.com` — ADMIN
+- `tri@thewisdomtri.com` — TRAINER
+- `jordan@acme.test` — PARTICIPANT
+- `viewer@acme.test` — COMPANY_VIEWER
 
 ## Stack
 
 - pnpm workspaces, Node.js 24, TypeScript 5.9
-- API: Express 5
-- DB: PostgreSQL + Drizzle ORM
-- Validation: Zod (`zod/v4`), `drizzle-zod`
-- API codegen: Orval (from OpenAPI spec)
-- Build: esbuild (CJS bundle)
+- Web: Vite + React 19 + wouter + @tanstack/react-query
+- API: Express 5 (`artifacts/api-server`)
+- DB: PostgreSQL + Drizzle ORM (`lib/db`)
+- Validation: Zod, `drizzle-zod`
+- API codegen: Orval (OpenAPI → react-query client + zod), from `lib/api-spec/openapi.yaml`
+- Build: esbuild (API bundle), Vite (web)
 
 ## Where things live
 
-_Populate as you build — short repo map plus pointers to the source-of-truth file for DB schema, API contracts, theme files, etc._
+- DB schema (source of truth): `lib/db/src/schema/*` — one Drizzle table per file (+ relations, drizzle-zod schemas, types).
+- Seed: `lib/db/src/seed.ts` (ports the former in-memory demo store, same stable IDs).
+- API contract (source of truth): `lib/api-spec/openapi.yaml`. Regenerate clients after editing.
+- API server: `artifacts/api-server/src/routes/*` (one file per domain), `src/lib/*` (db, principal/auth, rbac, scope, services).
+- Web app: `artifacts/tlc-platform/src` — pages under `app/*`, data fetched via generated hooks from `@workspace/api-client-react`.
 
 ## Architecture decisions
 
-_Populate as you build — non-obvious choices a reader couldn't infer from the code (3-5 bullets)._
-
-## Product
-
-_Describe the high-level user-facing capabilities of this app once they exist._
-
-## User preferences
-
-_Populate as you build — explicit user instructions worth remembering across sessions._
+- **Session:** lightweight demo login — the server validates email + shared password, mints a `session` row, and returns a bearer token. The web app persists it in localStorage and attaches it to every API request; the server rebuilds the principal per request. No password hashing (out of scope).
+- **RBAC + tenant scoping enforced server-side:** `lib/rbac.ts` capabilities + `lib/scope.ts` Drizzle `where` fragments (e.g. a company viewer can only read their own company's rows). The browser no longer holds the data.
+- **Payments & email are simulated stubs:** they persist state (payment → PAID, campaign → sent) without external calls.
+- **Reads return the same nested shapes** the old in-memory layer produced, so the UI was rewired with minimal churn (queries for reads, mutations + `invalidateQueries` for writes).
 
 ## Gotchas
 
-_Populate as you build — sharp edges, "always run X before Y" rules._
-
-## Pointers
-
-- See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and package details
+- After changing `openapi.yaml`, run the codegen script before typechecking the web app.
+- Dates cross the wire as ISO strings; `formatDate`/`daysUntil`/`derivePhase`/`currentWeek` already accept `Date | string`.
+- On a fresh database run `push` then `seed` (wired into `scripts/post-merge.sh`).

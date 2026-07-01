@@ -1,6 +1,6 @@
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { useLocation } from "wouter";
-import { createEnrollment } from "@/server/enrollment-actions";
+import { useCreateEnrollment } from "@workspace/api-client-react";
 import { formatPrice } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,7 +27,8 @@ export function EnrollForm({
   const [, navigate] = useLocation();
   const [cohortId, setCohortId] = useState(cohorts[0]?.id ?? "");
   const [error, setError] = useState<string | null>(null);
-  const [pending, startTransition] = useTransition();
+  const createEnrollment = useCreateEnrollment();
+  const pending = createEnrollment.isPending;
 
   const selected = cohorts.find((c) => c.id === cohortId);
 
@@ -51,14 +52,14 @@ export function EnrollForm({
         country: String(fd.get("country") ?? "US"),
       },
     };
-    startTransition(async () => {
-      const res = await createEnrollment(payload);
+    void (async () => {
+      const res = await createEnrollment.mutateAsync({ data: payload });
       if (!res.ok) {
-        setError(res.error);
+        setError(res.error ?? "Something went wrong.");
         return;
       }
       navigate(`/enroll/confirmation?status=${res.status}`);
-    });
+    })();
   }
 
   return (

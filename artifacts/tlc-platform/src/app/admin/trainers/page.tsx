@@ -1,18 +1,13 @@
-import { db } from "@/lib/db";
 import { requireRole } from "@/lib/session";
+import { useListTrainers } from "@workspace/api-client-react";
 import { Card } from "@/components/ui/card";
 import { Avatar } from "@/components/ui/avatar";
 import { initials } from "@/lib/utils";
 
 export default function TrainersPage() {
   requireRole("ADMIN");
-  const trainers = db.user.findMany({
-    where: { role: "TRAINER" },
-    orderBy: { name: "asc" },
-    include: {
-      trainerCohorts: { include: { _count: { select: { enrollments: true } } } },
-    },
-  });
+  const { data } = useListTrainers();
+  const trainers = data ?? [];
 
   return (
     <div className="flex flex-col gap-5">
@@ -23,7 +18,7 @@ export default function TrainersPage() {
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {trainers.map((t) => {
-          const participants = t.trainerCohorts.reduce((a, c) => a + c._count.enrollments, 0);
+          const participants = t.cohorts.reduce((a, c) => a + c.enrollmentCount, 0);
           return (
             <Card key={t.id} className="p-5">
               <div className="flex items-center gap-3">
@@ -35,7 +30,7 @@ export default function TrainersPage() {
               </div>
               <div className="mt-4 flex gap-6">
                 <div>
-                  <div className="font-display text-[22px] text-eq">{t.trainerCohorts.length}</div>
+                  <div className="font-display text-[22px] text-eq">{t.cohorts.length}</div>
                   <div className="text-[11px] text-muted-2">cohorts</div>
                 </div>
                 <div>
@@ -44,7 +39,7 @@ export default function TrainersPage() {
                 </div>
               </div>
               <div className="mt-3 flex flex-wrap gap-1.5">
-                {t.trainerCohorts.map((c) => (
+                {t.cohorts.map((c) => (
                   <span key={c.id} className="rounded-pill bg-page px-2.5 py-1 text-[11px] text-muted">
                     {c.name}
                   </span>

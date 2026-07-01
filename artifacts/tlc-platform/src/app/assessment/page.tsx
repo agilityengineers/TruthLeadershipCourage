@@ -1,19 +1,16 @@
 import { Link } from "wouter";
-import { db } from "@/lib/db";
+import { useGetAssessment } from "@workspace/api-client-react";
 import { AssessmentFlow } from "./assessment-flow";
 import type { QuestionLite } from "@/lib/assessment";
 
 export default function AssessmentPage() {
-  const assessment = db.assessment.findFirst({
-    where: { program: { slug: "tlc" } },
-    include: { questions: { where: { active: true }, orderBy: { order: "asc" } } },
-  });
+  const { data: assessment } = useGetAssessment();
 
   const questions: QuestionLite[] = (assessment?.questions ?? []).map((q) => ({
     id: q.id,
     theme: q.theme,
     pillar: q.pillar,
-    color: q.color,
+    color: q.color ?? "",
     prompt: q.prompt,
     benefit: q.benefit,
   }));

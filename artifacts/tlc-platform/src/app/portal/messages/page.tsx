@@ -1,17 +1,27 @@
+import { useEffect } from "react";
 import { useSearch } from "wouter";
 import { requireRole } from "@/lib/session";
-import { getThreadsForUser, getThread } from "@/server/chat-data";
-import { markThreadRead } from "@/server/chat-actions";
+import {
+  useListThreads,
+  useGetThread,
+  useMarkThreadRead,
+  type ThreadDetail,
+} from "@workspace/api-client-react";
 import { ChatView } from "@/components/chat/chat-view";
 
 export default function PortalMessagesPage() {
   const principal = requireRole("PARTICIPANT", "ADMIN");
-  const threads = getThreadsForUser(principal.id);
+  const { data: threads = [] } = useListThreads();
   const t = new URLSearchParams(useSearch()).get("t") ?? undefined;
   const activeId = t ?? threads[0]?.id;
 
-  const thread = activeId ? getThread(activeId, principal.id) : null;
-  if (thread) markThreadRead(thread.id);
+  const { data: thread } = useGetThread(activeId ?? "");
+  const markRead = useMarkThreadRead();
+
+  useEffect(() => {
+    if (thread) markRead.mutate({ id: thread.id });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [thread?.id]);
 
   return (
     <ChatView
@@ -24,7 +34,7 @@ export default function PortalMessagesPage() {
           id: m.id,
           body: m.body,
           senderId: m.senderId,
-          senderName: m.sender.name,
+          senderName: m.senderName ?? null,
           createdAt: m.createdAt,
         })) ?? []
       }
@@ -32,10 +42,7 @@ export default function PortalMessagesPage() {
   );
 }
 
-function threadTitle(
-  thread: NonNullable<Awaited<ReturnType<typeof getThread>>>,
-  userId: string,
-) {
+function threadTitle(thread: ThreadDetail, userId: string) {
   if (thread.type === "COHORT_CHANNEL") return thread.title ?? `${thread.cohort?.name ?? "Cohort"} channel`;
   const others = thread.members.filter((m) => m.userId !== userId).map((m) => m.user.name);
   return others.join(", ") || "Direct message";

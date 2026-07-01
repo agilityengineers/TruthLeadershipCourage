@@ -1,30 +1,30 @@
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { Link } from "wouter";
 import { Bell } from "lucide-react";
-import { markAllNotificationsRead } from "@/server/notification-actions";
+import { useQueryClient } from "@tanstack/react-query";
+import { useMarkAllNotificationsRead } from "@workspace/api-client-react";
 import { cn, formatDate } from "@/lib/utils";
 
 type Note = {
   id: string;
   title: string;
-  body: string | null;
-  href: string | null;
-  readAt: Date | null;
-  createdAt: Date;
+  body?: string | null;
+  href?: string | null;
+  readAt?: string | null;
+  createdAt: string;
 };
 
 export function NotificationBell({ notifications }: { notifications: Note[] }) {
-  const [, force] = useState(0);
-  const bump = () => force((n) => n + 1);
   const [open, setOpen] = useState(false);
-  const [, start] = useTransition();
+  const qc = useQueryClient();
+  const markAllRead = useMarkAllNotificationsRead();
   const unread = notifications.filter((n) => !n.readAt).length;
 
   function markRead() {
-    start(async () => {
-      await markAllNotificationsRead();
-      bump();
-    });
+    void (async () => {
+      await markAllRead.mutateAsync(undefined);
+      qc.invalidateQueries();
+    })();
   }
 
   return (
