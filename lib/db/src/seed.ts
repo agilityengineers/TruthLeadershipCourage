@@ -11,6 +11,7 @@
  */
 import { db, pool } from "./index";
 import * as s from "./schema";
+import { SECTIONS } from "@workspace/site-content";
 
 const PILLAR_COLOR: Record<string, string> = { EQ: "#024794", IQ: "#262161", MQ: "#662d91" };
 
@@ -178,7 +179,29 @@ async function seed() {
   await ins(s.message, messages);
   await ins(s.emailTemplate, emailTemplates);
 
-  console.info("[seed] done: %d users, %d cohorts, %d enrollments", users.length, 3, enrollments.length);
+  // ---- Editable marketing sections (one row per registry section) ----
+  // Stable ids keyed off the section key keep this idempotent; onConflictDoNothing
+  // means re-seeding never clobbers an admin's saved content or visibility.
+  const siteSections = SECTIONS.map((sec) => ({
+    id: `sec_${sec.key.replace(/[^a-zA-Z0-9]/g, "_")}`,
+    key: sec.key,
+    page: sec.page,
+    label: sec.label,
+    order: sec.order,
+    visible: true,
+    content: sec.default,
+    createdAt: now,
+    updatedAt: now,
+  }));
+  await ins(s.siteSection, siteSections);
+
+  console.info(
+    "[seed] done: %d users, %d cohorts, %d enrollments, %d sections",
+    users.length,
+    3,
+    enrollments.length,
+    siteSections.length,
+  );
 }
 
 seed()
