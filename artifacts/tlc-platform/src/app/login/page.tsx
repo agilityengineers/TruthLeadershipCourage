@@ -18,8 +18,8 @@ export default function LoginPage() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-soft-3 px-5 py-12">
       <div className="w-full max-w-[420px]">
-        <div className="mb-7 flex items-center gap-3">
-          <Logo size={44} withWordmark subtitle="TLC Platform" href="/" />
+        <div className="mb-7 flex items-center justify-center gap-3">
+          <Logo size={70} withWordmark subtitle="TLC Platform" href="/" />
         </div>
         <div className="rounded-[18px] border border-hair-1 bg-white p-8 shadow-card">
           <h1 className="font-display text-[26px] text-ink">{intro.heading}</h1>
