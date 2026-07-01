@@ -348,7 +348,7 @@ export default function LandingPage() {
       {/* Footer */}
       <footer className="border-t border-[#eef0f5] bg-white">
         <div className="shell flex flex-wrap items-center gap-3.5 py-[34px]">
-          <img src="/brand/wisdomtri-logo.jpg" alt="" width={40} height={40} className="h-10 w-10 object-contain" />
+          <img src="/brand/wisdomtri-logo.png" alt="" width={40} height={40} className="h-10 w-10 object-contain" />
           <span className="text-[14px] font-semibold text-indigo">The Wisdom Tri</span>
           <Link href="/organizations" className="text-[13px] font-semibold text-eq hover:underline">
             Leading a team? See TLC for Organizations →

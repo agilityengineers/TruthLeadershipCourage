@@ -28,7 +28,7 @@ export function Logo({
       style={{ width: size, height: size }}
     >
       <img
-        src="/brand/wisdomtri-logo.jpg"
+        src="/brand/wisdomtri-logo.png"
         alt="The Wisdom Tri"
         width={size}
         height={size}

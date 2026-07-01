@@ -20,12 +20,11 @@ export function LandingNav() {
       <div className="shell flex items-center gap-3.5 py-3.5">
         <Link href="/" className="flex items-center" aria-label="The Wisdom Tri home">
           <img
-            src="/brand/wisdomtri-logo.jpg"
+            src="/brand/wisdomtri-logo.png"
             alt="The Wisdom Tri"
             width={132}
             height={132}
             className="h-[88px] w-[88px] object-contain lg:h-[112px] lg:w-[112px]"
-            style={{ mixBlendMode: "multiply" }}
           />
         </Link>
         <nav className="ml-6 hidden gap-6 md:flex">

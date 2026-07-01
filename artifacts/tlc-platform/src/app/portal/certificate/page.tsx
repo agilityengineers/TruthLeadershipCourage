@@ -27,7 +27,7 @@ export default function CertificatePage() {
           <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(160deg,rgba(2,71,148,.04),rgba(102,45,145,.04))]" />
           <div className="relative">
             <div className="mb-6 flex justify-center">
-              <img src="/brand/wisdomtri-logo.jpg" alt="The Wisdom Tri" width={72} height={72} className="h-[72px] w-[72px] object-contain" />
+              <img src="/brand/wisdomtri-logo.png" alt="The Wisdom Tri" width={72} height={72} className="h-[72px] w-[72px] object-contain" />
             </div>
             <div className="eyebrow mb-4 text-mq">Certificate of Completion</div>
             <h1 className="font-display text-[clamp(28px,4vw,44px)] text-ink">{enr.user.name}</h1>

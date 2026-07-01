@@ -125,7 +125,7 @@ function BeforePhase({ enr }: { enr: NonNullable<Awaited<ReturnType<typeof getPa
         <div className="rounded-card border border-[#e6dff3] bg-[#f6f4fb] p-5">
           <div className="mb-3 flex items-center gap-2.5">
             <span className="flex h-10 w-10 items-center justify-center rounded-full bg-white">
-              <img src="/brand/wisdomtri-logo.jpg" alt="" width={30} height={30} className="h-[30px] w-[30px] object-contain" />
+              <img src="/brand/wisdomtri-logo.png" alt="" width={30} height={30} className="h-[30px] w-[30px] object-contain" />
             </span>
             <div>
               <div className="text-[13px] font-semibold text-indigo">A note from Tri</div>

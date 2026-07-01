@@ -25,7 +25,7 @@ export default function EnrollPage() {
     <div className="min-h-screen bg-soft-3 px-5 py-[clamp(24px,5vw,60px)] pb-16">
       <div className="mx-auto w-full max-w-[760px]">
         <div className="mb-7 flex items-center gap-3">
-          <img src="/brand/wisdomtri-logo.jpg" alt="" width={40} height={40} className="h-10 w-10 object-contain" />
+          <img src="/brand/wisdomtri-logo.png" alt="" width={40} height={40} className="h-10 w-10 object-contain" />
           <div>
             <div className="text-[13px] font-semibold leading-tight text-indigo">The Wisdom Tri</div>
             <div className="text-[10.5px] font-semibold uppercase tracking-[.14em] text-muted-3">
