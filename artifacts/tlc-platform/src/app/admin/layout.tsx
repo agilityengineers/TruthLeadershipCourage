@@ -1,10 +1,17 @@
 import { requireRole } from "@/lib/session";
 import { useGetMe } from "@workspace/api-client-react";
 import { initials } from "@/lib/utils";
-import { DashboardShell, type NavItem } from "@/components/brand/dashboard-shell";
+import {
+  DashboardShell,
+  type NavItem,
+} from "@/components/brand/dashboard-shell";
 import { NotificationBellServer } from "@/components/notifications/bell-server";
 
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
+export default function AdminLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const principal = requireRole("ADMIN");
   const { data: user } = useGetMe();
 
@@ -14,6 +21,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { label: "Cohorts", href: "/admin/cohorts" },
     { label: "Participants", href: "/admin/participants" },
     { label: "Trainers", href: "/admin/trainers" },
+    { label: "Users", href: "/admin/users" },
     { label: "Assessment", href: "/admin/assessment" },
     { label: "Site Content", href: "/admin/content" },
     { label: "Resources & Events", href: "/admin/resources" },
@@ -40,7 +48,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <>
           <div>
             <div className="label-caps">Admin Console</div>
-            <div className="mt-0.5 font-display text-[15px] text-ink">System overview</div>
+            <div className="mt-0.5 font-display text-[15px] text-ink">
+              System overview
+            </div>
           </div>
           <div className="ml-auto">
             <NotificationBellServer userId={principal.id} />

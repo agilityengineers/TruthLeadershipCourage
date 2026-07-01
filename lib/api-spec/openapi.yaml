@@ -698,6 +698,103 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/AnalyticsData" }
 
+  # ------------------------------------------------------------- admin users
+  /admin/users:
+    get:
+      operationId: listUsers
+      tags: [admin]
+      responses:
+        "200":
+          description: Users
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/AdminUserRow" }
+    post:
+      operationId: createUser
+      tags: [admin]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreateUserRequest" }
+      responses:
+        "200":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/InviteResult" }
+  /admin/users/{id}:
+    patch:
+      operationId: updateUser
+      tags: [admin]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/UpdateUserRequest" }
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Ok" }
+    delete:
+      operationId: deleteUser
+      tags: [admin]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Ok" }
+  /admin/users/{id}/invite:
+    post:
+      operationId: regenerateInvite
+      tags: [admin]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: Invite issued
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/InviteResult" }
+  /invite/{token}:
+    get:
+      operationId: getInvite
+      tags: [session]
+      parameters:
+        - { name: token, in: path, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: Invite info
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/InviteInfo" }
+  /invite/{token}/accept:
+    post:
+      operationId: acceptInvite
+      tags: [session]
+      parameters:
+        - { name: token, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AcceptInviteRequest" }
+      responses:
+        "200":
+          description: Accepted
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Ok" }
+
   # ----------------------------------------------------------------- company
   /company/overview:
     get:
@@ -1599,6 +1696,58 @@ components:
         companyId: { type: string }
         cohortId: { type: string }
         quantity: { type: integer }
+    AdminUserRow:
+      type: object
+      required: [id, email, role, status, hasPassword, createdAt]
+      properties:
+        id: { type: string }
+        name: { type: string, nullable: true }
+        email: { type: string }
+        role: { $ref: "#/components/schemas/Role" }
+        status: { type: string }
+        title: { type: string, nullable: true }
+        companyId: { type: string, nullable: true }
+        companyName: { type: string, nullable: true }
+        hasPassword: { type: boolean }
+        createdAt: { type: string, format: date-time }
+    CreateUserRequest:
+      type: object
+      required: [email, role]
+      properties:
+        name: { type: string }
+        email: { type: string }
+        role: { $ref: "#/components/schemas/Role" }
+        title: { type: string }
+        companyId: { type: string, nullable: true }
+        mode: { type: string, enum: [invite, password] }
+        password: { type: string }
+    UpdateUserRequest:
+      type: object
+      properties:
+        name: { type: string, nullable: true }
+        title: { type: string, nullable: true }
+        role: { $ref: "#/components/schemas/Role" }
+        status: { type: string }
+        companyId: { type: string, nullable: true }
+    InviteResult:
+      type: object
+      required: [ok, id]
+      properties:
+        ok: { type: boolean }
+        id: { type: string }
+        inviteToken: { type: string, nullable: true }
+        invitePath: { type: string, nullable: true }
+    InviteInfo:
+      type: object
+      required: [email]
+      properties:
+        email: { type: string }
+        name: { type: string, nullable: true }
+    AcceptInviteRequest:
+      type: object
+      required: [password]
+      properties:
+        password: { type: string }
     AdminCohortRow:
       type: object
       required: [id, name, startDate, endDate, price, currency, capacity, status, isPrivate, enrollmentCount]

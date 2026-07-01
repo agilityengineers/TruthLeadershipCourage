@@ -18,6 +18,7 @@ export type Capability =
   | "billing:manage"
   | "email:send"
   | "analytics:view"
+  | "user:manage" // create/edit/deactivate/delete platform users
   | "admin:all";
 
 const MATRIX: Record<Role, Capability[]> = {
@@ -44,6 +45,7 @@ const MATRIX: Record<Role, Capability[]> = {
     "billing:manage",
     "email:send",
     "analytics:view",
+    "user:manage",
   ],
   SUPER_ADMIN: ["admin:all"],
 };

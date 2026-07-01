@@ -1017,6 +1017,100 @@ export const GetAnalyticsResponse = zod.object({
 })
 
 
+export const ListUsersResponseItem = zod.object({
+  "id": zod.string(),
+  "name": zod.string().nullish(),
+  "email": zod.string(),
+  "role": zod.enum(['PARTICIPANT', 'COMPANY_VIEWER', 'TRAINER', 'ADMIN', 'SUPER_ADMIN']),
+  "status": zod.string(),
+  "title": zod.string().nullish(),
+  "companyId": zod.string().nullish(),
+  "companyName": zod.string().nullish(),
+  "hasPassword": zod.boolean(),
+  "createdAt": zod.coerce.date()
+})
+export const ListUsersResponse = zod.array(ListUsersResponseItem)
+
+
+export const CreateUserBody = zod.object({
+  "name": zod.string().optional(),
+  "email": zod.string(),
+  "role": zod.enum(['PARTICIPANT', 'COMPANY_VIEWER', 'TRAINER', 'ADMIN', 'SUPER_ADMIN']),
+  "title": zod.string().optional(),
+  "companyId": zod.string().nullish(),
+  "mode": zod.enum(['invite', 'password']).optional(),
+  "password": zod.string().optional()
+})
+
+export const CreateUserResponse = zod.object({
+  "ok": zod.boolean(),
+  "id": zod.string(),
+  "inviteToken": zod.string().nullish(),
+  "invitePath": zod.string().nullish()
+})
+
+
+export const UpdateUserParams = zod.object({
+  "id": zod.coerce.string()
+})
+
+export const UpdateUserBody = zod.object({
+  "name": zod.string().nullish(),
+  "title": zod.string().nullish(),
+  "role": zod.enum(['PARTICIPANT', 'COMPANY_VIEWER', 'TRAINER', 'ADMIN', 'SUPER_ADMIN']).optional(),
+  "status": zod.string().optional(),
+  "companyId": zod.string().nullish()
+})
+
+export const UpdateUserResponse = zod.object({
+  "ok": zod.boolean()
+})
+
+
+export const DeleteUserParams = zod.object({
+  "id": zod.coerce.string()
+})
+
+export const DeleteUserResponse = zod.object({
+  "ok": zod.boolean()
+})
+
+
+export const RegenerateInviteParams = zod.object({
+  "id": zod.coerce.string()
+})
+
+export const RegenerateInviteResponse = zod.object({
+  "ok": zod.boolean(),
+  "id": zod.string(),
+  "inviteToken": zod.string().nullish(),
+  "invitePath": zod.string().nullish()
+})
+
+
+export const GetInviteParams = zod.object({
+  "token": zod.coerce.string()
+})
+
+export const GetInviteResponse = zod.object({
+  "email": zod.string(),
+  "name": zod.string().nullish()
+})
+
+
+export const AcceptInviteParams = zod.object({
+  "token": zod.coerce.string()
+})
+
+export const AcceptInviteBody = zod.object({
+  "password": zod.string()
+})
+
+export const AcceptInviteResponse = zod.object({
+  "ok": zod.boolean()
+})
+
+
 export const GetCompanyOverviewResponse = zod.object({
   "company": zod.union([zod.object({
   "id": zod.string(),

@@ -636,6 +636,61 @@ export interface PurchaseSeatsRequest {
   quantity: number;
 }
 
+export interface AdminUserRow {
+  id: string;
+  name?: string | null;
+  email: string;
+  role: Role;
+  status: string;
+  title?: string | null;
+  companyId?: string | null;
+  companyName?: string | null;
+  hasPassword: boolean;
+  createdAt: string;
+}
+
+export type CreateUserRequestMode = typeof CreateUserRequestMode[keyof typeof CreateUserRequestMode];
+
+
+export const CreateUserRequestMode = {
+  invite: 'invite',
+  password: 'password',
+} as const;
+
+export interface CreateUserRequest {
+  name?: string;
+  email: string;
+  role: Role;
+  title?: string;
+  companyId?: string | null;
+  mode?: CreateUserRequestMode;
+  password?: string;
+}
+
+export interface UpdateUserRequest {
+  name?: string | null;
+  title?: string | null;
+  role?: Role;
+  status?: string;
+  companyId?: string | null;
+}
+
+export interface InviteResult {
+  ok: boolean;
+  id: string;
+  inviteToken?: string | null;
+  invitePath?: string | null;
+}
+
+export interface InviteInfo {
+  email: string;
+  name?: string | null;
+}
+
+export interface AcceptInviteRequest {
+  password: string;
+}
+
 export interface AdminCohortRow {
   id: string;
   name: string;
