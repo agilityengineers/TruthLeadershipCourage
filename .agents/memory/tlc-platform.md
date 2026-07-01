@@ -28,3 +28,13 @@ If a file was deleted by an earlier `git rm` during a merge, recover its post-PR
 `git show <commit>:<oldpath>`. Cross-page nav anchors: on landing use bare `#hash` (scroll in place);
 off-landing use `${import.meta.env.BASE_URL}#hash` so it routes home then scrolls (base-path safe).
 **Why:** keeps the preview faithful to the PR while respecting Vite/wouter conventions and base path.
+
+**The Drizzle backend is non-functional immediately after a merge — it needs manual bring-up.**
+Merging the backend PR only lands code; the Postgres DB starts with ZERO tables and the running
+api-server is a stale build. To make it work: (1) `pnpm install` (workspace deps like `drizzle-orm`
+may be unlinked, causing `drizzle-kit` "please install required packages: 'drizzle-orm'"),
+(2) `pnpm --filter @workspace/db run push-force` (non-interactive schema push to empty DB),
+(3) `pnpm --filter @workspace/db run seed` (idempotent, seeds demo content with stable IDs),
+(4) `restart_workflow("artifacts/api-server: API Server")` so it rebuilds with the current routes.
+**Why:** without this the frontend gets 404s / empty data even though all backend code is present.
+Demo login is shared password `password123`; sessions/consent/etc. persist as rows in Postgres.
