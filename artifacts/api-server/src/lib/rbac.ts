@@ -1,5 +1,10 @@
 /** Roles × capabilities, ported from the app's lib/rbac.ts. */
-export type Role = "PARTICIPANT" | "COMPANY_VIEWER" | "TRAINER" | "ADMIN" | "SUPER_ADMIN";
+export type Role =
+  | "PARTICIPANT"
+  | "COMPANY_VIEWER"
+  | "TRAINER"
+  | "ADMIN"
+  | "SUPER_ADMIN";
 
 export type Capability =
   | "portal:view"
@@ -15,12 +20,20 @@ export type Capability =
   | "content:manage"
   | "email:send"
   | "analytics:view"
+  | "user:manage"
   | "admin:all";
 
 const MATRIX: Record<Role, Capability[]> = {
   PARTICIPANT: ["portal:view", "chat:participate"],
   COMPANY_VIEWER: ["company:viewProgress", "analytics:view"],
-  TRAINER: ["chat:participate", "resource:manage", "event:manage", "email:send", "company:viewProgress", "analytics:view"],
+  TRAINER: [
+    "chat:participate",
+    "resource:manage",
+    "event:manage",
+    "email:send",
+    "company:viewProgress",
+    "analytics:view",
+  ],
   ADMIN: [
     "portal:view",
     "company:viewProgress",
@@ -35,6 +48,7 @@ const MATRIX: Record<Role, Capability[]> = {
     "content:manage",
     "email:send",
     "analytics:view",
+    "user:manage",
   ],
   SUPER_ADMIN: ["admin:all"],
 };

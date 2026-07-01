@@ -17,6 +17,7 @@ import CompanyLayout from "@/app/company/layout";
 // Public / marketing pages
 import LandingPage from "@/app/page";
 import LoginPage from "@/app/login/page";
+import InvitePage from "@/app/invite/page";
 import AssessmentPage from "@/app/assessment/page";
 import EnrollPage from "@/app/enroll/page";
 import EnrollConfirmationPage from "@/app/enroll/confirmation/page";
@@ -48,6 +49,7 @@ import AdminContent from "@/app/admin/content/page";
 import AdminParticipants from "@/app/admin/participants/page";
 import AdminResources from "@/app/admin/resources/page";
 import AdminTrainers from "@/app/admin/trainers/page";
+import AdminUsers from "@/app/admin/users/page";
 
 // Trainer pages
 import TrainerHome from "@/app/trainer/page";
@@ -107,6 +109,7 @@ function Router() {
       {/* Public */}
       <Route path="/" component={LandingPage} />
       <Route path="/login" component={LoginPage} />
+      <Route path="/invite" component={InvitePage} />
       <Route path="/assessment" component={AssessmentPage} />
       <Route path="/enroll" component={EnrollPage} />
       <Route path="/enroll/confirmation" component={EnrollConfirmationPage} />
@@ -140,6 +143,7 @@ function Router() {
         ["/admin/participants", AdminParticipants],
         ["/admin/resources", AdminResources],
         ["/admin/trainers", AdminTrainers],
+        ["/admin/users", AdminUsers],
       ])}
 
       {/* Trainer */}
