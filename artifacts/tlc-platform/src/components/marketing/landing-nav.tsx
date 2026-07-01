@@ -25,6 +25,7 @@ export function LandingNav() {
             width={132}
             height={132}
             className="h-[88px] w-[88px] object-contain lg:h-[112px] lg:w-[112px]"
+            style={{ mixBlendMode: "multiply" }}
           />
         </Link>
         <nav className="ml-6 hidden gap-6 md:flex">
