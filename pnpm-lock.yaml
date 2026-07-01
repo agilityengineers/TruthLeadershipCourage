@@ -172,6 +172,9 @@ importers:
       '@workspace/db':
         specifier: workspace:*
         version: link:../../lib/db
+      '@workspace/site-content':
+        specifier: workspace:*
+        version: link:../../lib/site-content
       cookie-parser:
         specifier: ^1.4.7
         version: 1.4.7
