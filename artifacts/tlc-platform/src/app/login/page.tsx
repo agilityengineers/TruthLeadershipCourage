@@ -3,11 +3,17 @@ import { Logo } from "@/components/brand/logo";
 import { LoginForm } from "./login-form";
 import { ssoLoginAction } from "@/server/auth-actions";
 import { Button } from "@/components/ui/button";
+import { usePageContent } from "@/lib/site-content";
 
 export default function LoginPage() {
   const params = new URLSearchParams(useSearch());
   const callbackUrl = params.get("callbackUrl") ?? undefined;
   const ssoEnabled = false;
+  // Editable intro copy; falls back to defaults so the form never waits on it.
+  const intro = (usePageContent("login").content("login.intro") ?? {
+    heading: "Welcome back",
+    body: "Sign in to your TLC portal.",
+  }) as { heading: string; body: string };
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-soft-3 px-5 py-12">
@@ -16,8 +22,8 @@ export default function LoginPage() {
           <Logo size={44} withWordmark subtitle="TLC Platform" href="/" />
         </div>
         <div className="rounded-[18px] border border-hair-1 bg-white p-8 shadow-card">
-          <h1 className="font-display text-[26px] text-ink">Welcome back</h1>
-          <p className="mt-1 text-sm text-muted">Sign in to your TLC portal.</p>
+          <h1 className="font-display text-[26px] text-ink">{intro.heading}</h1>
+          <p className="mt-1 text-sm text-muted">{intro.body}</p>
           <LoginForm callbackUrl={callbackUrl} />
           {ssoEnabled && (
             <>

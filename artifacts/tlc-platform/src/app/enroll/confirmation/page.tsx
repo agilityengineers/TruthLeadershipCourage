@@ -2,11 +2,26 @@ import { Link, useSearch } from "wouter";
 import { Logo } from "@/components/brand/logo";
 import { Button } from "@/components/ui/button";
 import { CheckCircle2, Clock } from "lucide-react";
+import { usePageContent } from "@/lib/site-content";
 
 export default function ConfirmationPage() {
   const params = new URLSearchParams(useSearch());
   const status = params.get("status") ?? undefined;
   const waitlisted = status === "WAITLISTED";
+  const c = (usePageContent("confirmation").content("confirmation.main") ?? {
+    heading: "Your seat is reserved.",
+    body: "Thank you for answering the call. We'll email you to confirm payment and shipping. Once payment is complete, your portal unlocks and your workbook ships before kickoff.",
+    waitlistHeading: "You're on the waitlist.",
+    waitlistBody: "This cohort is currently full. We'll email you the moment a seat opens — no further action needed.",
+    disclaimer:
+      "Payment is processed securely off-site (Stripe / ThriveCart). The TLC platform never collects card details.",
+  }) as {
+    heading: string;
+    body: string;
+    waitlistHeading: string;
+    waitlistBody: string;
+    disclaimer: string;
+  };
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-soft-3 px-5 text-center">
@@ -18,12 +33,10 @@ export default function ConfirmationPage() {
           <CheckCircle2 className="mx-auto h-12 w-12 text-success" />
         )}
         <h1 className="mt-5 font-display text-[clamp(26px,3.4vw,36px)] text-ink">
-          {waitlisted ? "You're on the waitlist." : "Your seat is reserved."}
+          {waitlisted ? c.waitlistHeading : c.heading}
         </h1>
         <p className="mt-3 text-[16px] leading-relaxed text-muted">
-          {waitlisted
-            ? "This cohort is currently full. We'll email you the moment a seat opens — no further action needed."
-            : "Thank you for answering the call. We'll email you to confirm payment and shipping. Once payment is complete, your portal unlocks and your workbook ships before kickoff."}
+          {waitlisted ? c.waitlistBody : c.body}
         </p>
         <div className="mt-7 flex flex-wrap items-center justify-center gap-3.5">
           <Button asChild size="lg">
@@ -34,10 +47,7 @@ export default function ConfirmationPage() {
           </Button>
         </div>
       </div>
-      <p className="mt-5 max-w-[36em] text-[12.5px] leading-relaxed text-muted-2">
-        Payment is processed securely off-site (Stripe / ThriveCart). The TLC platform never collects
-        card details.
-      </p>
+      <p className="mt-5 max-w-[36em] text-[12.5px] leading-relaxed text-muted-2">{c.disclaimer}</p>
     </div>
   );
 }

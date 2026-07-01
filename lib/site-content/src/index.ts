@@ -116,8 +116,8 @@ export const SECTIONS: SectionDef[] = [
       links: [
         { label: "TLC for Leaders", href: "/" },
         { label: "TLC for Organizations", href: "/organizations" },
-        { label: "About Tri", href: "/#guide" },
-        { label: "Stories", href: "/#stories" },
+        { label: "About Tri", href: "#guide" },
+        { label: "Stories", href: "#stories" },
       ],
       bookCall: { label: "Book a call", href: "/book-a-call" },
       cta: { label: "Start the Assessment", href: "/assessment" },
@@ -513,9 +513,9 @@ export const SECTIONS: SectionDef[] = [
       primaryCta: { label: "Start the Assessment →", href: "/assessment" },
       secondaryCta: { label: "Book a call with Tri", href: "/book-a-call" },
       faqs: [
-        { q: "What is the time commitment?", a: "Two hours a week of live virtual sessions while each session runs, across six months — plus an independent intersession and two private 1:1 coaching sessions. Built to fit a working leader's life, not to add a second job." },
-        { q: "Who is this for?", a: "Advancing leaders through the C-Suite who want to lead through people — not around them. It has nothing to do with how senior you are. Cohorts can also be run privately for a single company's team." },
-        { q: "I've done leadership training before. How is this different?", a: "Most training adds to what you do. TLC works on who you are underneath it — the part that decides how you lead under pressure. That's why it holds when the old patterns would normally return." },
+        { q: "What is the time commitment?", a: "Live virtual sessions of about two hours a week across six months — built around a working leader's schedule — plus an independent intersession and two private 1:1 coaching sessions." },
+        { q: "Who is this for?", a: "Advancing leaders on the path to the C-Suite who want to lead through people — not around them. Cohorts can also be run privately for a single company's leadership team." },
+        { q: "I've done leadership training before. How is this different?", a: "Most training adds tools that fade under pressure. TLC builds the leader underneath the tools — the 77% of how you show up that no tactic alone can produce — so it holds in real moments, not just in the room." },
         { q: "What happens after I start the assessment?", a: "You'll see your personalized leadership snapshot and how TLC maps to it, then a short path to book a fit conversation and, if it's a match, reserve your seat in an upcoming cohort." },
       ],
     },
@@ -861,7 +861,7 @@ export const SECTIONS: SectionDef[] = [
     ],
     default: {
       heading: "Let's talk about your leadership.",
-      body: "Book a 15-minute call with Tri to see whether the next cohort is the right fit. Most leaders start with the two-minute assessment first.",
+      body: "Book a 15-minute fit conversation with Tri to see whether TLC is the right fit for you or your team. Most leaders start with the two-minute assessment first.",
       primaryCta: { label: "Start the Assessment →", href: "/assessment" },
       secondaryCta: { label: "Back to home", href: "/" },
     },
