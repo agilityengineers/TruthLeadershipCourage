@@ -12,6 +12,7 @@ import emailRouter from "./email";
 import trainerRouter from "./trainer";
 import adminRouter from "./admin";
 import companyRouter from "./company";
+import contentRouter from "./content";
 import miscRouter from "./misc";
 
 const router: IRouter = Router();
@@ -29,6 +30,7 @@ router.use(emailRouter);
 router.use(trainerRouter);
 router.use(adminRouter);
 router.use(companyRouter);
+router.use(contentRouter);
 router.use(miscRouter);
 
 export default router;

@@ -722,6 +722,113 @@ paths:
                 type: array
                 items: { $ref: "#/components/schemas/CompanyPersonRow" }
 
+  /content/page/{page}:
+    get:
+      operationId: getPublicContent
+      tags: [content]
+      parameters:
+        - { name: page, in: path, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: Visible sections for a public page (plus globals)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PublicContent" }
+
+  /admin/content:
+    get:
+      operationId: getAdminContent
+      tags: [content]
+      responses:
+        "200":
+          description: All editable sections with field descriptors
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminContent" }
+
+  /admin/content/sections/{key}:
+    post:
+      operationId: updateSectionContent
+      tags: [content]
+      parameters:
+        - { name: key, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/UpdateSectionRequest" }
+      responses:
+        "200":
+          description: Saved
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Ok" }
+
+  /admin/content/sections/{key}/visibility:
+    post:
+      operationId: setSectionVisibility
+      tags: [content]
+      parameters:
+        - { name: key, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/SetVisibilityRequest" }
+      responses:
+        "200":
+          description: Toggled
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Ok" }
+
+  /admin/content/sections/{key}/reorder:
+    post:
+      operationId: reorderSection
+      tags: [content]
+      parameters:
+        - { name: key, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ReorderSectionRequest" }
+      responses:
+        "200":
+          description: Reordered
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Ok" }
+
+  /admin/content/sections/{key}/reset:
+    post:
+      operationId: resetSection
+      tags: [content]
+      parameters:
+        - { name: key, in: path, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: Reset to original
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Ok" }
+
+  /admin/content/upload:
+    post:
+      operationId: uploadContentImage
+      tags: [content]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/UploadImageRequest" }
+      responses:
+        "200":
+          description: Uploaded
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/UploadImageResult" }
+
 components:
   schemas:
     HealthStatus:
@@ -1643,3 +1750,66 @@ components:
         enrollments:
           type: array
           items: { $ref: "#/components/schemas/CompanyPersonEnrollment" }
+    PublicSection:
+      type: object
+      required: [key, content]
+      properties:
+        key: { type: string }
+        content: { type: object, additionalProperties: true }
+    PublicContent:
+      type: object
+      required: [sections]
+      properties:
+        sections:
+          type: array
+          items: { $ref: "#/components/schemas/PublicSection" }
+    AdminSection:
+      type: object
+      required: [key, page, group, label, description, core, order, visible, fields, content]
+      properties:
+        key: { type: string }
+        page: { type: string }
+        group: { type: string }
+        label: { type: string }
+        description: { type: string }
+        core: { type: boolean }
+        order: { type: integer }
+        visible: { type: boolean }
+        fields:
+          type: array
+          items: { type: object, additionalProperties: true }
+        content: { type: object, additionalProperties: true }
+    AdminContent:
+      type: object
+      required: [sections, uploadEnabled]
+      properties:
+        sections:
+          type: array
+          items: { $ref: "#/components/schemas/AdminSection" }
+        uploadEnabled: { type: boolean }
+    UpdateSectionRequest:
+      type: object
+      required: [content]
+      properties:
+        content: { type: object, additionalProperties: true }
+    SetVisibilityRequest:
+      type: object
+      required: [visible]
+      properties:
+        visible: { type: boolean }
+    ReorderSectionRequest:
+      type: object
+      required: [direction]
+      properties:
+        direction: { type: string, enum: [up, down] }
+    UploadImageRequest:
+      type: object
+      required: [contentType, dataBase64]
+      properties:
+        contentType: { type: string }
+        dataBase64: { type: string }
+    UploadImageResult:
+      type: object
+      required: [url]
+      properties:
+        url: { type: string }

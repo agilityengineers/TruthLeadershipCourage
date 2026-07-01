@@ -755,6 +755,70 @@ export interface CompanyPersonRow {
   enrollments: CompanyPersonEnrollment[];
 }
 
+export type PublicSectionContent = { [key: string]: unknown };
+
+export interface PublicSection {
+  key: string;
+  content: PublicSectionContent;
+}
+
+export interface PublicContent {
+  sections: PublicSection[];
+}
+
+export type AdminSectionFieldsItem = { [key: string]: unknown };
+
+export type AdminSectionContent = { [key: string]: unknown };
+
+export interface AdminSection {
+  key: string;
+  page: string;
+  group: string;
+  label: string;
+  description: string;
+  core: boolean;
+  order: number;
+  visible: boolean;
+  fields: AdminSectionFieldsItem[];
+  content: AdminSectionContent;
+}
+
+export interface AdminContent {
+  sections: AdminSection[];
+  uploadEnabled: boolean;
+}
+
+export type UpdateSectionRequestContent = { [key: string]: unknown };
+
+export interface UpdateSectionRequest {
+  content: UpdateSectionRequestContent;
+}
+
+export interface SetVisibilityRequest {
+  visible: boolean;
+}
+
+export type ReorderSectionRequestDirection = typeof ReorderSectionRequestDirection[keyof typeof ReorderSectionRequestDirection];
+
+
+export const ReorderSectionRequestDirection = {
+  up: 'up',
+  down: 'down',
+} as const;
+
+export interface ReorderSectionRequest {
+  direction: ReorderSectionRequestDirection;
+}
+
+export interface UploadImageRequest {
+  contentType: string;
+  dataBase64: string;
+}
+
+export interface UploadImageResult {
+  url: string;
+}
+
 export type GetThreadParams = {
 oversight?: boolean;
 };

@@ -12,6 +12,7 @@ export type Capability =
   | "trainer:manage"
   | "assessment:manage"
   | "billing:manage"
+  | "content:manage"
   | "email:send"
   | "analytics:view"
   | "admin:all";
@@ -31,6 +32,7 @@ const MATRIX: Record<Role, Capability[]> = {
     "trainer:manage",
     "assessment:manage",
     "billing:manage",
+    "content:manage",
     "email:send",
     "analytics:view",
   ],

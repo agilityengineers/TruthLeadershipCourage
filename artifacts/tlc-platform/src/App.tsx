@@ -44,6 +44,7 @@ import AdminBilling from "@/app/admin/billing/page";
 import AdminCohorts from "@/app/admin/cohorts/page";
 import AdminCommunications from "@/app/admin/communications/page";
 import AdminCompanies from "@/app/admin/companies/page";
+import AdminContent from "@/app/admin/content/page";
 import AdminParticipants from "@/app/admin/participants/page";
 import AdminResources from "@/app/admin/resources/page";
 import AdminTrainers from "@/app/admin/trainers/page";
@@ -135,6 +136,7 @@ function Router() {
         ["/admin/cohorts", AdminCohorts],
         ["/admin/communications", AdminCommunications],
         ["/admin/companies", AdminCompanies],
+        ["/admin/content", AdminContent],
         ["/admin/participants", AdminParticipants],
         ["/admin/resources", AdminResources],
         ["/admin/trainers", AdminTrainers],

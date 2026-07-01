@@ -1046,3 +1046,90 @@ export const ListCompanyPeopleResponseItem = zod.object({
 export const ListCompanyPeopleResponse = zod.array(ListCompanyPeopleResponseItem)
 
 
+export const GetPublicContentParams = zod.object({
+  "page": zod.coerce.string()
+})
+
+export const GetPublicContentResponse = zod.object({
+  "sections": zod.array(zod.object({
+  "key": zod.string(),
+  "content": zod.record(zod.string(), zod.unknown())
+}))
+})
+
+
+export const GetAdminContentResponse = zod.object({
+  "sections": zod.array(zod.object({
+  "key": zod.string(),
+  "page": zod.string(),
+  "group": zod.string(),
+  "label": zod.string(),
+  "description": zod.string(),
+  "core": zod.boolean(),
+  "order": zod.number(),
+  "visible": zod.boolean(),
+  "fields": zod.array(zod.record(zod.string(), zod.unknown())),
+  "content": zod.record(zod.string(), zod.unknown())
+})),
+  "uploadEnabled": zod.boolean()
+})
+
+
+export const UpdateSectionContentParams = zod.object({
+  "key": zod.coerce.string()
+})
+
+export const UpdateSectionContentBody = zod.object({
+  "content": zod.record(zod.string(), zod.unknown())
+})
+
+export const UpdateSectionContentResponse = zod.object({
+  "ok": zod.boolean()
+})
+
+
+export const SetSectionVisibilityParams = zod.object({
+  "key": zod.coerce.string()
+})
+
+export const SetSectionVisibilityBody = zod.object({
+  "visible": zod.boolean()
+})
+
+export const SetSectionVisibilityResponse = zod.object({
+  "ok": zod.boolean()
+})
+
+
+export const ReorderSectionParams = zod.object({
+  "key": zod.coerce.string()
+})
+
+export const ReorderSectionBody = zod.object({
+  "direction": zod.enum(['up', 'down'])
+})
+
+export const ReorderSectionResponse = zod.object({
+  "ok": zod.boolean()
+})
+
+
+export const ResetSectionParams = zod.object({
+  "key": zod.coerce.string()
+})
+
+export const ResetSectionResponse = zod.object({
+  "ok": zod.boolean()
+})
+
+
+export const UploadContentImageBody = zod.object({
+  "contentType": zod.string(),
+  "dataBase64": zod.string()
+})
+
+export const UploadContentImageResponse = zod.object({
+  "url": zod.string()
+})
+
+

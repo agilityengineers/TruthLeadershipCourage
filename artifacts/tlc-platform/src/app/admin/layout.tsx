@@ -15,6 +15,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { label: "Participants", href: "/admin/participants" },
     { label: "Trainers", href: "/admin/trainers" },
     { label: "Assessment", href: "/admin/assessment" },
+    { label: "Site Content", href: "/admin/content" },
     { label: "Resources & Events", href: "/admin/resources" },
     { label: "Analytics", href: "/admin/analytics" },
     { label: "Communications", href: "/admin/communications" },

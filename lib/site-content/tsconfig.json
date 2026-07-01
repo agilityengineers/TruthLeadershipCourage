@@ -8,6 +8,5 @@
     "rootDir": "src",
     "types": ["node"]
   },
-  "references": [{ "path": "../site-content" }],
   "include": ["src"]
 }

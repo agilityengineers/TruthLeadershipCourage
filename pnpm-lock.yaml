@@ -172,6 +172,9 @@ importers:
       '@workspace/db':
         specifier: workspace:*
         version: link:../../lib/db
+      '@workspace/site-content':
+        specifier: workspace:*
+        version: link:../../lib/site-content
       cookie-parser:
         specifier: ^1.4.7
         version: 1.4.7
@@ -611,6 +614,9 @@ importers:
 
   lib/db:
     dependencies:
+      '@workspace/site-content':
+        specifier: workspace:*
+        version: link:../site-content
       drizzle-orm:
         specifier: 'catalog:'
         version: 0.45.2(@types/pg@8.20.0)(pg@8.22.0)
@@ -636,6 +642,16 @@ importers:
       tsx:
         specifier: 'catalog:'
         version: 4.22.4
+
+  lib/site-content:
+    dependencies:
+      zod:
+        specifier: 'catalog:'
+        version: 3.25.76
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 25.9.4
 
   scripts:
     devDependencies:
