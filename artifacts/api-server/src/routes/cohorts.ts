@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { db, schema, eq, and, inArray, asc, count } from "../lib/db";
+import { db, schema, eq, count } from "../lib/db";
 import { asyncHandler } from "../lib/http";
 
 const router: IRouter = Router();
@@ -10,49 +10,10 @@ function seatsLeft(capacity: number, enrolled: number): number | null {
   return capacity > 0 ? Math.max(0, capacity - enrolled) : null;
 }
 
-/** Public: cohorts open for enrollment, for the marketing "Upcoming cohorts" index. */
-router.get(
-  "/cohorts",
-  asyncHandler(async (_req, res) => {
-    const cohorts = await db.query.cohort.findMany({
-      where: and(
-        eq(schema.cohort.isPrivate, false),
-        inArray(schema.cohort.status, ["ENROLLING", "RUNNING"]),
-      ),
-      orderBy: [asc(schema.cohort.startDate)],
-      with: { trainer: { columns: { name: true } } },
-    });
-    const counts = await db
-      .select({ cohortId: schema.enrollment.cohortId, n: count() })
-      .from(schema.enrollment)
-      .groupBy(schema.enrollment.cohortId);
-    const countMap = new Map(counts.map((c) => [c.cohortId, Number(c.n)]));
-
-    res.json(
-      cohorts.map((c) => ({
-        id: c.id,
-        slug: c.slug,
-        name: c.name,
-        tagline: c.tagline,
-        startDate: c.startDate,
-        endDate: c.endDate,
-        sessionDay: c.sessionDay,
-        sessionTime: c.sessionTime,
-        timezone: c.timezone,
-        price: c.price,
-        currency: c.currency,
-        status: c.status,
-        format: c.format,
-        location: c.location,
-        heroImageUrl: c.heroImageUrl,
-        trainerName: c.trainer?.name ?? null,
-        seatsLeft: seatsLeft(c.capacity, countMap.get(c.id) ?? 0),
-      })),
-    );
-  }),
-);
-
-/** Public: a single cohort's landing detail, addressed by slug. */
+/**
+ * Public: a single cohort's landing detail, addressed by slug. The list of
+ * open cohorts is served separately by GET /cohorts/upcoming (enrollment route).
+ */
 router.get(
   "/cohorts/:slug",
   asyncHandler(async (req, res) => {

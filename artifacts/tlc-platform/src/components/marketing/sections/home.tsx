@@ -316,7 +316,13 @@ export function HomeGlance({ content }: { content: SC }) {
             </div>
           ))}
         </div>
-        <p className="mt-4 text-[13px] text-muted-2">{c.footnote}</p>
+        <Link
+          href="/cohorts"
+          className="mt-4 inline-flex items-center gap-1 text-[13px] font-medium text-eq transition-colors hover:text-indigo hover:underline"
+        >
+          {c.footnote}
+          <span aria-hidden>→</span>
+        </Link>
       </div>
     </div>
   );

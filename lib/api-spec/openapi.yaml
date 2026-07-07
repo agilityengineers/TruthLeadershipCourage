@@ -114,6 +114,16 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/EnrollOptions" }
+  /cohorts/upcoming:
+    get:
+      operationId: getUpcomingCohorts
+      tags: [enrollment]
+      responses:
+        "200":
+          description: Public upcoming cohorts
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/UpcomingCohorts" }
   /enrollments:
     post:
       operationId: createEnrollment
@@ -647,18 +657,6 @@ paths:
                 required: [error]
                 properties:
                   error: { type: string }
-  /cohorts:
-    get:
-      operationId: listPublicCohorts
-      tags: [public]
-      responses:
-        "200":
-          description: Publicly listed cohorts open for enrollment
-          content:
-            application/json:
-              schema:
-                type: array
-                items: { $ref: "#/components/schemas/PublicCohortCard" }
   /cohorts/{slug}:
     get:
       operationId: getPublicCohort
@@ -1184,6 +1182,29 @@ components:
         companies:
           type: array
           items: { $ref: "#/components/schemas/CompanyLite" }
+    UpcomingCohort:
+      type: object
+      required: [id, name, slug, startDate, endDate, price, currency, seatsLeft, status]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        slug: { type: string }
+        startDate: { type: string, format: date-time }
+        endDate: { type: string, format: date-time }
+        sessionDay: { type: string, nullable: true }
+        sessionTime: { type: string, nullable: true }
+        timezone: { type: string, nullable: true }
+        price: { type: integer }
+        currency: { type: string }
+        seatsLeft: { type: integer, nullable: true }
+        status: { type: string }
+    UpcomingCohorts:
+      type: object
+      required: [cohorts]
+      properties:
+        cohorts:
+          type: array
+          items: { $ref: "#/components/schemas/UpcomingCohort" }
     ShippingAddress:
       type: object
       required: [line1, city, state, postal]
@@ -1945,27 +1966,6 @@ components:
             properties:
               id: { type: string }
               name: { type: string }
-    PublicCohortCard:
-      type: object
-      required: [id, slug, name, startDate, endDate, price, currency, status, format, seatsLeft]
-      properties:
-        id: { type: string }
-        slug: { type: string }
-        name: { type: string }
-        tagline: { type: string, nullable: true }
-        startDate: { type: string, format: date-time }
-        endDate: { type: string, format: date-time }
-        sessionDay: { type: string, nullable: true }
-        sessionTime: { type: string, nullable: true }
-        timezone: { type: string, nullable: true }
-        price: { type: integer }
-        currency: { type: string }
-        status: { type: string }
-        format: { type: string }
-        location: { type: string, nullable: true }
-        heroImageUrl: { type: string, nullable: true }
-        trainerName: { type: string, nullable: true }
-        seatsLeft: { type: integer, nullable: true }
     PublicCohort:
       type: object
       required:

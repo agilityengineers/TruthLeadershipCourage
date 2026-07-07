@@ -67,7 +67,6 @@ import type {
   Ok,
   ParticipantContext,
   PublicCohort,
-  PublicCohortCard,
   PublicContent,
   PurchaseSeatsRequest,
   RefundRequest,
@@ -90,6 +89,7 @@ import type {
   TrainerParticipantDetail,
   TrainerParticipantRow,
   TrainerResourcesData,
+  UpcomingCohorts,
   UpdateCohortRequest,
   UpdateQuestionRequest,
   UpdateSectionRequest,
@@ -595,6 +595,77 @@ export function useGetEnrollOptions<TData = Awaited<ReturnType<typeof getEnrollO
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
   const queryOptions = getGetEnrollOptionsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetUpcomingCohortsUrl = () => {
+
+
+
+
+  return `/api/cohorts/upcoming`
+}
+
+export const getUpcomingCohorts = async ( options?: RequestInit): Promise<UpcomingCohorts> => {
+
+  return customFetch<UpcomingCohorts>(getGetUpcomingCohortsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetUpcomingCohortsQueryKey = () => {
+    return [
+    `/api/cohorts/upcoming`
+    ] as const;
+    }
+
+
+export const getGetUpcomingCohortsQueryOptions = <TData = Awaited<ReturnType<typeof getUpcomingCohorts>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getUpcomingCohorts>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetUpcomingCohortsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getUpcomingCohorts>>> = ({ signal }) => getUpcomingCohorts({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getUpcomingCohorts>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetUpcomingCohortsQueryResult = NonNullable<Awaited<ReturnType<typeof getUpcomingCohorts>>>
+export type GetUpcomingCohortsQueryError = ErrorType<unknown>
+
+
+
+export function useGetUpcomingCohorts<TData = Awaited<ReturnType<typeof getUpcomingCohorts>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getUpcomingCohorts>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetUpcomingCohortsQueryOptions(options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 
@@ -3254,77 +3325,6 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       > => {
       return useMutation(getDeleteCohortMutationOptions(options));
     }
-
-export const getListPublicCohortsUrl = () => {
-
-
-
-
-  return `/api/cohorts`
-}
-
-export const listPublicCohorts = async ( options?: RequestInit): Promise<PublicCohortCard[]> => {
-
-  return customFetch<PublicCohortCard[]>(getListPublicCohortsUrl(),
-  {
-    ...options,
-    method: 'GET'
-
-
-  }
-);}
-
-
-
-
-
-export const getListPublicCohortsQueryKey = () => {
-    return [
-    `/api/cohorts`
-    ] as const;
-    }
-
-
-export const getListPublicCohortsQueryOptions = <TData = Awaited<ReturnType<typeof listPublicCohorts>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listPublicCohorts>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
-) => {
-
-const {query: queryOptions, request: requestOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getListPublicCohortsQueryKey();
-
-
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof listPublicCohorts>>> = ({ signal }) => listPublicCohorts({ signal, ...requestOptions });
-
-
-
-
-
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listPublicCohorts>>, TError, TData> & { queryKey: QueryKey }
-}
-
-export type ListPublicCohortsQueryResult = NonNullable<Awaited<ReturnType<typeof listPublicCohorts>>>
-export type ListPublicCohortsQueryError = ErrorType<unknown>
-
-
-
-export function useListPublicCohorts<TData = Awaited<ReturnType<typeof listPublicCohorts>>, TError = ErrorType<unknown>>(
-  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listPublicCohorts>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
-
- ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
-
-  const queryOptions = getListPublicCohortsQueryOptions(options)
-
-  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
-
-  return withQueryKey(query, queryOptions.queryKey);
-}
-
-
-
-
-
-
 
 export const getGetPublicCohortUrl = (slug: string,) => {
 

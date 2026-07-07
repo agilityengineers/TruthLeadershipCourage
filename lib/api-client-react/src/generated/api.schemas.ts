@@ -149,6 +149,25 @@ export interface EnrollOptions {
   companies: CompanyLite[];
 }
 
+export interface UpcomingCohort {
+  id: string;
+  name: string;
+  slug: string;
+  startDate: string;
+  endDate: string;
+  sessionDay?: string | null;
+  sessionTime?: string | null;
+  timezone?: string | null;
+  price: number;
+  currency: string;
+  seatsLeft: number | null;
+  status: string;
+}
+
+export interface UpcomingCohorts {
+  cohorts: UpcomingCohort[];
+}
+
 export interface ShippingAddress {
   line1: string;
   line2?: string;
@@ -828,26 +847,6 @@ export interface CohortFormOptions {
   programs: CohortFormOptionsProgramsItem[];
   trainers: CohortFormOptionsTrainersItem[];
   companies: CohortFormOptionsCompaniesItem[];
-}
-
-export interface PublicCohortCard {
-  id: string;
-  slug: string;
-  name: string;
-  tagline?: string | null;
-  startDate: string;
-  endDate: string;
-  sessionDay?: string | null;
-  sessionTime?: string | null;
-  timezone?: string | null;
-  price: number;
-  currency: string;
-  status: string;
-  format: string;
-  location?: string | null;
-  heroImageUrl?: string | null;
-  trainerName?: string | null;
-  seatsLeft: number | null;
 }
 
 export interface PublicCohort {

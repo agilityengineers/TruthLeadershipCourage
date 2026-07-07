@@ -6,11 +6,10 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export interface PublicCohortCard {
+export interface UpcomingCohort {
   id: string;
-  slug: string;
   name: string;
-  tagline?: string | null;
+  slug: string;
   startDate: Date;
   endDate: Date;
   sessionDay?: string | null;
@@ -18,10 +17,6 @@ export interface PublicCohortCard {
   timezone?: string | null;
   price: number;
   currency: string;
-  status: string;
-  format: string;
-  location?: string | null;
-  heroImageUrl?: string | null;
-  trainerName?: string | null;
   seatsLeft: number | null;
+  status: string;
 }

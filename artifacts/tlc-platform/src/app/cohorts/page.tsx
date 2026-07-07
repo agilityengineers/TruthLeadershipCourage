@@ -1,102 +1,176 @@
 import { Link } from "wouter";
-import { useListPublicCohorts } from "@workspace/api-client-react";
+import { useGetUpcomingCohorts } from "@workspace/api-client-react";
+import type { UpcomingCohort } from "@workspace/api-client-react";
+import { LandingNav } from "@/components/marketing/landing-nav";
+import { Footer } from "@/components/marketing/footer";
+import { Eyebrow } from "@/components/brand/primitives";
+import { Button } from "@/components/ui/button";
+import { usePageContent } from "@/lib/site-content";
 import { formatDate, formatPrice } from "@/lib/utils";
-import { Calendar, ArrowRight } from "lucide-react";
 
-const FORMAT_LABEL: Record<string, string> = {
-  online: "Online · live video",
-  in_person: "In person",
-  hybrid: "Hybrid",
+type IntroCopy = { eyebrow: string; heading: string; intro: string; emptyState: string };
+
+const INTRO_FALLBACK: IntroCopy = {
+  eyebrow: "Upcoming cohorts",
+  heading: "Find the cohort that fits your season.",
+  intro:
+    "Every cohort runs six months — live, virtual, and small by design. Browse the cohorts opening next and reserve your seat while they're still enrolling.",
+  emptyState:
+    "No cohorts are open for enrollment right now. Book a fit conversation and we'll let you know the moment the next one opens.",
 };
 
-function PublicHeader() {
+/** Short time-zone label (e.g. "PDT") for the cohort's start date, if resolvable. */
+function tzAbbrev(tz: string | null | undefined, ref: string): string | null {
+  if (!tz) return null;
+  try {
+    const parts = new Intl.DateTimeFormat("en-US", {
+      timeZone: tz,
+      timeZoneName: "short",
+    }).formatToParts(new Date(ref));
+    return parts.find((p) => p.type === "timeZoneName")?.value ?? null;
+  } catch {
+    return null;
+  }
+}
+
+function statusPill(cohort: UpcomingCohort): { label: string; color: string; bg: string } {
+  if (cohort.status === "ENROLLING") {
+    return { label: "Enrolling now", color: "#0f7a4d", bg: "#e7f5ee" };
+  }
+  const started = new Date(cohort.startDate).getTime() <= Date.now();
+  return started
+    ? { label: "In session", color: "#55596e", bg: "#f0f1f6" }
+    : { label: "Starting soon", color: "#662d91", bg: "#f2ecf8" };
+}
+
+function CohortCard({ cohort }: { cohort: UpcomingCohort }) {
+  const pill = statusPill(cohort);
+  const enrolling = cohort.status === "ENROLLING";
+  const soldOut = cohort.seatsLeft === 0;
+
+  const schedule = [
+    cohort.sessionDay ? `${cohort.sessionDay}s` : null,
+    cohort.sessionTime,
+    tzAbbrev(cohort.timezone, cohort.startDate),
+  ]
+    .filter(Boolean)
+    .join(" · ");
+
   return (
-    <header className="flex items-center gap-3 px-5 py-4">
-      <Link href="/" className="flex items-center gap-2.5">
-        <img src="/brand/wisdomtri-logo.png" alt="" width={34} height={34} className="h-[34px] w-[34px] object-contain" />
-        <span className="text-[13px] font-semibold text-indigo">The Wisdom Tri</span>
-      </Link>
-      <div className="ml-auto flex items-center gap-4 text-[12.5px] font-semibold text-muted-3">
-        <Link href="/" className="hover:text-ink">
-          Home
-        </Link>
-        <Link href="/login" className="hover:text-ink">
-          Sign in
+    <div className="flex flex-col rounded-[16px] border border-hair-1 bg-white p-[26px] shadow-card">
+      <div className="mb-4 flex items-start justify-between gap-3">
+        <h3 className="font-display text-[21px] leading-tight text-ink">
+          <Link href={`/cohort/${cohort.slug}`} className="hover:text-eq">
+            {cohort.name}
+          </Link>
+        </h3>
+        <span
+          className="shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[.04em]"
+          style={{ color: pill.color, background: pill.bg }}
+        >
+          {pill.label}
+        </span>
+      </div>
+
+      <dl className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <div>
+          <dt className="label-caps mb-[5px]">Dates</dt>
+          <dd className="text-[14px] leading-snug text-ink">
+            {formatDate(cohort.startDate)} – {formatDate(cohort.endDate)}
+          </dd>
+        </div>
+        {schedule && (
+          <div>
+            <dt className="label-caps mb-[5px]">Sessions</dt>
+            <dd className="text-[14px] leading-snug text-ink">{schedule}</dd>
+          </div>
+        )}
+        <div>
+          <dt className="label-caps mb-[5px]">Investment</dt>
+          <dd className="text-[14px] leading-snug text-ink">{formatPrice(cohort.price, cohort.currency)}</dd>
+        </div>
+        <div>
+          <dt className="label-caps mb-[5px]">Seats</dt>
+          <dd className="text-[14px] leading-snug text-ink">
+            {cohort.seatsLeft === null
+              ? "Limited by design"
+              : soldOut
+                ? "Full — join the waitlist"
+                : `${cohort.seatsLeft} left`}
+          </dd>
+        </div>
+      </dl>
+
+      <div className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-2 pt-5 border-t border-hair-1">
+        {enrolling ? (
+          <Button asChild size="md" variant={soldOut ? "outline" : "primary"}>
+            <Link href={`/enroll?cohort=${cohort.id}`}>
+              {soldOut ? "Join the waitlist →" : "Reserve your seat →"}
+            </Link>
+          </Button>
+        ) : (
+          <Button asChild size="md" variant="outline">
+            <Link href="/book-a-call">Book a fit call →</Link>
+          </Button>
+        )}
+        <Link href={`/cohort/${cohort.slug}`} className="text-[13px] font-semibold text-eq hover:underline">
+          View details →
         </Link>
       </div>
-    </header>
+    </div>
   );
 }
 
-export default function CohortsIndexPage() {
-  const { data, isLoading } = useListPublicCohorts();
-  const cohorts = data ?? [];
+export default function UpcomingCohortsPage() {
+  const { ready, content } = usePageContent("cohorts");
+  const nav = content("global.nav");
+  const footer = content("global.footer");
+  const copy = (content("cohorts.intro") ?? INTRO_FALLBACK) as IntroCopy;
+
+  const { data } = useGetUpcomingCohorts();
+  const cohorts = data?.cohorts ?? [];
+
+  if (!ready) return <div className="min-h-screen bg-white" />;
 
   return (
-    <div className="min-h-screen bg-white text-ink">
-      <PublicHeader />
+    <div className="bg-white text-ink">
+      {nav && <LandingNav content={nav as Parameters<typeof LandingNav>[0]["content"]} />}
 
-      <section className="border-b border-hair-1 bg-soft-3">
-        <div className="mx-auto max-w-[880px] px-5 py-[clamp(36px,5vw,60px)]">
-          <div className="text-[11px] font-semibold uppercase tracking-[.14em] text-eq">Truth · Leadership · Courage</div>
-          <h1 className="mt-2 font-display text-[clamp(28px,4.4vw,42px)] leading-[1.1] text-ink">Upcoming cohorts</h1>
-          <p className="mt-3 max-w-[560px] text-[16px] leading-relaxed text-muted">
-            Choose the cohort that fits your calendar and reserve your seat. Each cohort is a small group moving through
-            the six-month program together.
-          </p>
+      <section className="border-b border-[#eef0f5] bg-soft-3">
+        <div className="shell py-[clamp(44px,6vw,72px)]">
+          <Eyebrow color="#662d91" rule className="mb-[18px]">
+            {copy.eyebrow}
+          </Eyebrow>
+          <h1 className="mb-4 max-w-[18ch] text-[clamp(30px,4vw,46px)] leading-[1.08] text-ink">{copy.heading}</h1>
+          <p className="max-w-[58ch] text-[15px] leading-relaxed text-muted">{copy.intro}</p>
         </div>
       </section>
 
-      <div className="mx-auto max-w-[880px] px-5 py-[clamp(28px,4vw,48px)]">
-        {isLoading ? (
-          <p className="text-muted">Loading…</p>
-        ) : cohorts.length === 0 ? (
-          <div className="rounded-[16px] border border-hair-1 bg-soft-3 p-10 text-center">
-            <p className="font-display text-[18px] text-ink">No cohorts are open right now</p>
-            <p className="mt-2 text-[14px] text-muted-2">
-              New cohorts are announced regularly.{" "}
-              <Link href="/book-a-call" className="font-semibold text-eq hover:underline">
-                Book a call
-              </Link>{" "}
-              to hear about the next one.
-            </p>
+      <section className="shell py-[clamp(40px,5vw,64px)]">
+        {cohorts.length === 0 ? (
+          <div className="rounded-[16px] border border-dashed border-hair-2 bg-soft-3 p-[clamp(28px,4vw,44px)] text-center">
+            <p className="mx-auto max-w-[46ch] text-[15px] leading-relaxed text-muted">{copy.emptyState}</p>
+            <div className="mt-5">
+              <Button asChild size="md">
+                <Link href="/book-a-call">Book a fit call →</Link>
+              </Button>
+            </div>
           </div>
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
             {cohorts.map((c) => (
-              <Link
-                key={c.id}
-                href={`/cohort/${c.slug}`}
-                className="group flex flex-col rounded-[16px] border border-hair-1 bg-white p-5 shadow-card transition-shadow hover:shadow-lg"
-              >
-                <div className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[.08em] text-muted-3">
-                  <Calendar size={13} className="text-eq" />
-                  {formatDate(c.startDate, { month: "short", year: "numeric" })} –{" "}
-                  {formatDate(c.endDate, { month: "short", year: "numeric" })}
-                </div>
-                <h2 className="mt-2 font-display text-[20px] leading-tight text-ink">{c.name}</h2>
-                {c.tagline && <p className="mt-1.5 text-[13.5px] leading-relaxed text-muted-2">{c.tagline}</p>}
-
-                <div className="mt-3 text-[12.5px] text-muted-2">
-                  {[FORMAT_LABEL[c.format] ?? c.format, c.sessionDay ? `${c.sessionDay}s` : null, c.trainerName]
-                    .filter(Boolean)
-                    .join(" · ")}
-                </div>
-
-                <div className="mt-4 flex items-center justify-between border-t border-hair-1 pt-3">
-                  <span className="font-display text-[17px] text-ink">
-                    {c.price > 0 ? formatPrice(c.price, c.currency) : "Free"}
-                  </span>
-                  <span className="inline-flex items-center gap-1 text-[13px] font-semibold text-eq">
-                    {c.seatsLeft === 0 ? "Waitlist" : "View cohort"}
-                    <ArrowRight size={15} className="transition-transform group-hover:translate-x-0.5" />
-                  </span>
-                </div>
-              </Link>
+              <CohortCard key={c.id} cohort={c} />
             ))}
           </div>
         )}
-      </div>
+      </section>
+
+      {footer && (
+        <Footer
+          content={footer as Parameters<typeof Footer>[0]["content"]}
+          crossLink={{ label: "← Back to TLC for Leaders", href: "/" }}
+        />
+      )}
     </div>
   );
 }
