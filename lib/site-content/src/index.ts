@@ -407,8 +407,8 @@ export const SECTIONS: SectionDef[] = [
     ],
     default: {
       eyebrow: "What changes",
-      headingLead: "The leader you become",
-      headingEmphasis: "— and the people who feel it.",
+      headingLead: "The leader you become,",
+      headingEmphasis: "and the people who feel it.",
       items: [
         { icon: { src: "/brand/selfdiscovery.png", alt: "" }, title: "Lead from a grounded place", body: "Steadier under pressure, with deeper self-trust." },
         { icon: { src: "/brand/harmony.png", alt: "" }, title: "Hard conversations, with ease", body: "Prepare and hold them with confidence and intention." },
