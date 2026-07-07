@@ -1,7 +1,8 @@
 import { LandingNav } from "@/components/marketing/landing-nav";
 import { Footer } from "@/components/marketing/footer";
 import { SECTION_COMPONENTS } from "@/components/marketing/sections/registry";
-import { usePageContent } from "@/lib/site-content";
+import { SectionDivider } from "@/components/marketing/sections/section-divider";
+import { isSectionEmpty, usePageContent } from "@/lib/site-content";
 
 export default function LandingPage() {
   const { ready, sections, content } = usePageContent("home");
@@ -17,6 +18,8 @@ export default function LandingPage() {
       {nav && <LandingNav content={nav as Parameters<typeof LandingNav>[0]["content"]} />}
 
       {body.map((s) => {
+        // A section with no content acts as a slim divider between sections.
+        if (isSectionEmpty(s.content)) return <SectionDivider key={s.key} />;
         const Section = SECTION_COMPONENTS[s.key];
         return <Section key={s.key} content={s.content} />;
       })}

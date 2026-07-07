@@ -1,11 +1,10 @@
 import { LandingNav } from "@/components/marketing/landing-nav";
 import { Footer } from "@/components/marketing/footer";
 import { SECTION_COMPONENTS } from "@/components/marketing/sections/registry";
-import { SectionDivider } from "@/components/marketing/sections/section-divider";
-import { isSectionEmpty, usePageContent } from "@/lib/site-content";
+import { usePageContent } from "@/lib/site-content";
 
-export default function OrganizationsPage() {
-  const { ready, sections, content } = usePageContent("organizations");
+export default function AboutTriPage() {
+  const { ready, sections, content } = usePageContent("about-tri");
   const nav = content("global.nav");
   const footer = content("global.footer");
 
@@ -18,8 +17,6 @@ export default function OrganizationsPage() {
       {nav && <LandingNav content={nav as Parameters<typeof LandingNav>[0]["content"]} />}
 
       {body.map((s) => {
-        // A section with no content acts as a slim divider between sections.
-        if (isSectionEmpty(s.content)) return <SectionDivider key={s.key} />;
         const Section = SECTION_COMPONENTS[s.key];
         return <Section key={s.key} content={s.content} />;
       })}
@@ -27,7 +24,7 @@ export default function OrganizationsPage() {
       {footer && (
         <Footer
           content={footer as Parameters<typeof Footer>[0]["content"]}
-          crossLink={{ label: "← TLC for Leaders", href: "/" }}
+          crossLink={{ label: "← Back to TLC for Leaders", href: "/" }}
         />
       )}
     </div>

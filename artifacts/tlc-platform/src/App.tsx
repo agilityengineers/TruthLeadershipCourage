@@ -25,6 +25,7 @@ import BookACallPage from "@/app/book-a-call/page";
 import OrganizationsPage from "@/app/organizations/page";
 import CohortsIndexPage from "@/app/cohorts/page";
 import CohortLandingPage from "@/app/cohort/[slug]/page";
+import AboutTriPage from "@/app/about-tri/page";
 import AppNotFound from "@/app/not-found";
 
 // Portal pages
@@ -119,6 +120,7 @@ function Router() {
       <Route path="/organizations" component={OrganizationsPage} />
       <Route path="/cohorts" component={CohortsIndexPage} />
       <Route path="/cohort/:slug" component={CohortLandingPage} />
+      <Route path="/about-tri" component={AboutTriPage} />
 
       {/* Portal */}
       {group(PARTICIPANT_ROLES, PortalLayout, [
