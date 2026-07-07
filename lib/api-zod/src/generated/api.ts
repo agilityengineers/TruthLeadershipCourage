@@ -104,6 +104,24 @@ export const GetEnrollOptionsResponse = zod.object({
 })
 
 
+export const GetUpcomingCohortsResponse = zod.object({
+  "cohorts": zod.array(zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "slug": zod.string(),
+  "startDate": zod.coerce.date(),
+  "endDate": zod.coerce.date(),
+  "sessionDay": zod.string().nullish(),
+  "sessionTime": zod.string().nullish(),
+  "timezone": zod.string().nullish(),
+  "price": zod.number(),
+  "currency": zod.string(),
+  "seatsLeft": zod.number().nullable(),
+  "status": zod.string()
+}))
+})
+
+
 export const CreateEnrollmentBody = zod.object({
   "name": zod.string(),
   "email": zod.string(),

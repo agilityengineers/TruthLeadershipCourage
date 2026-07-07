@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import { CreateEnrollmentBody, FulfillEnrollmentBody, MarkWeekCompleteBody } from "@workspace/api-zod";
-import { db, schema, eq, and, or, ne, inArray, asc, count, sql } from "../lib/db";
+import { db, schema, eq, and, or, ne, inArray, asc, count, gte, sql } from "../lib/db";
 import { asyncHandler, HttpError, notFound, forbidden } from "../lib/http";
 import { requirePrincipal } from "../lib/principal";
 import {
@@ -46,6 +46,46 @@ router.get(
         status: c.status,
       })),
       companies,
+    });
+  }),
+);
+
+/**
+ * Public: upcoming cohorts for the marketing "upcoming cohorts" page. Public
+ * (non-private) cohorts that are enrolling or running and have not yet ended,
+ * ordered by start date, with remaining seats when capacity is set.
+ */
+router.get(
+  "/cohorts/upcoming",
+  asyncHandler(async (_req, res) => {
+    const cohorts = await db.query.cohort.findMany({
+      where: and(
+        eq(schema.cohort.isPrivate, false),
+        inArray(schema.cohort.status, ["ENROLLING", "RUNNING"]),
+        gte(schema.cohort.endDate, new Date()),
+      ),
+      orderBy: [asc(schema.cohort.startDate)],
+    });
+    const counts = await db
+      .select({ cohortId: schema.enrollment.cohortId, n: count() })
+      .from(schema.enrollment)
+      .groupBy(schema.enrollment.cohortId);
+    const countMap = new Map(counts.map((c) => [c.cohortId, Number(c.n)]));
+    res.json({
+      cohorts: cohorts.map((c) => ({
+        id: c.id,
+        name: c.name,
+        slug: c.slug,
+        startDate: c.startDate,
+        endDate: c.endDate,
+        sessionDay: c.sessionDay,
+        sessionTime: c.sessionTime,
+        timezone: c.timezone,
+        price: c.price,
+        currency: c.currency,
+        seatsLeft: c.capacity > 0 ? Math.max(0, c.capacity - (countMap.get(c.id) ?? 0)) : null,
+        status: c.status,
+      })),
     });
   }),
 );

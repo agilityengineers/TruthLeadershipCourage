@@ -113,6 +113,16 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/EnrollOptions" }
+  /cohorts/upcoming:
+    get:
+      operationId: getUpcomingCohorts
+      tags: [enrollment]
+      responses:
+        "200":
+          description: Public upcoming cohorts
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/UpcomingCohorts" }
   /enrollments:
     post:
       operationId: createEnrollment
@@ -1096,6 +1106,29 @@ components:
         companies:
           type: array
           items: { $ref: "#/components/schemas/CompanyLite" }
+    UpcomingCohort:
+      type: object
+      required: [id, name, slug, startDate, endDate, price, currency, seatsLeft, status]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        slug: { type: string }
+        startDate: { type: string, format: date-time }
+        endDate: { type: string, format: date-time }
+        sessionDay: { type: string, nullable: true }
+        sessionTime: { type: string, nullable: true }
+        timezone: { type: string, nullable: true }
+        price: { type: integer }
+        currency: { type: string }
+        seatsLeft: { type: integer, nullable: true }
+        status: { type: string }
+    UpcomingCohorts:
+      type: object
+      required: [cohorts]
+      properties:
+        cohorts:
+          type: array
+          items: { $ref: "#/components/schemas/UpcomingCohort" }
     ShippingAddress:
       type: object
       required: [line1, city, state, postal]
