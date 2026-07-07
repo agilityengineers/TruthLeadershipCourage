@@ -37,4 +37,4 @@ may be unlinked, causing `drizzle-kit` "please install required packages: 'drizz
 (3) `pnpm --filter @workspace/db run seed` (idempotent, seeds demo content with stable IDs),
 (4) `restart_workflow("artifacts/api-server: API Server")` so it rebuilds with the current routes.
 **Why:** without this the frontend gets 404s / empty data even though all backend code is present.
-Demo login is shared password `password123`; sessions/consent/etc. persist as rows in Postgres.
+Each account signs in with its own scrypt password hash (no shared demo password); seeded demo accounts have a null hash and must set a password via the admin invite / set-password flow first. Sessions/consent/etc. persist as rows in Postgres.

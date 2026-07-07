@@ -3,7 +3,8 @@
  * in-memory `src/data/store.ts`. Uses the SAME stable IDs so links stay valid,
  * and is idempotent (rows conflict-on-id do nothing) so it is safe to re-run.
  *
- * Demo logins (shared password `password123`):
+ * Demo accounts (seeded with no password hash — sign in only after a password
+ * is set through the admin invite / set-password flow):
  *   admin@thewisdomtri.com  (ADMIN)
  *   tri@thewisdomtri.com    (TRAINER)
  *   jordan@acme.test        (PARTICIPANT)

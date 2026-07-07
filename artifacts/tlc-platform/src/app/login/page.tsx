@@ -44,8 +44,9 @@ export default function LoginPage() {
         </p>
         {import.meta.env.MODE !== "production" && (
           <div className="mt-6 rounded-[12px] border border-hair-2 bg-white/60 p-4 text-[12px] leading-relaxed text-muted-2">
-            <span className="font-semibold text-ink">Demo logins</span> (password{" "}
-            <code className="rounded bg-page px-1">password123</code>):<br />
+            <span className="font-semibold text-ink">Demo accounts</span> (set a
+            password via the admin invite / set-password flow before signing
+            in):<br />
             admin@thewisdomtri.com · tri@thewisdomtri.com · jordan@acme.test · viewer@acme.test
           </div>
         )}
