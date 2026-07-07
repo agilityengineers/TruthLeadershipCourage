@@ -133,8 +133,8 @@ export function HomeProblem({ content }: { content: SC }) {
           </div>
         ))}
       </div>
-      <div className="mt-[42px] rounded-[14px] border-l-[3px] border-mq bg-[#f6f4fb] px-[30px] py-[26px]">
-        <p className="max-w-[34em] font-display text-[19px] italic leading-[1.5] text-[#2b2747]">{c.pullQuote}</p>
+      <div className="mx-auto mt-[42px] max-w-[40em] rounded-[14px] border-l-[3px] border-mq bg-[#f6f4fb] px-[30px] py-[26px]">
+        <p className="font-display text-[19px] italic leading-[1.5] text-[#2b2747]">{c.pullQuote}</p>
       </div>
     </section>
   );
