@@ -1,5 +1,6 @@
 import { Link } from "wouter";
 import { LeadershipModel } from "@/components/marketing/leadership-model";
+import { OperatingSystemCard } from "@/components/marketing/operating-system-card";
 import { FAQ } from "@/components/marketing/faq";
 import { Eyebrow } from "@/components/brand/primitives";
 import { Button } from "@/components/ui/button";
@@ -133,8 +134,8 @@ export function HomeProblem({ content }: { content: SC }) {
           </div>
         ))}
       </div>
-      <div className="mt-[42px] rounded-[14px] border-l-[3px] border-mq bg-[#f6f4fb] px-[30px] py-[26px]">
-        <p className="max-w-[34em] font-display text-[19px] italic leading-[1.5] text-[#2b2747]">{c.pullQuote}</p>
+      <div className="mx-auto mt-[42px] max-w-[40em] rounded-[14px] border-l-[3px] border-mq bg-[#f6f4fb] px-[30px] py-[26px]">
+        <p className="font-display text-[19px] italic leading-[1.5] text-[#2b2747]">{c.pullQuote}</p>
       </div>
     </section>
   );
@@ -218,7 +219,7 @@ export function HomePlan({ content }: { content: SC }) {
         <div className="mb-[46px] text-center">
           <Eyebrow className="mb-3.5 justify-center">{c.eyebrow}</Eyebrow>
           <h2 className="text-[clamp(28px,3.4vw,40px)] leading-[1.1] text-ink">
-            {c.headingLead} <em className="italic text-eq">{c.headingEmphasis}</em>
+            {c.headingLead} <em className="mt-1 block italic text-eq">{c.headingEmphasis}</em>
           </h2>
         </div>
         <div className="mb-[54px] grid grid-cols-1 gap-5 md:grid-cols-3">
@@ -241,11 +242,8 @@ export function HomePlan({ content }: { content: SC }) {
         <div className="grid items-center gap-[clamp(30px,5vw,56px)] lg:grid-cols-[1fr_.92fr]">
           <LeadershipModel className="mx-auto w-full max-w-[460px]" />
           <div>
-            <div className="mb-7 rounded-[16px] border border-hair-2 bg-white p-[26px] shadow-card">
-              <div className="font-display text-[18px] leading-[1.42] text-ink">{c.summaryTop}</div>
-              <div className="mt-2 font-display text-[18px] leading-[1.42] text-mq">{c.summaryBottom}</div>
-              <div className="label-caps mt-3.5">EQ + IQ + MQ™</div>
-            </div>
+            <OperatingSystemCard className="mb-7" />
+
             <div className="grid gap-[18px]">
               {c.pillars.map((m) => (
                 <div key={m.title} className="flex gap-3.5">
@@ -278,12 +276,15 @@ export function HomeOutcomes({ content }: { content: SC }) {
       <Eyebrow color="#024794" className="mb-3.5">
         {c.eyebrow}
       </Eyebrow>
-      <h2 className="mb-[42px] max-w-[14em] text-[clamp(28px,3.4vw,40px)] leading-[1.1] text-ink">
+      <h2 className="mb-[42px] max-w-[18em] text-[clamp(28px,3.4vw,40px)] leading-[1.1] text-ink">
         {c.headingLead} <em className="italic text-mq">{c.headingEmphasis}</em>
       </h2>
-      <div className="grid grid-cols-1 gap-x-[26px] gap-y-5 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {c.items.map((o) => (
-          <div key={o.title} className="flex gap-3.5">
+          <div
+            key={o.title}
+            className="flex gap-3.5 rounded-[14px] border border-hair-2 bg-white p-[22px] shadow-card"
+          >
             <img src={o.icon.src} alt={o.icon.alt} width={44} height={44} className="h-11 w-11 shrink-0" />
             <div>
               <h4 className="mb-1 text-[17px] text-ink">{o.title}</h4>
@@ -349,6 +350,85 @@ export function HomeStories({ content }: { content: SC }) {
         ))}
       </div>
     </section>
+  );
+}
+
+function FitMark() {
+  return (
+    <svg viewBox="0 0 20 20" width={20} height={20} className="mt-[2px] h-5 w-5 shrink-0" aria-hidden="true">
+      <circle cx="10" cy="10" r="10" fill="#e4f1ea" />
+      <path
+        d="M5.8 10.4l2.6 2.6L14.2 7.2"
+        fill="none"
+        stroke="#1c7d4d"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function NotYetMark() {
+  return (
+    <svg viewBox="0 0 20 20" width={20} height={20} className="mt-[2px] h-5 w-5 shrink-0" aria-hidden="true">
+      <circle cx="10" cy="10" r="10" fill="#eceef4" />
+      <path d="M6.4 10h7.2" fill="none" stroke="#9498ab" strokeWidth="1.8" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+export function HomeWhoFor({ content }: { content: SC }) {
+  const c = content as {
+    eyebrow: string;
+    headingLead: string;
+    headingEmphasis: string;
+    intro: string;
+    forTitle: string;
+    forItems: { text: string }[];
+    notTitle: string;
+    notItems: { text: string }[];
+  };
+  return (
+    <div className="border-y border-[#eef0f5] bg-[#f8f9fc]">
+      <div className="shell py-[clamp(56px,7vw,92px)]">
+        <div className="max-w-[44em]">
+          <Eyebrow color="#662d91" className="mb-3.5">
+            {c.eyebrow}
+          </Eyebrow>
+          <h2 className="mb-3.5 text-[clamp(28px,3.4vw,40px)] leading-[1.1] text-ink">
+            {c.headingLead} <em className="italic text-mq">{c.headingEmphasis}</em>
+          </h2>
+          <p className="mb-[42px] text-[17px] leading-[1.6] text-muted">{c.intro}</p>
+        </div>
+        <div className="grid grid-cols-1 gap-[26px] md:grid-cols-2">
+          <div className="rounded-[14px] border border-hair-2 bg-white p-[28px] shadow-card">
+            <div className="label-caps mb-[18px]" style={{ color: "#1c7d4d" }}>
+              {c.forTitle}
+            </div>
+            <ul className="grid gap-3.5">
+              {c.forItems.map((item, i) => (
+                <li key={i} className="flex gap-3 text-[15px] leading-[1.5] text-[#3c3c52]">
+                  <FitMark />
+                  <span>{item.text}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div className="rounded-[14px] border border-hair-2 bg-white p-[28px]">
+            <div className="label-caps mb-[18px]">{c.notTitle}</div>
+            <ul className="grid gap-3.5">
+              {c.notItems.map((item, i) => (
+                <li key={i} className="flex gap-3 text-[15px] leading-[1.5] text-[#62657a]">
+                  <NotYetMark />
+                  <span>{item.text}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
 
