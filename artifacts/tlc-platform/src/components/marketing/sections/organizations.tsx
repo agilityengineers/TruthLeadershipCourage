@@ -1,5 +1,6 @@
 import { Link } from "wouter";
 import { LeadershipModel } from "@/components/marketing/leadership-model";
+import { OperatingSystemCard } from "@/components/marketing/operating-system-card";
 import { Eyebrow } from "@/components/brand/primitives";
 import { Button } from "@/components/ui/button";
 
@@ -147,11 +148,8 @@ export function OrgFormula({ content }: { content: SC }) {
         <div className="grid items-center gap-[clamp(30px,5vw,56px)] lg:grid-cols-[1fr_.92fr]">
           <LeadershipModel className="mx-auto w-full max-w-[460px]" />
           <div>
-            <div className="mb-7 rounded-[16px] border border-hair-2 bg-white p-[26px] shadow-card">
-              <div className="font-display text-[18px] leading-[1.42] text-ink">{c.summaryTop}</div>
-              <div className="mt-2 font-display text-[18px] leading-[1.42] text-mq">{c.summaryBottom}</div>
-              <div className="label-caps mt-3.5">EQ + IQ + MQ™</div>
-            </div>
+            <OperatingSystemCard className="mb-7" />
+
             {c.paragraphs.map((p, i) => (
               <p key={i} className="mb-3.5 text-[16px] leading-[1.6] text-[#4c5066] last:mb-0">
                 {p.text}
