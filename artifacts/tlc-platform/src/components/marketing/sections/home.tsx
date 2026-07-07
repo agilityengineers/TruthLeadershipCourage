@@ -346,6 +346,85 @@ export function HomeStories({ content }: { content: SC }) {
   );
 }
 
+function FitMark() {
+  return (
+    <svg viewBox="0 0 20 20" width={20} height={20} className="mt-[2px] h-5 w-5 shrink-0" aria-hidden="true">
+      <circle cx="10" cy="10" r="10" fill="#e4f1ea" />
+      <path
+        d="M5.8 10.4l2.6 2.6L14.2 7.2"
+        fill="none"
+        stroke="#1c7d4d"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function NotYetMark() {
+  return (
+    <svg viewBox="0 0 20 20" width={20} height={20} className="mt-[2px] h-5 w-5 shrink-0" aria-hidden="true">
+      <circle cx="10" cy="10" r="10" fill="#eceef4" />
+      <path d="M6.4 10h7.2" fill="none" stroke="#9498ab" strokeWidth="1.8" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+export function HomeWhoFor({ content }: { content: SC }) {
+  const c = content as {
+    eyebrow: string;
+    headingLead: string;
+    headingEmphasis: string;
+    intro: string;
+    forTitle: string;
+    forItems: { text: string }[];
+    notTitle: string;
+    notItems: { text: string }[];
+  };
+  return (
+    <div className="border-y border-[#eef0f5] bg-[#f8f9fc]">
+      <div className="shell py-[clamp(56px,7vw,92px)]">
+        <div className="max-w-[44em]">
+          <Eyebrow color="#662d91" className="mb-3.5">
+            {c.eyebrow}
+          </Eyebrow>
+          <h2 className="mb-3.5 text-[clamp(28px,3.4vw,40px)] leading-[1.1] text-ink">
+            {c.headingLead} <em className="italic text-mq">{c.headingEmphasis}</em>
+          </h2>
+          <p className="mb-[42px] text-[17px] leading-[1.6] text-muted">{c.intro}</p>
+        </div>
+        <div className="grid grid-cols-1 gap-[26px] md:grid-cols-2">
+          <div className="rounded-[14px] border border-hair-2 bg-white p-[28px] shadow-card">
+            <div className="label-caps mb-[18px]" style={{ color: "#1c7d4d" }}>
+              {c.forTitle}
+            </div>
+            <ul className="grid gap-3.5">
+              {c.forItems.map((item, i) => (
+                <li key={i} className="flex gap-3 text-[15px] leading-[1.5] text-[#3c3c52]">
+                  <FitMark />
+                  <span>{item.text}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div className="rounded-[14px] border border-hair-2 bg-white p-[28px]">
+            <div className="label-caps mb-[18px]">{c.notTitle}</div>
+            <ul className="grid gap-3.5">
+              {c.notItems.map((item, i) => (
+                <li key={i} className="flex gap-3 text-[15px] leading-[1.5] text-[#62657a]">
+                  <NotYetMark />
+                  <span>{item.text}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function HomeFinalCta({ content }: { content: SC }) {
   const c = content as {
     eyebrow: string;
