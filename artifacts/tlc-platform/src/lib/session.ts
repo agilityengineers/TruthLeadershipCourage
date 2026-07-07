@@ -3,8 +3,8 @@ import type { Principal } from "./scope";
 import { can, type Capability, homeForRole } from "./rbac";
 
 /**
- * Client-side session. The server validates the email + shared demo password
- * and returns a bearer token; we persist the returned user + token in
+ * Client-side session. The server validates the email + the account's own
+ * password and returns a bearer token; we persist the returned user + token in
  * localStorage. The token is attached to every API request (see
  * `setAuthTokenGetter` in main.tsx). Route-level guards read the cached user
  * synchronously so <RequireRole> in App.tsx stays simple.

@@ -5,9 +5,10 @@ import { promisify } from "node:util";
  * Password hashing using Node's built-in scrypt — no external dependency and no
  * native build step. Stored format: `scrypt$<saltHex>$<hashHex>`.
  *
- * Seeded/legacy demo accounts have a null `passwordHash` and continue to log in
- * with the shared demo password (see routes/session.ts); accounts created or
- * activated through the admin console carry a real hash verified here.
+ * Every account authenticates against its own stored hash. Accounts with a null
+ * `passwordHash` have no password set and cannot sign in until they set one
+ * through the invite / set-password flow (`verifyPassword` returns false for a
+ * missing hash). Passwords are minted only via the admin console / invite path.
  */
 
 const scryptAsync = promisify(scrypt);

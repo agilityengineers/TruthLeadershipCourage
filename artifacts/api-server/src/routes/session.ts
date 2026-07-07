@@ -7,10 +7,9 @@ import { loadPrincipal, requirePrincipal } from "../lib/principal";
 import { verifyPassword } from "../lib/password";
 
 const router: IRouter = Router();
-const DEMO_PASSWORD = "password123";
 const SESSION_TTL_MS = 30 * 24 * 60 * 60 * 1000;
 
-/** Demo credential login: any seeded user + the shared demo password. */
+/** Password login: verifies the email against the account's own stored hash. */
 router.post(
   "/session/login",
   asyncHandler(async (req, res) => {
@@ -25,11 +24,10 @@ router.post(
         "This account is not active. Contact an administrator.",
       );
     }
-    // Accounts with a real password hash are verified against it; seeded/legacy
-    // demo accounts (null hash) fall back to the shared demo password.
-    const ok = user.passwordHash
-      ? await verifyPassword(password, user.passwordHash)
-      : password === DEMO_PASSWORD;
+    // Authenticate against the account's own stored password hash. Accounts
+    // with no password set (null hash) always fail here and must set one via
+    // the invite / set-password flow before they can sign in.
+    const ok = await verifyPassword(password, user.passwordHash);
     if (!ok) throw unauthorized("Invalid email or password.");
     const token = randomUUID();
     await db.insert(schema.session).values({

@@ -14,7 +14,10 @@ a persistent Postgres database through a typed REST API.
 - `pnpm run typecheck` — full typecheck across all packages
 - Required env: `DATABASE_URL` — Postgres connection string. For the Vite dev proxy set `API_PROXY_TARGET` (defaults to `http://localhost:8080`).
 
-### Demo logins (shared password: `password123`)
+### Demo accounts
+
+Seeded with no password hash — set a password through the admin invite /
+set-password flow before signing in (there is no shared demo password).
 
 - `admin@thewisdomtri.com` — ADMIN
 - `tri@thewisdomtri.com` — TRAINER
@@ -41,7 +44,7 @@ a persistent Postgres database through a typed REST API.
 
 ## Architecture decisions
 
-- **Session:** the server validates credentials, mints a `session` row, and returns a bearer token. The web app persists it in localStorage and attaches it to every API request; the server rebuilds the principal per request. Accounts created through the admin console carry a real scrypt password hash (`lib/password.ts`); seeded/legacy demo accounts have a null hash and continue to sign in with the shared demo password (`password123`). Only `status === "active"` accounts may log in.
+- **Session:** the server validates credentials, mints a `session` row, and returns a bearer token. The web app persists it in localStorage and attaches it to every API request; the server rebuilds the principal per request. Every account authenticates against its own scrypt password hash (`lib/password.ts`); accounts with a null hash (never onboarded) cannot sign in until they set a password via the invite / set-password flow. Only `status === "active"` accounts may log in.
 - **User management:** admins (capability `user:manage`) manage all platform users at `/admin/users` — create (with an initial password or an emailed-style invite link), edit role/status/company, and delete. Guardrails: `SUPER_ADMIN` creation/edits are gated to super admins, an admin cannot change their own role/status, the last active admin cannot be demoted/deactivated/deleted, and users linked to real content (enrollments, messages, etc.) can't be hard-deleted (deactivate instead). Invite links are single-use `verification_token` rows; the public `/invite?token=…` page sets the password and activates the account.
 - **RBAC + tenant scoping enforced server-side:** `lib/rbac.ts` capabilities + `lib/scope.ts` Drizzle `where` fragments (e.g. a company viewer can only read their own company's rows). The browser no longer holds the data.
 - **Payments & email are simulated stubs:** they persist state (payment → PAID, campaign → sent) without external calls.
