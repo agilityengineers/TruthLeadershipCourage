@@ -113,7 +113,6 @@ export const SECTIONS: SectionDef[] = [
           { kind: "url", name: "href", label: "Link" },
         ],
       },
-      linkFields("bookCall", "“Book a call” link"),
       linkFields("cta", "Primary button"),
     ],
     default: {
@@ -124,8 +123,7 @@ export const SECTIONS: SectionDef[] = [
         { label: "About Tri", href: "/about-tri" },
         { label: "Stories", href: "#stories" },
       ],
-      bookCall: { label: "Book a call", href: "/book-a-call" },
-      cta: { label: "Start the Assessment", href: "/assessment" },
+      cta: { label: "Upcoming Cohort Dates", href: "/cohorts" },
     },
   },
   {
@@ -154,7 +152,8 @@ export const SECTIONS: SectionDef[] = [
     page: "home",
     group: "Home page",
     label: "Hero",
-    description: "The opening banner: headline, intro, the two primary calls-to-action, photo, and stat chips.",
+    description:
+      "The opening banner: headline, intro, the primary call-to-action, photo, and stat chips. The next open cohort's start date is shown automatically beside the button.",
     order: 1,
     core: true,
     fields: [
@@ -163,8 +162,7 @@ export const SECTIONS: SectionDef[] = [
       { kind: "text", name: "headlineEmphasis", label: "Headline — emphasized part (italic, colored)" },
       { kind: "textarea", name: "body", label: "Intro paragraph" },
       linkFields("primaryCta", "Primary button"),
-      linkFields("secondaryCta", "Secondary button"),
-      { kind: "text", name: "microcopy", label: "Microcopy under the buttons" },
+      { kind: "text", name: "microcopy", label: "Microcopy under the button" },
       { kind: "image", name: "image", label: "Hero image" },
       {
         kind: "list",
@@ -182,9 +180,8 @@ export const SECTIONS: SectionDef[] = [
       headlineLead: "Become a leader",
       headlineEmphasis: "worth following.",
       body: "You've done the trainings, read the books, collected the frameworks. So why does it still come apart in the moment that matters? By one well-known measure, only about 23% of how well you lead is what you do. The other 77% is who you are — and that's the part TLC works on.",
-      primaryCta: { label: "Start the Leadership Assessment →", href: "/assessment" },
-      secondaryCta: { label: "Book a 15-min call", href: "/book-a-call" },
-      microcopy: "Free · 2 minutes · no card required",
+      primaryCta: { label: "Upcoming Cohort Dates →", href: "/cohorts" },
+      microcopy: "Six-month cohort · live and virtual · seats limited by design",
       image: { src: "/brand/tri_T.png", alt: "Forest canopy" },
       stats: [
         { value: "6 mo", label: "PROGRAM" },
