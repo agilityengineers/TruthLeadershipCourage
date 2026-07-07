@@ -30,7 +30,12 @@ export type FieldDef =
       item: FieldDef[];
     };
 
-export type SectionGroup = "Global" | "Home page" | "Organizations page" | "Other pages";
+export type SectionGroup =
+  | "Global"
+  | "Home page"
+  | "Organizations page"
+  | "About Tri page"
+  | "Other pages";
 
 export interface SectionDef {
   key: string;
@@ -116,7 +121,7 @@ export const SECTIONS: SectionDef[] = [
       links: [
         { label: "TLC for Leaders", href: "/" },
         { label: "TLC for Organizations", href: "/organizations" },
-        { label: "About Tri", href: "#guide" },
+        { label: "About Tri", href: "/about-tri" },
         { label: "Stories", href: "#stories" },
       ],
       bookCall: { label: "Book a call", href: "/book-a-call" },
@@ -313,7 +318,7 @@ export const SECTIONS: SectionDef[] = [
           text: "Sitting in all three seats taught her one lesson from every angle: how a person leads impacts far more than the numbers. Lead well, and the ripple reaches people's homes.",
         },
       ],
-      cta: { label: "Get to know Tri →", href: "/book-a-call" },
+      cta: { label: "Get to know Tri →", href: "/about-tri" },
     },
   },
   {
@@ -897,6 +902,307 @@ export const SECTIONS: SectionDef[] = [
     },
   },
 
+  // ═════════════════════════════ ABOUT TRI ════════════════════════════════════
+  {
+    key: "aboutTri.hero",
+    page: "about-tri",
+    group: "About Tri page",
+    label: "Hero (“Hi, I’m Tri”)",
+    description: "The opening of the bio page: portrait, greeting, pronunciation, intro paragraphs, buttons, and stat chips.",
+    order: 1,
+    core: true,
+    fields: [
+      { kind: "text", name: "eyebrow", label: "Eyebrow" },
+      { kind: "text", name: "headingLead", label: "Heading — first part" },
+      { kind: "text", name: "headingEmphasis", label: "Heading — emphasized part (italic, colored)" },
+      { kind: "text", name: "pronounce", label: "Pronunciation line" },
+      { kind: "text", name: "role", label: "Role line" },
+      {
+        kind: "list",
+        name: "paragraphs",
+        label: "Intro paragraphs",
+        itemLabel: "paragraph",
+        item: [{ kind: "textarea", name: "text", label: "Text" }],
+      },
+      { kind: "image", name: "image", label: "Portrait" },
+      linkFields("primaryCta", "Primary button"),
+      linkFields("secondaryCta", "Secondary button"),
+      {
+        kind: "list",
+        name: "stats",
+        label: "Stat chips",
+        itemLabel: "stat",
+        item: [
+          { kind: "text", name: "value", label: "Value" },
+          { kind: "text", name: "label", label: "Label" },
+        ],
+      },
+    ],
+    default: {
+      eyebrow: "Meet Your Guide",
+      headingLead: "Hi, I'm",
+      headingEmphasis: "Tri.",
+      pronounce: "If we haven't met yet — it's pronounced “Tree Win.”",
+      role: "Founder & Executive Coach, The Wisdom Tri · Vistage Chair · MA, PCC",
+      paragraphs: [
+        {
+          text: "For more than thirty years I've worked alongside leaders from three very different seats: as a senior executive with full P&L responsibility, as a Vistage Chair guiding CEO peer-advisory boards, and — for the last decade — as an executive coach to C-level leaders in high-growth companies.",
+        },
+        {
+          text: "Seeing leadership from all three angles taught me the same lesson over and over: how a person leads shapes far more than the numbers. I'm not here to turn you into a different leader. I'm here to help you lead from who you already are, at your best — so you become a leader worth following.",
+        },
+      ],
+      image: { src: "/brand/mq_E.png", alt: "Tri T. Nguyen coaching two leaders" },
+      primaryCta: { label: "Book a call with Tri", href: "/book-a-call" },
+      secondaryCta: { label: "Start the Assessment →", href: "/assessment" },
+      stats: [
+        { value: "30+", label: "YEARS LEADING" },
+        { value: "25 yrs", label: "IN THE C-SUITE" },
+        { value: "EQ·IQ·MQ", label: "THE METHOD" },
+      ],
+    },
+  },
+  {
+    key: "aboutTri.story",
+    page: "about-tri",
+    group: "About Tri page",
+    label: "My story",
+    description: "The narrative section: eyebrow, heading, story paragraphs, a pull-quote, and an atmospheric image.",
+    order: 2,
+    fields: [
+      { kind: "text", name: "eyebrow", label: "Eyebrow" },
+      { kind: "text", name: "headingLead", label: "Heading — first part" },
+      { kind: "text", name: "headingEmphasis", label: "Heading — emphasized part" },
+      {
+        kind: "list",
+        name: "paragraphs",
+        label: "Story paragraphs",
+        itemLabel: "paragraph",
+        item: [{ kind: "textarea", name: "text", label: "Text" }],
+      },
+      { kind: "textarea", name: "pullQuote", label: "Pull-quote" },
+      { kind: "image", name: "image", label: "Atmospheric image" },
+    ],
+    default: {
+      eyebrow: "My story",
+      headingLead: "To lead others well,",
+      headingEmphasis: "first lead yourself.",
+      paragraphs: [
+        {
+          text: "Early in my career I climbed the ladder the way most of us are taught to — by getting results. I grew through progressive leadership roles at companies like Johnson & Johnson, Avon, and Fleetwood, and eventually into the C-suite as an Executive Vice President, carrying P&L responsibility and enterprise-wide oversight.",
+        },
+        {
+          text: "I learned how to hit the numbers. What I didn't learn until much later was that the numbers were never the whole story. The teams that truly thrived weren't led by the smartest person in the room — they were led by people who knew themselves, stayed steady under pressure, and made everyone around them better.",
+        },
+        {
+          text: "That realization sent me back to school for a master's in Applied Psychology, and then into coaching. It became my core conviction and the heart of everything I teach: to lead others effectively, you must first lead yourself. That's how you build credibility and real connection — and how you create impact that reaches past the org chart and into people's lives.",
+        },
+      ],
+      pullQuote:
+        "“To lead others effectively, one must first lead Self — building the credibility and relatability that create lasting impact across your team, your organization, and your community.”",
+      image: { src: "/brand/tri_T.png", alt: "Sunlight through a forest canopy" },
+    },
+  },
+  {
+    key: "aboutTri.journey",
+    page: "about-tri",
+    group: "About Tri page",
+    label: "The path here (timeline)",
+    description: "The career journey shown as a story-style timeline of roles — not a résumé.",
+    order: 3,
+    fields: [
+      { kind: "text", name: "eyebrow", label: "Eyebrow" },
+      { kind: "text", name: "headingLead", label: "Heading — first part" },
+      { kind: "text", name: "headingEmphasis", label: "Heading — emphasized part" },
+      { kind: "textarea", name: "intro", label: "Intro paragraph" },
+      {
+        kind: "list",
+        name: "items",
+        label: "Timeline entries",
+        itemLabel: "role",
+        item: [
+          { kind: "text", name: "period", label: "Years" },
+          { kind: "text", name: "title", label: "Role title" },
+          { kind: "text", name: "org", label: "Organization" },
+          { kind: "textarea", name: "body", label: "Description" },
+        ],
+      },
+    ],
+    default: {
+      eyebrow: "The path here",
+      headingLead: "Three seats,",
+      headingEmphasis: "one throughline.",
+      intro:
+        "I've led from inside the business, alongside other CEOs, and across the table as a coach. Here's the road that shaped the way I work today.",
+      items: [
+        {
+          period: "2019 – Present",
+          title: "Founder & Executive Coach",
+          org: "The Wisdom Tri",
+          body: "My coaching practice for C-level leaders in high-growth companies, delivered virtually and in person. Here I built The Enlightened Leadership program on a simple framework — ELQ™ = EQ + IQ + MQ™ — the emotional, intellectual, and mentoring intelligences a leader needs to lead themselves, their team, and the leaders who come next.",
+        },
+        {
+          period: "2016 – Present",
+          title: "Vistage Chair",
+          org: "Vistage International",
+          body: "I lead CEO and C-suite peer-advisory boards, guiding accomplished leaders through their toughest calls in a room of trusted peers. Facilitating other CEOs keeps me close to the real, unscripted challenges of leading at the top.",
+        },
+        {
+          period: "2001 – 2015",
+          title: "Executive Vice President",
+          org: "Bowermaster & Associates",
+          body: "Fourteen years in the C-suite with full P&L responsibility, strategic-planning authority, and enterprise-wide operational oversight. Having actually carried the weight of those decisions is what lets me coach today's executives with candor instead of theory.",
+        },
+        {
+          period: "1989 – 2001",
+          title: "Progressive Leadership Roles",
+          org: "Johnson & Johnson · Avon · Fleetwood",
+          body: "Where it started — building the operational expertise and business acumen, one hard-won lesson at a time, across Fortune 500 and mid-market companies.",
+        },
+      ],
+    },
+  },
+  {
+    key: "aboutTri.approach",
+    page: "about-tri",
+    group: "About Tri page",
+    label: "How I work (beliefs)",
+    description: "The three coaching convictions shown as cards.",
+    order: 4,
+    fields: [
+      { kind: "text", name: "eyebrow", label: "Eyebrow" },
+      { kind: "text", name: "headingLead", label: "Heading — first part" },
+      { kind: "text", name: "headingEmphasis", label: "Heading — emphasized part" },
+      { kind: "textarea", name: "intro", label: "Intro paragraph" },
+      {
+        kind: "list",
+        name: "items",
+        label: "Belief cards",
+        itemLabel: "belief",
+        item: [
+          { kind: "text", name: "eyebrow", label: "Tag" },
+          { kind: "text", name: "title", label: "Title" },
+          { kind: "textarea", name: "body", label: "Body" },
+        ],
+      },
+    ],
+    default: {
+      eyebrow: "How I work",
+      headingLead: "The convictions",
+      headingEmphasis: "I coach from.",
+      intro: "Every leader I work with is different. These three beliefs shape how I show up for all of them.",
+      items: [
+        {
+          eyebrow: "Self-leadership",
+          title: "It starts with you",
+          body: "Before you can lead a team, you have to lead yourself. We build the self-command that keeps you grounded when everything around you isn't.",
+        },
+        {
+          eyebrow: "Self-awareness",
+          title: "See yourself clearly",
+          body: "Growth begins the moment you see how you actually land on others. I hold up an honest mirror — with enough care that you can look, and enough candor that it counts.",
+        },
+        {
+          eyebrow: "Purpose-driven",
+          title: "Lead on purpose",
+          body: "The most resilient leaders are anchored to something bigger than the next quarter. We reconnect your leadership to your purpose, so it holds under pressure.",
+        },
+      ],
+    },
+  },
+  {
+    key: "aboutTri.credentials",
+    page: "about-tri",
+    group: "About Tri page",
+    label: "Credentials & training",
+    description: "Education, certifications, and the sectors Tri has coached in — presented cleanly, not as a résumé.",
+    order: 5,
+    fields: [
+      { kind: "text", name: "eyebrow", label: "Eyebrow" },
+      { kind: "text", name: "headingLead", label: "Heading — first part" },
+      { kind: "text", name: "headingEmphasis", label: "Heading — emphasized part" },
+      { kind: "text", name: "educationTitle", label: "Education — column title" },
+      {
+        kind: "list",
+        name: "education",
+        label: "Education",
+        itemLabel: "degree",
+        item: [
+          { kind: "text", name: "degree", label: "Degree" },
+          { kind: "text", name: "detail", label: "School & year" },
+        ],
+      },
+      { kind: "text", name: "certificationsTitle", label: "Certifications — column title" },
+      {
+        kind: "list",
+        name: "certifications",
+        label: "Certifications",
+        itemLabel: "certification",
+        item: [
+          { kind: "text", name: "name", label: "Credential" },
+          { kind: "text", name: "detail", label: "Body & year" },
+        ],
+      },
+      { kind: "text", name: "sectorsTitle", label: "Sectors — column title" },
+      {
+        kind: "list",
+        name: "sectors",
+        label: "Sectors",
+        itemLabel: "sector",
+        item: [{ kind: "text", name: "text", label: "Sector" }],
+      },
+    ],
+    default: {
+      eyebrow: "Credentials",
+      headingLead: "Trained for this —",
+      headingEmphasis: "on paper and in the arena.",
+      educationTitle: "Education",
+      education: [
+        { degree: "MA, Applied Psychology", detail: "University of Santa Monica · 2012" },
+        { degree: "BS, Business Administration", detail: "California Polytechnic University · 1996" },
+      ],
+      certificationsTitle: "Certifications",
+      certifications: [
+        { name: "ICF Professional Certified Coach (PCC)", detail: "International Coaching Federation · 2021" },
+        { name: "iPEC Certified Professional Coach", detail: "iPEC · 2021" },
+        { name: "Vistage Chair", detail: "Vistage International · since 2016" },
+      ],
+      sectorsTitle: "Sectors I've coached in",
+      sectors: [
+        { text: "Technology" },
+        { text: "Construction" },
+        { text: "Manufacturing" },
+        { text: "Professional services" },
+        { text: "Logistics" },
+      ],
+    },
+  },
+  {
+    key: "aboutTri.cta",
+    page: "about-tri",
+    group: "About Tri page",
+    label: "Closing call-to-action",
+    description: "The closing invitation and its two buttons on the bio page.",
+    order: 6,
+    core: true,
+    fields: [
+      { kind: "text", name: "eyebrow", label: "Eyebrow" },
+      { kind: "text", name: "headingLead", label: "Heading — first part" },
+      { kind: "text", name: "headingEmphasis", label: "Heading — emphasized part" },
+      { kind: "textarea", name: "body", label: "Paragraph" },
+      linkFields("primaryCta", "Primary button"),
+      linkFields("secondaryCta", "Secondary button"),
+    ],
+    default: {
+      eyebrow: "Let's talk",
+      headingLead: "Let's talk about",
+      headingEmphasis: "your leadership.",
+      body: "Whether you're leading a team, a whole company, or figuring out your next chapter as a leader — I'd love to hear where you are. Start with the two-minute assessment, or book a 15-minute call and we'll talk, leader to leader.",
+      primaryCta: { label: "Start the Assessment →", href: "/assessment" },
+      secondaryCta: { label: "Book a call with Tri", href: "/book-a-call" },
+    },
+  },
+
   // ═════════════════════════════ OTHER PAGES ══════════════════════════════════
   {
     key: "bookACall.main",
@@ -990,4 +1296,10 @@ export function sectionsForPage(page: string): SectionDef[] {
   return SECTIONS.filter((s) => s.page === page).sort((a, b) => a.order - b.order);
 }
 
-export const SECTION_GROUPS: SectionGroup[] = ["Global", "Home page", "Organizations page", "Other pages"];
+export const SECTION_GROUPS: SectionGroup[] = [
+  "Global",
+  "Home page",
+  "Organizations page",
+  "About Tri page",
+  "Other pages",
+];

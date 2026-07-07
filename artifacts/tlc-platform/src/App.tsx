@@ -23,6 +23,7 @@ import EnrollPage from "@/app/enroll/page";
 import EnrollConfirmationPage from "@/app/enroll/confirmation/page";
 import BookACallPage from "@/app/book-a-call/page";
 import OrganizationsPage from "@/app/organizations/page";
+import AboutTriPage from "@/app/about-tri/page";
 import AppNotFound from "@/app/not-found";
 
 // Portal pages
@@ -115,6 +116,7 @@ function Router() {
       <Route path="/enroll/confirmation" component={EnrollConfirmationPage} />
       <Route path="/book-a-call" component={BookACallPage} />
       <Route path="/organizations" component={OrganizationsPage} />
+      <Route path="/about-tri" component={AboutTriPage} />
 
       {/* Portal */}
       {group(PARTICIPANT_ROLES, PortalLayout, [

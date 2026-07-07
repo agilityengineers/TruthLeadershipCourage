@@ -23,6 +23,14 @@ import {
   OrgProof,
   OrgGetStarted,
 } from "./organizations";
+import {
+  AboutTriHero,
+  AboutTriStory,
+  AboutTriJourney,
+  AboutTriApproach,
+  AboutTriCredentials,
+  AboutTriCta,
+} from "./about-tri";
 
 type SectionComponent = ComponentType<{ content: Record<string, unknown> }>;
 
@@ -48,4 +56,10 @@ export const SECTION_COMPONENTS: Record<string, SectionComponent> = {
   "org.builtFor": OrgBuiltFor,
   "org.proof": OrgProof,
   "org.getStarted": OrgGetStarted,
+  "aboutTri.hero": AboutTriHero,
+  "aboutTri.story": AboutTriStory,
+  "aboutTri.journey": AboutTriJourney,
+  "aboutTri.approach": AboutTriApproach,
+  "aboutTri.credentials": AboutTriCredentials,
+  "aboutTri.cta": AboutTriCta,
 };

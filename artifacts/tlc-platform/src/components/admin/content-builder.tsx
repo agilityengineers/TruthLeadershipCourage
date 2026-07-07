@@ -39,12 +39,13 @@ export type AdminSection = {
   content: Record<string, unknown>;
 };
 
-const GROUP_ORDER = ["Global", "Home page", "Organizations page", "Other pages"];
+const GROUP_ORDER = ["Global", "Home page", "Organizations page", "About Tri page", "Other pages"];
 
 const PAGE_VIEW: Record<string, string> = {
   global: "/",
   home: "/",
   organizations: "/organizations",
+  "about-tri": "/about-tri",
   "book-a-call": "/book-a-call",
   login: "/login",
   enroll: "/enroll",
@@ -63,6 +64,8 @@ function groupBlurb(group: string): string {
       return "Sections of the main landing page (/). Toggle, reorder, and edit each one.";
     case "Organizations page":
       return "Sections of the “TLC for Organizations” page (/organizations).";
+    case "About Tri page":
+      return "Sections of Tri’s bio page (/about-tri) — the story, timeline, beliefs, and credentials.";
     case "Other pages":
       return "Copy on the book-a-call, sign-in, enrollment, and confirmation pages.";
     default:
