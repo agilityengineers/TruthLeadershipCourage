@@ -149,6 +149,25 @@ export interface EnrollOptions {
   companies: CompanyLite[];
 }
 
+export interface UpcomingCohort {
+  id: string;
+  name: string;
+  slug: string;
+  startDate: string;
+  endDate: string;
+  sessionDay?: string | null;
+  sessionTime?: string | null;
+  timezone?: string | null;
+  price: number;
+  currency: string;
+  seatsLeft: number | null;
+  status: string;
+}
+
+export interface UpcomingCohorts {
+  cohorts: UpcomingCohort[];
+}
+
 export interface ShippingAddress {
   line1: string;
   line2?: string;

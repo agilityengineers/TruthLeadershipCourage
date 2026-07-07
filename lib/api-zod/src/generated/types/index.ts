@@ -124,6 +124,8 @@ export * from './trainerOverview';
 export * from './trainerParticipantDetail';
 export * from './trainerParticipantRow';
 export * from './trainerResourcesData';
+export * from './upcomingCohort';
+export * from './upcomingCohorts';
 export * from './updateQuestionRequest';
 export * from './updateSectionRequest';
 export * from './updateSectionRequestContent';

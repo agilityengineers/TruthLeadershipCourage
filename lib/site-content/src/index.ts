@@ -444,7 +444,7 @@ export const SECTIONS: SectionDef[] = [
         { label: "Coaching", value: "2 private 1:1s", sub: "With Tri, focused on you" },
         { label: "Investment", value: "$5,500", sub: "Seats limited by design" },
       ],
-      footnote: "Next cohort dates are shared on your fit conversation — seats are limited by design.",
+      footnote: "Check out the upcoming cohorts",
     },
   },
   {
@@ -899,6 +899,29 @@ export const SECTIONS: SectionDef[] = [
       heading: "Confirm your seat in the cohort",
       intro: "Choose your cohort, tell us where to ship your physical workbook, and we'll handle the rest.",
       disclaimer: "Payment is handled securely and separately — no card details are entered here.",
+    },
+  },
+  {
+    key: "cohorts.intro",
+    page: "cohorts",
+    group: "Other pages",
+    label: "Upcoming cohorts — intro",
+    description:
+      "The eyebrow, heading, and intro above the list of upcoming cohorts, plus the message shown when none are open. (The cohort list itself is data-driven.)",
+    order: 1,
+    fields: [
+      { kind: "text", name: "eyebrow", label: "Eyebrow" },
+      { kind: "text", name: "heading", label: "Heading" },
+      { kind: "textarea", name: "intro", label: "Intro paragraph" },
+      { kind: "textarea", name: "emptyState", label: "Empty-state message" },
+    ],
+    default: {
+      eyebrow: "Upcoming cohorts",
+      heading: "Find the cohort that fits your season.",
+      intro:
+        "Every cohort runs six months — live, virtual, and small by design. Browse the cohorts opening next and reserve your seat while they're still enrolling.",
+      emptyState:
+        "No cohorts are open for enrollment right now. Book a fit conversation and we'll let you know the moment the next one opens.",
     },
   },
   {
