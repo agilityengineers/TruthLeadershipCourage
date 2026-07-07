@@ -7,6 +7,7 @@ import { usePageContent } from "@/lib/site-content";
 export default function EnrollPage() {
   const params = new URLSearchParams(useSearch());
   const response = params.get("response") ?? undefined;
+  const preselectCohortId = params.get("cohort") ?? undefined;
 
   const { data } = useGetEnrollOptions();
   const cohorts = data?.cohorts ?? [];
@@ -51,7 +52,12 @@ export default function EnrollPage() {
           {cohorts.length === 0 ? (
             <p className="mt-6 text-muted">No cohorts are open for enrollment right now.</p>
           ) : (
-            <EnrollForm responseId={response} cohorts={cohorts} companies={companies} />
+            <EnrollForm
+              responseId={response}
+              cohorts={cohorts}
+              companies={companies}
+              initialCohortId={preselectCohortId}
+            />
           )}
         </div>
         <p className="mt-4 text-center text-[12.5px] text-[#a2a6b8]">{copy.disclaimer}</p>

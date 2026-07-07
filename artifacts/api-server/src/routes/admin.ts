@@ -1,5 +1,11 @@
 import { Router, type IRouter } from "express";
-import { CreateCompanyBody, PurchaseSeatsBody, CloneCohortBody } from "@workspace/api-zod";
+import {
+  CreateCompanyBody,
+  PurchaseSeatsBody,
+  CloneCohortBody,
+  CreateCohortBody,
+  UpdateCohortBody,
+} from "@workspace/api-zod";
 import { db, schema, eq, and, inArray, isNotNull, asc, desc, count } from "../lib/db";
 import { asyncHandler, HttpError } from "../lib/http";
 import { requireRole, requireCapability } from "../lib/principal";
@@ -163,6 +169,7 @@ router.get(
     res.json(
       cohorts.map((c) => ({
         id: c.id,
+        slug: c.slug,
         name: c.name,
         startDate: c.startDate,
         endDate: c.endDate,
@@ -172,9 +179,202 @@ router.get(
         capacity: c.capacity,
         status: c.status,
         isPrivate: c.isPrivate,
+        format: c.format,
         enrollmentCount: enrByCohort.get(c.id) ?? 0,
+        programId: c.programId,
+        trainerId: c.trainerId,
+        companyId: c.companyId,
+        sessionDay: c.sessionDay,
+        sessionTime: c.sessionTime,
+        timezone: c.timezone,
+        tagline: c.tagline,
+        description: c.description,
+        heroImageUrl: c.heroImageUrl,
+        location: c.location,
+        enrollByDate: c.enrollByDate,
       })),
     );
+  }),
+);
+
+/** Programs, trainers, and companies used to populate the create/edit cohort form. */
+router.get(
+  "/admin/cohorts/options",
+  asyncHandler(async (req, res) => {
+    await requireRole(req, "ADMIN");
+    const [programs, trainers, companies] = await Promise.all([
+      db.query.program.findMany({ columns: { id: true, name: true }, orderBy: [asc(schema.program.name)] }),
+      db.query.user.findMany({
+        where: eq(schema.user.role, "TRAINER"),
+        columns: { id: true, name: true },
+        orderBy: [asc(schema.user.name)],
+      }),
+      db.query.company.findMany({ columns: { id: true, name: true }, orderBy: [asc(schema.company.name)] }),
+    ]);
+    res.json({ programs, trainers, companies });
+  }),
+);
+
+async function uniqueCohortSlug(name: string) {
+  let slug = slugify(name) || "cohort";
+  if (await db.query.cohort.findFirst({ where: eq(schema.cohort.slug, slug) })) {
+    slug = `${slug}-${Date.now().toString(36)}`;
+  }
+  return slug;
+}
+
+/** Create a cohort from scratch — the way the very first cohort is born. */
+router.post(
+  "/admin/cohorts",
+  asyncHandler(async (req, res) => {
+    const principal = await requireCapability(req, "cohort:manage");
+    const body = CreateCohortBody.parse(req.body);
+
+    let programId = body.programId;
+    if (!programId) {
+      const firstProgram = await db.query.program.findFirst({ orderBy: [asc(schema.program.createdAt)] });
+      if (!firstProgram) throw new HttpError(400, "No program exists yet — seed a program before creating a cohort.");
+      programId = firstProgram.id;
+    }
+
+    const startDate = new Date(body.startDate);
+    const endDate = new Date(body.endDate);
+    if (Number.isNaN(startDate.getTime()) || Number.isNaN(endDate.getTime())) {
+      throw new HttpError(400, "Invalid start or end date.");
+    }
+    if (endDate <= startDate) throw new HttpError(400, "End date must be after the start date.");
+
+    const slug = await uniqueCohortSlug(body.name);
+    const [created] = await db
+      .insert(schema.cohort)
+      .values({
+        programId,
+        name: body.name,
+        slug,
+        startDate,
+        endDate,
+        sessionDay: body.sessionDay ?? null,
+        sessionTime: body.sessionTime ?? null,
+        timezone: body.timezone ?? null,
+        price: body.price ?? 0,
+        currency: body.currency ?? "usd",
+        capacity: body.capacity ?? 0,
+        status: (body.status ?? "DRAFT") as (typeof schema.cohort.$inferInsert)["status"],
+        isPrivate: body.isPrivate ?? false,
+        trainerId: body.trainerId || null,
+        companyId: body.companyId || null,
+        tagline: body.tagline ?? null,
+        description: body.description ?? null,
+        heroImageUrl: body.heroImageUrl ?? null,
+        format: body.format ?? "online",
+        location: body.location ?? null,
+        enrollByDate: body.enrollByDate ? new Date(body.enrollByDate) : null,
+      })
+      .returning();
+
+    await audit({ actorId: principal.id, action: "cohort.create", entity: "Cohort", entityId: created!.id });
+    res.json({ ok: true, id: created!.id });
+  }),
+);
+
+/** Edit a cohort's details and landing-page content. */
+router.patch(
+  "/admin/cohorts/:id",
+  asyncHandler(async (req, res) => {
+    const principal = await requireCapability(req, "cohort:manage");
+    const id = String(req.params.id);
+    const body = UpdateCohortBody.parse(req.body);
+    const existing = await db.query.cohort.findFirst({ where: eq(schema.cohort.id, id) });
+    if (!existing) throw new HttpError(404, "Cohort not found");
+
+    const patch: Partial<typeof schema.cohort.$inferInsert> = { updatedAt: new Date() };
+    if (body.name !== undefined) patch.name = body.name;
+    if (body.startDate !== undefined) patch.startDate = new Date(body.startDate);
+    if (body.endDate !== undefined) patch.endDate = new Date(body.endDate);
+    if (body.sessionDay !== undefined) patch.sessionDay = body.sessionDay;
+    if (body.sessionTime !== undefined) patch.sessionTime = body.sessionTime;
+    if (body.timezone !== undefined) patch.timezone = body.timezone;
+    if (body.price !== undefined) patch.price = body.price;
+    if (body.currency !== undefined) patch.currency = body.currency;
+    if (body.capacity !== undefined) patch.capacity = body.capacity;
+    if (body.status !== undefined) patch.status = body.status as (typeof schema.cohort.$inferInsert)["status"];
+    if (body.isPrivate !== undefined) patch.isPrivate = body.isPrivate;
+    if (body.trainerId !== undefined) patch.trainerId = body.trainerId || null;
+    if (body.companyId !== undefined) patch.companyId = body.companyId || null;
+    if (body.tagline !== undefined) patch.tagline = body.tagline;
+    if (body.description !== undefined) patch.description = body.description;
+    if (body.heroImageUrl !== undefined) patch.heroImageUrl = body.heroImageUrl;
+    if (body.format !== undefined) patch.format = body.format;
+    if (body.location !== undefined) patch.location = body.location;
+    if (body.enrollByDate !== undefined) patch.enrollByDate = body.enrollByDate ? new Date(body.enrollByDate) : null;
+
+    if (patch.startDate && patch.endDate && patch.endDate <= patch.startDate) {
+      throw new HttpError(400, "End date must be after the start date.");
+    }
+
+    await db.update(schema.cohort).set(patch).where(eq(schema.cohort.id, id));
+    await audit({ actorId: principal.id, action: "cohort.update", entity: "Cohort", entityId: id });
+    res.json({ ok: true });
+  }),
+);
+
+/**
+ * Delete a cohort. A cohort with real participants (enrollments) can't be hard-
+ * deleted — that would destroy payment and progress records — so we guide the
+ * admin to archive it instead. Cohorts with no enrollments are removed along with
+ * their scaffolding (events, seats, threads, resources, waitlist, campaigns).
+ */
+router.delete(
+  "/admin/cohorts/:id",
+  asyncHandler(async (req, res) => {
+    const principal = await requireCapability(req, "cohort:manage");
+    const id = String(req.params.id);
+    const existing = await db.query.cohort.findFirst({ where: eq(schema.cohort.id, id) });
+    if (!existing) throw new HttpError(404, "Cohort not found");
+
+    const [{ n } = { n: 0 }] = await db
+      .select({ n: count() })
+      .from(schema.enrollment)
+      .where(eq(schema.enrollment.cohortId, id));
+    const enrolled = Number(n);
+    if (enrolled > 0) {
+      throw new HttpError(
+        409,
+        `This cohort has ${enrolled} enrollment${enrolled === 1 ? "" : "s"}. Archive it instead to preserve participant and payment records.`,
+      );
+    }
+
+    await db.transaction(async (tx) => {
+      const events = await tx.query.event.findMany({
+        where: eq(schema.event.cohortId, id),
+        columns: { id: true },
+      });
+      const eventIds = events.map((e) => e.id);
+      if (eventIds.length) {
+        await tx.delete(schema.coachingBooking).where(inArray(schema.coachingBooking.eventId, eventIds));
+      }
+      await tx.delete(schema.event).where(eq(schema.event.cohortId, id));
+
+      const threads = await tx.query.thread.findMany({
+        where: eq(schema.thread.cohortId, id),
+        columns: { id: true },
+      });
+      const threadIds = threads.map((t) => t.id);
+      if (threadIds.length) {
+        await tx.delete(schema.message).where(inArray(schema.message.threadId, threadIds));
+        await tx.delete(schema.threadMember).where(inArray(schema.threadMember.threadId, threadIds));
+      }
+      await tx.delete(schema.thread).where(eq(schema.thread.cohortId, id));
+
+      await tx.delete(schema.seat).where(eq(schema.seat.cohortId, id));
+      await tx.delete(schema.resource).where(eq(schema.resource.cohortId, id));
+      await tx.delete(schema.waitlistEntry).where(eq(schema.waitlistEntry.cohortId, id));
+      await tx.delete(schema.emailCampaign).where(eq(schema.emailCampaign.cohortId, id));
+      await tx.delete(schema.cohort).where(eq(schema.cohort.id, id));
+    });
+
+    await audit({ actorId: principal.id, action: "cohort.delete", entity: "Cohort", entityId: id });
+    res.json({ ok: true });
   }),
 );
 

@@ -33,6 +33,14 @@ export const cohort = pgTable("cohort", {
   isPrivate: boolean("is_private").notNull().default(false),
   trainerId: text("trainer_id").references(() => user.id),
   companyId: text("company_id").references(() => company.id),
+  // ── Public landing-page content (all optional; the page falls back to
+  //    program-level copy when a cohort doesn't override it). ──
+  tagline: text("tagline"),
+  description: text("description"),
+  heroImageUrl: text("hero_image_url"),
+  format: text("format").notNull().default("online"),
+  location: text("location"),
+  enrollByDate: timestamp("enroll_by_date", { withTimezone: true, mode: "date" }),
   createdAt: createdAt(),
   updatedAt: updatedAt(),
 });

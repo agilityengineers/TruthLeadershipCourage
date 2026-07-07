@@ -693,6 +693,7 @@ export interface AcceptInviteRequest {
 
 export interface AdminCohortRow {
   id: string;
+  slug: string;
   name: string;
   startDate: string;
   endDate: string;
@@ -702,13 +703,180 @@ export interface AdminCohortRow {
   capacity: number;
   status: string;
   isPrivate: boolean;
+  format: string;
   enrollmentCount: number;
+  programId?: string;
+  trainerId?: string | null;
+  companyId?: string | null;
+  sessionDay?: string | null;
+  sessionTime?: string | null;
+  timezone?: string | null;
+  tagline?: string | null;
+  description?: string | null;
+  heroImageUrl?: string | null;
+  location?: string | null;
+  enrollByDate?: string | null;
 }
 
 export interface CloneCohortRequest {
   sourceId: string;
   name: string;
   startDate: string;
+}
+
+export type CreateCohortRequestStatus = typeof CreateCohortRequestStatus[keyof typeof CreateCohortRequestStatus];
+
+
+export const CreateCohortRequestStatus = {
+  DRAFT: 'DRAFT',
+  ENROLLING: 'ENROLLING',
+  RUNNING: 'RUNNING',
+  COMPLETED: 'COMPLETED',
+  ARCHIVED: 'ARCHIVED',
+} as const;
+
+export type CreateCohortRequestFormat = typeof CreateCohortRequestFormat[keyof typeof CreateCohortRequestFormat];
+
+
+export const CreateCohortRequestFormat = {
+  online: 'online',
+  in_person: 'in_person',
+  hybrid: 'hybrid',
+} as const;
+
+export interface CreateCohortRequest {
+  programId?: string;
+  name: string;
+  startDate: string;
+  endDate: string;
+  sessionDay?: string;
+  sessionTime?: string;
+  timezone?: string;
+  price?: number;
+  currency?: string;
+  capacity?: number;
+  status?: CreateCohortRequestStatus;
+  isPrivate?: boolean;
+  trainerId?: string;
+  companyId?: string;
+  tagline?: string;
+  description?: string;
+  heroImageUrl?: string;
+  format?: CreateCohortRequestFormat;
+  location?: string;
+  enrollByDate?: string;
+}
+
+export type UpdateCohortRequestStatus = typeof UpdateCohortRequestStatus[keyof typeof UpdateCohortRequestStatus];
+
+
+export const UpdateCohortRequestStatus = {
+  DRAFT: 'DRAFT',
+  ENROLLING: 'ENROLLING',
+  RUNNING: 'RUNNING',
+  COMPLETED: 'COMPLETED',
+  ARCHIVED: 'ARCHIVED',
+} as const;
+
+export type UpdateCohortRequestFormat = typeof UpdateCohortRequestFormat[keyof typeof UpdateCohortRequestFormat];
+
+
+export const UpdateCohortRequestFormat = {
+  online: 'online',
+  in_person: 'in_person',
+  hybrid: 'hybrid',
+} as const;
+
+export interface UpdateCohortRequest {
+  name?: string;
+  startDate?: string;
+  endDate?: string;
+  sessionDay?: string;
+  sessionTime?: string;
+  timezone?: string;
+  price?: number;
+  currency?: string;
+  capacity?: number;
+  status?: UpdateCohortRequestStatus;
+  isPrivate?: boolean;
+  trainerId?: string | null;
+  companyId?: string | null;
+  tagline?: string;
+  description?: string;
+  heroImageUrl?: string;
+  format?: UpdateCohortRequestFormat;
+  location?: string;
+  enrollByDate?: string | null;
+}
+
+export type CohortFormOptionsProgramsItem = {
+  id: string;
+  name: string;
+};
+
+export type CohortFormOptionsTrainersItem = {
+  id: string;
+  name: string | null;
+};
+
+export type CohortFormOptionsCompaniesItem = {
+  id: string;
+  name: string;
+};
+
+export interface CohortFormOptions {
+  programs: CohortFormOptionsProgramsItem[];
+  trainers: CohortFormOptionsTrainersItem[];
+  companies: CohortFormOptionsCompaniesItem[];
+}
+
+export interface PublicCohortCard {
+  id: string;
+  slug: string;
+  name: string;
+  tagline?: string | null;
+  startDate: string;
+  endDate: string;
+  sessionDay?: string | null;
+  sessionTime?: string | null;
+  timezone?: string | null;
+  price: number;
+  currency: string;
+  status: string;
+  format: string;
+  location?: string | null;
+  heroImageUrl?: string | null;
+  trainerName?: string | null;
+  seatsLeft: number | null;
+}
+
+export interface PublicCohort {
+  id: string;
+  slug: string;
+  name: string;
+  tagline?: string | null;
+  description?: string | null;
+  heroImageUrl?: string | null;
+  startDate: string;
+  endDate: string;
+  enrollByDate?: string | null;
+  sessionDay?: string | null;
+  sessionTime?: string | null;
+  timezone?: string | null;
+  price: number;
+  currency: string;
+  status: string;
+  format: string;
+  location?: string | null;
+  isPrivate: boolean;
+  capacity: number;
+  enrollmentCount: number;
+  seatsLeft: number | null;
+  totalWeeks: number;
+  programName: string;
+  programDescription?: string | null;
+  trainerName?: string | null;
+  trainerTitle?: string | null;
 }
 
 export interface AdminParticipantRow {
@@ -876,5 +1044,9 @@ export interface UploadImageResult {
 
 export type GetThreadParams = {
 oversight?: boolean;
+};
+
+export type DeleteCohort409 = {
+  error: string;
 };
 

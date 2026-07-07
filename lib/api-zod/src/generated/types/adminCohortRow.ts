@@ -8,6 +8,7 @@
 
 export interface AdminCohortRow {
   id: string;
+  slug: string;
   name: string;
   startDate: Date;
   endDate: Date;
@@ -17,5 +18,17 @@ export interface AdminCohortRow {
   capacity: number;
   status: string;
   isPrivate: boolean;
+  format: string;
   enrollmentCount: number;
+  programId?: string;
+  trainerId?: string | null;
+  companyId?: string | null;
+  sessionDay?: string | null;
+  sessionTime?: string | null;
+  timezone?: string | null;
+  tagline?: string | null;
+  description?: string | null;
+  heroImageUrl?: string | null;
+  location?: string | null;
+  enrollByDate?: Date | null;
 }
