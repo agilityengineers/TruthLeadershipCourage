@@ -37,17 +37,20 @@ import type {
   BillingPayment,
   CertificateResult,
   CloneCohortRequest,
+  CohortFormOptions,
   CommunicationsData,
   CompaniesData,
   CompanyOverview,
   CompanyPersonRow,
   CompleteWeekRequest,
   CountResponse,
+  CreateCohortRequest,
   CreateCompanyRequest,
   CreateEnrollmentRequest,
   CreateEventRequest,
   CreateResourceRequest,
   CreateUserRequest,
+  DeleteCohort409,
   EnrollOptions,
   EnrollResult,
   FulfillRequest,
@@ -63,6 +66,7 @@ import type {
   NotificationItem,
   Ok,
   ParticipantContext,
+  PublicCohort,
   PublicContent,
   PurchaseSeatsRequest,
   RefundRequest,
@@ -86,6 +90,7 @@ import type {
   TrainerParticipantRow,
   TrainerResourcesData,
   UpcomingCohorts,
+  UpdateCohortRequest,
   UpdateQuestionRequest,
   UpdateSectionRequest,
   UpdateUserRequest,
@@ -3045,6 +3050,341 @@ export function useListCohorts<TData = Awaited<ReturnType<typeof listCohorts>>, 
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
   const queryOptions = getListCohortsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getCreateCohortUrl = () => {
+
+
+
+
+  return `/api/admin/cohorts`
+}
+
+export const createCohort = async (createCohortRequest: CreateCohortRequest, options?: RequestInit): Promise<IdResult> => {
+
+  return customFetch<IdResult>(getCreateCohortUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(createCohortRequest)
+  }
+);}
+
+
+
+
+export const getCreateCohortMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createCohort>>, TError,{data: BodyType<CreateCohortRequest>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createCohort>>, TError,{data: BodyType<CreateCohortRequest>}, TContext> => {
+
+const mutationKey = ['createCohort'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createCohort>>, {data: BodyType<CreateCohortRequest>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  createCohort(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateCohortMutationResult = NonNullable<Awaited<ReturnType<typeof createCohort>>>
+    export type CreateCohortMutationBody = BodyType<CreateCohortRequest>
+    export type CreateCohortMutationError = ErrorType<unknown>
+
+    export const useCreateCohort = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createCohort>>, TError,{data: BodyType<CreateCohortRequest>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createCohort>>,
+        TError,
+        {data: BodyType<CreateCohortRequest>},
+        TContext
+      > => {
+      return useMutation(getCreateCohortMutationOptions(options));
+    }
+
+export const getGetCohortFormOptionsUrl = () => {
+
+
+
+
+  return `/api/admin/cohorts/options`
+}
+
+export const getCohortFormOptions = async ( options?: RequestInit): Promise<CohortFormOptions> => {
+
+  return customFetch<CohortFormOptions>(getGetCohortFormOptionsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetCohortFormOptionsQueryKey = () => {
+    return [
+    `/api/admin/cohorts/options`
+    ] as const;
+    }
+
+
+export const getGetCohortFormOptionsQueryOptions = <TData = Awaited<ReturnType<typeof getCohortFormOptions>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getCohortFormOptions>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetCohortFormOptionsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getCohortFormOptions>>> = ({ signal }) => getCohortFormOptions({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getCohortFormOptions>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetCohortFormOptionsQueryResult = NonNullable<Awaited<ReturnType<typeof getCohortFormOptions>>>
+export type GetCohortFormOptionsQueryError = ErrorType<unknown>
+
+
+
+export function useGetCohortFormOptions<TData = Awaited<ReturnType<typeof getCohortFormOptions>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getCohortFormOptions>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetCohortFormOptionsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getUpdateCohortUrl = (id: string,) => {
+
+
+
+
+  return `/api/admin/cohorts/${id}`
+}
+
+export const updateCohort = async (id: string,
+    updateCohortRequest: UpdateCohortRequest, options?: RequestInit): Promise<Ok> => {
+
+  return customFetch<Ok>(getUpdateCohortUrl(id),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(updateCohortRequest)
+  }
+);}
+
+
+
+
+export const getUpdateCohortMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateCohort>>, TError,{id: string;data: BodyType<UpdateCohortRequest>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateCohort>>, TError,{id: string;data: BodyType<UpdateCohortRequest>}, TContext> => {
+
+const mutationKey = ['updateCohort'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateCohort>>, {id: string;data: BodyType<UpdateCohortRequest>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  updateCohort(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateCohortMutationResult = NonNullable<Awaited<ReturnType<typeof updateCohort>>>
+    export type UpdateCohortMutationBody = BodyType<UpdateCohortRequest>
+    export type UpdateCohortMutationError = ErrorType<unknown>
+
+    export const useUpdateCohort = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateCohort>>, TError,{id: string;data: BodyType<UpdateCohortRequest>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateCohort>>,
+        TError,
+        {id: string;data: BodyType<UpdateCohortRequest>},
+        TContext
+      > => {
+      return useMutation(getUpdateCohortMutationOptions(options));
+    }
+
+export const getDeleteCohortUrl = (id: string,) => {
+
+
+
+
+  return `/api/admin/cohorts/${id}`
+}
+
+export const deleteCohort = async (id: string, options?: RequestInit): Promise<Ok> => {
+
+  return customFetch<Ok>(getDeleteCohortUrl(id),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+export const getDeleteCohortMutationOptions = <TError = ErrorType<DeleteCohort409>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteCohort>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteCohort>>, TError,{id: string}, TContext> => {
+
+const mutationKey = ['deleteCohort'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteCohort>>, {id: string}> = (props) => {
+          const {id} = props ?? {};
+
+          return  deleteCohort(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteCohortMutationResult = NonNullable<Awaited<ReturnType<typeof deleteCohort>>>
+
+    export type DeleteCohortMutationError = ErrorType<DeleteCohort409>
+
+    export const useDeleteCohort = <TError = ErrorType<DeleteCohort409>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteCohort>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof deleteCohort>>,
+        TError,
+        {id: string},
+        TContext
+      > => {
+      return useMutation(getDeleteCohortMutationOptions(options));
+    }
+
+export const getGetPublicCohortUrl = (slug: string,) => {
+
+
+
+
+  return `/api/cohorts/${slug}`
+}
+
+export const getPublicCohort = async (slug: string, options?: RequestInit): Promise<PublicCohort> => {
+
+  return customFetch<PublicCohort>(getGetPublicCohortUrl(slug),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetPublicCohortQueryKey = (slug: string,) => {
+    return [
+    `/api/cohorts/${slug}`
+    ] as const;
+    }
+
+
+export const getGetPublicCohortQueryOptions = <TData = Awaited<ReturnType<typeof getPublicCohort>>, TError = ErrorType<void>>(slug: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getPublicCohort>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetPublicCohortQueryKey(slug);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getPublicCohort>>> = ({ signal }) => getPublicCohort(slug, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: slug !== null && slug !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getPublicCohort>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetPublicCohortQueryResult = NonNullable<Awaited<ReturnType<typeof getPublicCohort>>>
+export type GetPublicCohortQueryError = ErrorType<void>
+
+
+
+export function useGetPublicCohort<TData = Awaited<ReturnType<typeof getPublicCohort>>, TError = ErrorType<void>>(
+ slug: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getPublicCohort>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetPublicCohortQueryOptions(slug,options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 

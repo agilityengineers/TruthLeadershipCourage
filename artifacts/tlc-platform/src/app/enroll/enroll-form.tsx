@@ -19,13 +19,17 @@ export function EnrollForm({
   cohorts,
   companies,
   responseId,
+  initialCohortId,
 }: {
   cohorts: CohortOpt[];
   companies: { id: string; name: string }[];
   responseId?: string;
+  initialCohortId?: string;
 }) {
   const [, navigate] = useLocation();
-  const [cohortId, setCohortId] = useState(cohorts[0]?.id ?? "");
+  const [cohortId, setCohortId] = useState(
+    (initialCohortId && cohorts.some((c) => c.id === initialCohortId) ? initialCohortId : cohorts[0]?.id) ?? "",
+  );
   const [error, setError] = useState<string | null>(null);
   const createEnrollment = useCreateEnrollment();
   const pending = createEnrollment.isPending;

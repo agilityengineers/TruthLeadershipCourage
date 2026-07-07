@@ -59,7 +59,11 @@ function CohortCard({ cohort }: { cohort: UpcomingCohort }) {
   return (
     <div className="flex flex-col rounded-[16px] border border-hair-1 bg-white p-[26px] shadow-card">
       <div className="mb-4 flex items-start justify-between gap-3">
-        <h3 className="font-display text-[21px] leading-tight text-ink">{cohort.name}</h3>
+        <h3 className="font-display text-[21px] leading-tight text-ink">
+          <Link href={`/cohort/${cohort.slug}`} className="hover:text-eq">
+            {cohort.name}
+          </Link>
+        </h3>
         <span
           className="shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[.04em]"
           style={{ color: pill.color, background: pill.bg }}
@@ -97,16 +101,21 @@ function CohortCard({ cohort }: { cohort: UpcomingCohort }) {
         </div>
       </dl>
 
-      <div className="mt-6 pt-5 border-t border-hair-1">
+      <div className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-2 pt-5 border-t border-hair-1">
         {enrolling ? (
           <Button asChild size="md" variant={soldOut ? "outline" : "primary"}>
-            <Link href="/enroll">{soldOut ? "Join the waitlist →" : "Reserve your seat →"}</Link>
+            <Link href={`/enroll?cohort=${cohort.id}`}>
+              {soldOut ? "Join the waitlist →" : "Reserve your seat →"}
+            </Link>
           </Button>
         ) : (
           <Button asChild size="md" variant="outline">
             <Link href="/book-a-call">Book a fit call →</Link>
           </Button>
         )}
+        <Link href={`/cohort/${cohort.slug}`} className="text-[13px] font-semibold text-eq hover:underline">
+          View details →
+        </Link>
       </div>
     </div>
   );

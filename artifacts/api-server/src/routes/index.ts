@@ -15,6 +15,7 @@ import usersRouter from "./users";
 import inviteRouter from "./invite";
 import companyRouter from "./company";
 import contentRouter from "./content";
+import cohortsRouter from "./cohorts";
 import miscRouter from "./misc";
 
 const router: IRouter = Router();
@@ -35,6 +36,7 @@ router.use(usersRouter);
 router.use(inviteRouter);
 router.use(companyRouter);
 router.use(contentRouter);
+router.use(cohortsRouter);
 router.use(miscRouter);
 
 export default router;

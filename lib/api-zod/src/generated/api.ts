@@ -894,6 +894,7 @@ export const PurchaseSeatsResponse = zod.object({
 
 export const ListCohortsResponseItem = zod.object({
   "id": zod.string(),
+  "slug": zod.string(),
   "name": zod.string(),
   "startDate": zod.coerce.date(),
   "endDate": zod.coerce.date(),
@@ -903,9 +904,140 @@ export const ListCohortsResponseItem = zod.object({
   "capacity": zod.number(),
   "status": zod.string(),
   "isPrivate": zod.boolean(),
-  "enrollmentCount": zod.number()
+  "format": zod.string(),
+  "enrollmentCount": zod.number(),
+  "programId": zod.string().optional(),
+  "trainerId": zod.string().nullish(),
+  "companyId": zod.string().nullish(),
+  "sessionDay": zod.string().nullish(),
+  "sessionTime": zod.string().nullish(),
+  "timezone": zod.string().nullish(),
+  "tagline": zod.string().nullish(),
+  "description": zod.string().nullish(),
+  "heroImageUrl": zod.string().nullish(),
+  "location": zod.string().nullish(),
+  "enrollByDate": zod.coerce.date().nullish()
 })
 export const ListCohortsResponse = zod.array(ListCohortsResponseItem)
+
+
+export const CreateCohortBody = zod.object({
+  "programId": zod.string().optional(),
+  "name": zod.string(),
+  "startDate": zod.string(),
+  "endDate": zod.string(),
+  "sessionDay": zod.string().optional(),
+  "sessionTime": zod.string().optional(),
+  "timezone": zod.string().optional(),
+  "price": zod.number().optional(),
+  "currency": zod.string().optional(),
+  "capacity": zod.number().optional(),
+  "status": zod.enum(['DRAFT', 'ENROLLING', 'RUNNING', 'COMPLETED', 'ARCHIVED']).optional(),
+  "isPrivate": zod.boolean().optional(),
+  "trainerId": zod.string().optional(),
+  "companyId": zod.string().optional(),
+  "tagline": zod.string().optional(),
+  "description": zod.string().optional(),
+  "heroImageUrl": zod.string().optional(),
+  "format": zod.enum(['online', 'in_person', 'hybrid']).optional(),
+  "location": zod.string().optional(),
+  "enrollByDate": zod.string().optional()
+})
+
+export const CreateCohortResponse = zod.object({
+  "ok": zod.boolean(),
+  "id": zod.string()
+})
+
+
+export const GetCohortFormOptionsResponse = zod.object({
+  "programs": zod.array(zod.object({
+  "id": zod.string(),
+  "name": zod.string()
+})),
+  "trainers": zod.array(zod.object({
+  "id": zod.string(),
+  "name": zod.string().nullable()
+})),
+  "companies": zod.array(zod.object({
+  "id": zod.string(),
+  "name": zod.string()
+}))
+})
+
+
+export const UpdateCohortParams = zod.object({
+  "id": zod.coerce.string()
+})
+
+export const UpdateCohortBody = zod.object({
+  "name": zod.string().optional(),
+  "startDate": zod.string().optional(),
+  "endDate": zod.string().optional(),
+  "sessionDay": zod.string().optional(),
+  "sessionTime": zod.string().optional(),
+  "timezone": zod.string().optional(),
+  "price": zod.number().optional(),
+  "currency": zod.string().optional(),
+  "capacity": zod.number().optional(),
+  "status": zod.enum(['DRAFT', 'ENROLLING', 'RUNNING', 'COMPLETED', 'ARCHIVED']).optional(),
+  "isPrivate": zod.boolean().optional(),
+  "trainerId": zod.string().nullish(),
+  "companyId": zod.string().nullish(),
+  "tagline": zod.string().optional(),
+  "description": zod.string().optional(),
+  "heroImageUrl": zod.string().optional(),
+  "format": zod.enum(['online', 'in_person', 'hybrid']).optional(),
+  "location": zod.string().optional(),
+  "enrollByDate": zod.string().nullish()
+})
+
+export const UpdateCohortResponse = zod.object({
+  "ok": zod.boolean()
+})
+
+
+export const DeleteCohortParams = zod.object({
+  "id": zod.coerce.string()
+})
+
+export const DeleteCohortResponse = zod.object({
+  "ok": zod.boolean()
+})
+
+
+export const GetPublicCohortParams = zod.object({
+  "slug": zod.coerce.string()
+})
+
+export const GetPublicCohortResponse = zod.object({
+  "id": zod.string(),
+  "slug": zod.string(),
+  "name": zod.string(),
+  "tagline": zod.string().nullish(),
+  "description": zod.string().nullish(),
+  "heroImageUrl": zod.string().nullish(),
+  "startDate": zod.coerce.date(),
+  "endDate": zod.coerce.date(),
+  "enrollByDate": zod.coerce.date().nullish(),
+  "sessionDay": zod.string().nullish(),
+  "sessionTime": zod.string().nullish(),
+  "timezone": zod.string().nullish(),
+  "price": zod.number(),
+  "currency": zod.string(),
+  "status": zod.string(),
+  "format": zod.string(),
+  "location": zod.string().nullish(),
+  "isPrivate": zod.boolean(),
+  "capacity": zod.number(),
+  "enrollmentCount": zod.number(),
+  "seatsLeft": zod.number().nullable(),
+  "totalWeeks": zod.number(),
+  "programName": zod.string(),
+  "programDescription": zod.string().nullish(),
+  "trainerName": zod.string().nullish(),
+  "trainerTitle": zod.string().nullish()
+})
 
 
 export const CloneCohortBody = zod.object({

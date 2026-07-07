@@ -24,6 +24,7 @@ tags:
   - name: trainer
   - name: admin
   - name: company
+  - name: public
 
 paths:
   /healthz:
@@ -595,6 +596,81 @@ paths:
               schema:
                 type: array
                 items: { $ref: "#/components/schemas/AdminCohortRow" }
+    post:
+      operationId: createCohort
+      tags: [admin]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreateCohortRequest" }
+      responses:
+        "200":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/IdResult" }
+  /admin/cohorts/options:
+    get:
+      operationId: getCohortFormOptions
+      tags: [admin]
+      responses:
+        "200":
+          description: Programs, trainers, and companies for the cohort form
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CohortFormOptions" }
+  /admin/cohorts/{id}:
+    patch:
+      operationId: updateCohort
+      tags: [admin]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/UpdateCohortRequest" }
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Ok" }
+    delete:
+      operationId: deleteCohort
+      tags: [admin]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Ok" }
+        "409":
+          description: Cohort has enrollments — archive instead
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [error]
+                properties:
+                  error: { type: string }
+  /cohorts/{slug}:
+    get:
+      operationId: getPublicCohort
+      tags: [public]
+      parameters:
+        - { name: slug, in: path, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: A single cohort's public landing detail
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PublicCohort" }
+        "404":
+          description: Not found
   /admin/cohorts/clone:
     post:
       operationId: cloneCohort
@@ -1783,9 +1859,10 @@ components:
         password: { type: string }
     AdminCohortRow:
       type: object
-      required: [id, name, startDate, endDate, price, currency, capacity, status, isPrivate, enrollmentCount]
+      required: [id, slug, name, startDate, endDate, price, currency, capacity, status, isPrivate, format, enrollmentCount]
       properties:
         id: { type: string }
+        slug: { type: string }
         name: { type: string }
         startDate: { type: string, format: date-time }
         endDate: { type: string, format: date-time }
@@ -1795,7 +1872,19 @@ components:
         capacity: { type: integer }
         status: { type: string }
         isPrivate: { type: boolean }
+        format: { type: string }
         enrollmentCount: { type: integer }
+        programId: { type: string }
+        trainerId: { type: string, nullable: true }
+        companyId: { type: string, nullable: true }
+        sessionDay: { type: string, nullable: true }
+        sessionTime: { type: string, nullable: true }
+        timezone: { type: string, nullable: true }
+        tagline: { type: string, nullable: true }
+        description: { type: string, nullable: true }
+        heroImageUrl: { type: string, nullable: true }
+        location: { type: string, nullable: true }
+        enrollByDate: { type: string, format: date-time, nullable: true }
     CloneCohortRequest:
       type: object
       required: [sourceId, name, startDate]
@@ -1803,6 +1892,111 @@ components:
         sourceId: { type: string }
         name: { type: string }
         startDate: { type: string }
+    CreateCohortRequest:
+      type: object
+      required: [name, startDate, endDate]
+      properties:
+        programId: { type: string }
+        name: { type: string }
+        startDate: { type: string }
+        endDate: { type: string }
+        sessionDay: { type: string }
+        sessionTime: { type: string }
+        timezone: { type: string }
+        price: { type: integer }
+        currency: { type: string }
+        capacity: { type: integer }
+        status: { type: string, enum: [DRAFT, ENROLLING, RUNNING, COMPLETED, ARCHIVED] }
+        isPrivate: { type: boolean }
+        trainerId: { type: string }
+        companyId: { type: string }
+        tagline: { type: string }
+        description: { type: string }
+        heroImageUrl: { type: string }
+        format: { type: string, enum: [online, in_person, hybrid] }
+        location: { type: string }
+        enrollByDate: { type: string }
+    UpdateCohortRequest:
+      type: object
+      properties:
+        name: { type: string }
+        startDate: { type: string }
+        endDate: { type: string }
+        sessionDay: { type: string }
+        sessionTime: { type: string }
+        timezone: { type: string }
+        price: { type: integer }
+        currency: { type: string }
+        capacity: { type: integer }
+        status: { type: string, enum: [DRAFT, ENROLLING, RUNNING, COMPLETED, ARCHIVED] }
+        isPrivate: { type: boolean }
+        trainerId: { type: string, nullable: true }
+        companyId: { type: string, nullable: true }
+        tagline: { type: string }
+        description: { type: string }
+        heroImageUrl: { type: string }
+        format: { type: string, enum: [online, in_person, hybrid] }
+        location: { type: string }
+        enrollByDate: { type: string, nullable: true }
+    CohortFormOptions:
+      type: object
+      required: [programs, trainers, companies]
+      properties:
+        programs:
+          type: array
+          items:
+            type: object
+            required: [id, name]
+            properties:
+              id: { type: string }
+              name: { type: string }
+        trainers:
+          type: array
+          items:
+            type: object
+            required: [id, name]
+            properties:
+              id: { type: string }
+              name: { type: string, nullable: true }
+        companies:
+          type: array
+          items:
+            type: object
+            required: [id, name]
+            properties:
+              id: { type: string }
+              name: { type: string }
+    PublicCohort:
+      type: object
+      required:
+        [id, slug, name, startDate, endDate, price, currency, status, format, isPrivate, capacity, enrollmentCount, seatsLeft, programName, totalWeeks]
+      properties:
+        id: { type: string }
+        slug: { type: string }
+        name: { type: string }
+        tagline: { type: string, nullable: true }
+        description: { type: string, nullable: true }
+        heroImageUrl: { type: string, nullable: true }
+        startDate: { type: string, format: date-time }
+        endDate: { type: string, format: date-time }
+        enrollByDate: { type: string, format: date-time, nullable: true }
+        sessionDay: { type: string, nullable: true }
+        sessionTime: { type: string, nullable: true }
+        timezone: { type: string, nullable: true }
+        price: { type: integer }
+        currency: { type: string }
+        status: { type: string }
+        format: { type: string }
+        location: { type: string, nullable: true }
+        isPrivate: { type: boolean }
+        capacity: { type: integer }
+        enrollmentCount: { type: integer }
+        seatsLeft: { type: integer, nullable: true }
+        totalWeeks: { type: integer }
+        programName: { type: string }
+        programDescription: { type: string, nullable: true }
+        trainerName: { type: string, nullable: true }
+        trainerTitle: { type: string, nullable: true }
     AdminParticipantRow:
       type: object
       required: [id, userEmail, cohortName, completedCount, status]
