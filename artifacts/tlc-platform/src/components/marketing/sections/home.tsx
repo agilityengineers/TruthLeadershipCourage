@@ -219,7 +219,7 @@ export function HomePlan({ content }: { content: SC }) {
         <div className="mb-[46px] text-center">
           <Eyebrow className="mb-3.5 justify-center">{c.eyebrow}</Eyebrow>
           <h2 className="text-[clamp(28px,3.4vw,40px)] leading-[1.1] text-ink">
-            {c.headingLead} <em className="italic text-eq">{c.headingEmphasis}</em>
+            {c.headingLead} <em className="mt-1 block italic text-eq">{c.headingEmphasis}</em>
           </h2>
         </div>
         <div className="mb-[54px] grid grid-cols-1 gap-5 md:grid-cols-3">
