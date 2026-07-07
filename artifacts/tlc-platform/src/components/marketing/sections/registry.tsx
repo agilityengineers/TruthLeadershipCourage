@@ -9,6 +9,7 @@ import {
   HomeOutcomes,
   HomeGlance,
   HomeStories,
+  HomeWhoFor,
   HomeFinalCta,
 } from "./home";
 import {
@@ -36,6 +37,7 @@ export const SECTION_COMPONENTS: Record<string, SectionComponent> = {
   "home.outcomes": HomeOutcomes,
   "home.glance": HomeGlance,
   "home.stories": HomeStories,
+  "home.whoFor": HomeWhoFor,
   "home.finalCta": HomeFinalCta,
   "org.hero": OrgHero,
   "org.problem": OrgProblem,
