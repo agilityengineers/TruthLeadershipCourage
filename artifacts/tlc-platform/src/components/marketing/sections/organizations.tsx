@@ -118,8 +118,8 @@ export function OrgProblem({ content }: { content: SC }) {
         {c.headingLead} <em className="italic text-mq">{c.headingEmphasis}</em>
       </h2>
       <p className="mb-10 max-w-[42em] text-[17px] leading-[1.55] text-muted">{c.body}</p>
-      <div className="rounded-[14px] border-l-[3px] border-mq bg-[#f6f4fb] px-[30px] py-[26px]">
-        <p className="max-w-[36em] font-display text-[19px] italic leading-[1.5] text-[#2b2747]">{c.quote}</p>
+      <div className="mx-auto max-w-[40em] rounded-[14px] border-l-[3px] border-mq bg-[#f6f4fb] px-[30px] py-[26px]">
+        <p className="font-display text-[19px] italic leading-[1.5] text-[#2b2747]">{c.quote}</p>
       </div>
     </section>
   );
