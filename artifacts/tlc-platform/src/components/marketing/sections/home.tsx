@@ -278,12 +278,15 @@ export function HomeOutcomes({ content }: { content: SC }) {
       <Eyebrow color="#024794" className="mb-3.5">
         {c.eyebrow}
       </Eyebrow>
-      <h2 className="mb-[42px] max-w-[14em] text-[clamp(28px,3.4vw,40px)] leading-[1.1] text-ink">
+      <h2 className="mb-[42px] max-w-[18em] text-[clamp(28px,3.4vw,40px)] leading-[1.1] text-ink">
         {c.headingLead} <em className="italic text-mq">{c.headingEmphasis}</em>
       </h2>
-      <div className="grid grid-cols-1 gap-x-[26px] gap-y-5 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {c.items.map((o) => (
-          <div key={o.title} className="flex gap-3.5">
+          <div
+            key={o.title}
+            className="flex gap-3.5 rounded-[14px] border border-hair-2 bg-white p-[22px] shadow-card"
+          >
             <img src={o.icon.src} alt={o.icon.alt} width={44} height={44} className="h-11 w-11 shrink-0" />
             <div>
               <h4 className="mb-1 text-[17px] text-ink">{o.title}</h4>
