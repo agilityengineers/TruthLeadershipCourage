@@ -22,6 +22,29 @@ function addDays(base: Date, days: number) {
   return d;
 }
 
+function addWeeks(base: Date, weeks: number) {
+  return addDays(base, weeks * 7);
+}
+
+/** Month-and-year label for a date (e.g. "August 2026"), stable across zones. */
+const MONTH_YEAR = new Intl.DateTimeFormat("en-US", { month: "long", year: "numeric", timeZone: "UTC" });
+const cohortSlug = (name: string) => name.toLowerCase().replace(/\s+/g, "-");
+
+/**
+ * A demo date `days` from `base`, pinned to 16:00 UTC (~9am Pacific). When a
+ * `weekday` (0=Sun…6=Sat) is given, snaps FORWARD to it so a cohort's kickoff
+ * lands on its advertised session day — used only for future dates, where the
+ * ±6-day snap can't disturb a running cohort's derived week number. Keeping
+ * every demo date relative to seed time means there's always a cohort mid-run
+ * and one opening soon, whenever the database is seeded.
+ */
+function demoDate(base: Date, days: number, weekday?: number) {
+  const d = addDays(base, days);
+  if (weekday !== undefined) d.setUTCDate(d.getUTCDate() + ((weekday - d.getUTCDay() + 7) % 7));
+  d.setUTCHours(16, 0, 0, 0);
+  return d;
+}
+
 async function seed() {
   const now = new Date();
 
@@ -91,10 +114,22 @@ async function seed() {
   const admin = { id: "u_admin", email: "admin@thewisdomtri.com", name: "TLC Admin", role: "ADMIN" as const, status: "active", companyId: null, image: null, title: null, phone: null, createdAt: now, updatedAt: now };
   const rkim = { id: "u_rkim", email: "rkim@thewisdomtri.com", name: "R. Kim", role: "TRAINER" as const, status: "active", companyId: null, image: null, title: null, phone: null, createdAt: now, updatedAt: now };
 
-  // ---- Cohorts ----
-  const fall = { id: "coh_fall", programId: program.id, name: "Fall 2026", slug: "fall-2026", startDate: new Date("2026-08-13T16:00:00Z"), endDate: new Date("2027-02-25T19:00:00Z"), sessionDay: "Thursday", sessionTime: "9:00–11:00 AM", timezone: "America/Los_Angeles", price: 550000, currency: "usd", capacity: 84, status: "RUNNING" as const, isPrivate: false, trainerId: tri.id, companyId: null, tagline: "Lead with truth. Grow with courage.", description: "Six months of guided leadership growth with a small cohort of peers — weekly live sessions, a physical workbook, and 1:1 coaching across the Truth, Leadership, and Courage pillars.", format: "online", location: "Live on Zoom", createdAt: now, updatedAt: now };
-  const spring = { id: "coh_spring", programId: program.id, name: "Spring 2027", slug: "spring-2027", startDate: new Date("2027-03-04T17:00:00Z"), endDate: new Date("2027-09-02T19:00:00Z"), sessionDay: "Thursday", sessionTime: "9:00–11:00 AM", timezone: "America/Los_Angeles", price: 550000, currency: "usd", capacity: 62, status: "ENROLLING" as const, isPrivate: false, trainerId: tri.id, companyId: null, tagline: "The next chapter of your leadership starts here.", description: "Join the Spring 2027 cohort and move through the full six-month TLC journey alongside a committed group of leaders. Weekly live sessions, a physical workbook, and personal coaching.", format: "online", location: "Live on Zoom", createdAt: now, updatedAt: now };
-  const meridianCohort = { id: "coh_meridian", programId: program.id, name: "Meridian — Private", slug: "meridian-private", startDate: new Date("2026-06-04T17:00:00Z"), endDate: new Date("2026-12-03T19:00:00Z"), sessionDay: "Tuesday", sessionTime: "1:00–3:00 PM", timezone: "America/Los_Angeles", price: 0, currency: "usd", capacity: 12, status: "RUNNING" as const, isPrivate: true, trainerId: tri.id, companyId: meridian.id, createdAt: now, updatedAt: now };
+  // ---- Cohorts (dates relative to seed time so the demo always shows a live
+  //      cohort mid-program and a soon-to-start cohort open for enrollment) ----
+  // The active cohort starts ~45 days ago so its date-derived "current week"
+  // lands on week 7 — the week seeded as AVAILABLE for the demo participants —
+  // keeping the portal, progress, and "mark week complete" flows consistent.
+  // Meridian stays RUNNING but starts later than the active cohort so it never
+  // becomes the trainer's earliest-start "primary" cohort.
+  const fallStart = demoDate(now, -45);
+  const springStart = demoDate(now, 42, 4); // ~6 weeks out, snapped to a Thursday
+  const meridianStart = demoDate(now, -21);
+  const fallName = MONTH_YEAR.format(fallStart);
+  const springName = MONTH_YEAR.format(springStart);
+
+  const fall = { id: "coh_fall", programId: program.id, name: fallName, slug: cohortSlug(fallName), startDate: fallStart, endDate: addWeeks(fallStart, 26), sessionDay: "Thursday", sessionTime: "9:00–11:00 AM", timezone: "America/Los_Angeles", price: 550000, currency: "usd", capacity: 84, status: "RUNNING" as const, isPrivate: false, trainerId: tri.id, companyId: null, tagline: "Lead with truth. Grow with courage.", description: "Six months of guided leadership growth with a small cohort of peers — weekly live sessions, a physical workbook, and 1:1 coaching across the Truth, Leadership, and Courage pillars.", format: "online", location: "Live on Zoom", createdAt: now, updatedAt: now };
+  const spring = { id: "coh_spring", programId: program.id, name: springName, slug: cohortSlug(springName), startDate: springStart, endDate: addWeeks(springStart, 26), enrollByDate: demoDate(now, 21), sessionDay: "Thursday", sessionTime: "9:00–11:00 AM", timezone: "America/Los_Angeles", price: 550000, currency: "usd", capacity: 62, status: "ENROLLING" as const, isPrivate: false, trainerId: tri.id, companyId: null, tagline: "The next chapter of your leadership starts here.", description: "Reserve your seat in the next TLC cohort and move through the full six-month journey alongside a committed group of leaders — weekly live sessions, a physical workbook, and personal 1:1 coaching.", format: "online", location: "Live on Zoom", createdAt: now, updatedAt: now };
+  const meridianCohort = { id: "coh_meridian", programId: program.id, name: "Meridian — Private", slug: "meridian-private", startDate: meridianStart, endDate: addWeeks(meridianStart, 26), sessionDay: "Tuesday", sessionTime: "1:00–3:00 PM", timezone: "America/Los_Angeles", price: 0, currency: "usd", capacity: 12, status: "RUNNING" as const, isPrivate: true, trainerId: tri.id, companyId: meridian.id, createdAt: now, updatedAt: now };
 
   // ---- Fall weekly events ----
   const events = [] as s.InsertEvent[];
@@ -125,20 +160,20 @@ async function seed() {
 
   for (const p of people) {
     users.push({ id: `u_${p.key}`, email: p.email, name: p.name, role: "PARTICIPANT", status: "active", companyId: p.company?.id ?? null, image: null, title: null, phone: null, createdAt: now, updatedAt: now });
-    const enrollment = { id: `enr_${p.key}`, userId: `u_${p.key}`, cohortId: fall.id, companyId: p.company?.id ?? null, seatId: null, status: "ACTIVE" as const, shippingAddress: shipAddr, enrolledAt: new Date("2026-06-20"), completedAt: null, createdAt: now, updatedAt: now };
+    const enrollment = { id: `enr_${p.key}`, userId: `u_${p.key}`, cohortId: fall.id, companyId: p.company?.id ?? null, seatId: null, status: "ACTIVE" as const, shippingAddress: shipAddr, enrolledAt: addDays(fallStart, -7), completedAt: null, createdAt: now, updatedAt: now };
     enrollments.push(enrollment);
     for (let w = 1; w <= 24; w++) {
       moduleProgress.push({ id: `mp_${p.key}_${w}`, enrollmentId: enrollment.id, weekNo: w, moduleId: modules[(w - 1) % modules.length]?.id ?? null, status: w < p.weeks ? "COMPLETED" : w === p.weeks ? "AVAILABLE" : "LOCKED", completedAt: w < p.weeks ? now : null });
     }
     shipments.push({ id: `ship_${p.key}`, enrollmentId: enrollment.id, status: "PRINTING", carrier: null, tracking: null, address: shipAddr, shippedAt: null, deliveredAt: null, createdAt: now, updatedAt: now });
     payments.push({ id: `pay_${p.key}`, enrollmentId: enrollment.id, companyId: p.company?.id ?? null, processor: "STRIPE", externalId: `seed_u_${p.key}`, amount: 550000, currency: "usd", status: "PAID", couponId: null, raw: null, createdAt: now, updatedAt: now });
-    bookings.push({ id: `bk_${p.key}_1`, enrollmentId: enrollment.id, trainerId: tri.id, eventId: null, slot: new Date("2026-11-12T22:00:00Z"), status: "SCHEDULED", notes: null, sequence: 1, createdAt: now });
+    bookings.push({ id: `bk_${p.key}_1`, enrollmentId: enrollment.id, trainerId: tri.id, eventId: null, slot: demoDate(now, 14), status: "SCHEDULED", notes: null, sequence: 1, createdAt: now });
   }
 
   users.push({ id: "u_viewer", email: "viewer@acme.test", name: "Acme Manager", role: "COMPANY_VIEWER", status: "active", companyId: acme.id, image: null, title: null, phone: null, createdAt: now, updatedAt: now });
 
   // ---- Threads / members / messages ----
-  const channel = { id: "thr_channel", type: "COHORT_CHANNEL" as const, cohortId: fall.id, title: "Fall 2026 Cohort", createdAt: now, updatedAt: now };
+  const channel = { id: "thr_channel", type: "COHORT_CHANNEL" as const, cohortId: fall.id, title: `${fall.name} Cohort`, createdAt: now, updatedAt: now };
   const direct = { id: "thr_direct", type: "DIRECT" as const, cohortId: null, title: "Jordan ↔ Tri", createdAt: now, updatedAt: now };
 
   const threadMembers = [] as s.InsertThreadMember[];
@@ -148,7 +183,7 @@ async function seed() {
   threadMembers.push({ id: "tm_direct_tri", threadId: direct.id, userId: tri.id, lastReadAt: null });
 
   const messages = [
-    { id: "msg_channel_1", threadId: channel.id, senderId: tri.id, body: "Welcome to the Fall 2026 cohort! Drop a hello and one thing you want to work on.", attachments: null, createdAt: now },
+    { id: "msg_channel_1", threadId: channel.id, senderId: tri.id, body: `Welcome to the ${fall.name} cohort! Drop a hello and one thing you want to work on.`, attachments: null, createdAt: now },
     { id: "msg_direct_1", threadId: direct.id, senderId: tri.id, body: "Hi Jordan — looking forward to our first 1:1.", attachments: null, createdAt: now },
   ] as s.InsertMessage[];
 

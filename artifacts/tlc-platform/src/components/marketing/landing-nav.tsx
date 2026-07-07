@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 type NavContent = {
   logoAlt: string;
   links: { label: string; href: string }[];
-  bookCall: { label: string; href: string };
   cta: { label: string; href: string };
 };
 
@@ -14,7 +13,7 @@ function isRoute(href: string) {
 }
 
 export function LandingNav({ content }: { content: NavContent }) {
-  const { logoAlt, links, bookCall, cta } = content;
+  const { logoAlt, links, cta } = content;
   const [location] = useLocation();
   const onLanding = location === "/" || location === "";
   const anchorHref = (hash: string) => (onLanding ? hash : `${import.meta.env.BASE_URL}${hash}`);
@@ -53,9 +52,6 @@ export function LandingNav({ content }: { content: NavContent }) {
           )}
         </nav>
         <div className="ml-auto flex items-center gap-3.5">
-          <Link href={bookCall.href} className="hidden text-[13.5px] font-semibold text-eq sm:inline">
-            {bookCall.label}
-          </Link>
           <Button asChild size="md">
             <Link href={cta.href}>{cta.label}</Link>
           </Button>

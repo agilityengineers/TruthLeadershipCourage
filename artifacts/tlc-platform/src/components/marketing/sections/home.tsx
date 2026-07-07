@@ -1,9 +1,11 @@
 import { Link } from "wouter";
+import { useGetUpcomingCohorts } from "@workspace/api-client-react";
 import { LeadershipModel } from "@/components/marketing/leadership-model";
 import { OperatingSystemCard } from "@/components/marketing/operating-system-card";
 import { FAQ } from "@/components/marketing/faq";
 import { Eyebrow } from "@/components/brand/primitives";
 import { Button } from "@/components/ui/button";
+import { formatDate } from "@/lib/utils";
 
 type Img = { src: string; alt: string };
 type Lnk = { label: string; href: string };
@@ -40,6 +42,37 @@ function PromiseStat({ value, label, valueColor = "#fff" }: { value: string; lab
   );
 }
 
+/**
+ * The next cohort a visitor can act on, shown beside the hero's primary CTA.
+ * Auto-populated from live data: the soonest cohort open for enrollment (the
+ * upcoming list is already sorted by start date), falling back to the soonest
+ * upcoming cohort. Links to that cohort's own landing page so the button flow
+ * — hero → cohort dates → this cohort → reserve a seat — is visible end to end.
+ */
+function NextCohortLink() {
+  const { data } = useGetUpcomingCohorts();
+  const cohorts = data?.cohorts ?? [];
+  const next = cohorts.find((co) => co.status === "ENROLLING") ?? cohorts[0];
+  if (!next) return null;
+  return (
+    <Link
+      href={`/cohort/${next.slug}`}
+      className="group flex flex-col rounded-[12px] border border-[#d6d9e6] px-[18px] py-2.5 transition-colors hover:border-eq"
+      aria-label={`Next cohort begins ${formatDate(next.startDate)} — view ${next.name}`}
+    >
+      <span className="text-[10px] font-semibold uppercase tracking-[.11em] text-[#8a8fa3]">
+        Next cohort begins
+      </span>
+      <span className="mt-0.5 flex items-center gap-1.5 font-display text-[16px] leading-tight text-ink group-hover:text-eq">
+        {formatDate(next.startDate)}
+        <span aria-hidden className="transition-transform group-hover:translate-x-0.5">
+          →
+        </span>
+      </span>
+    </Link>
+  );
+}
+
 export function HomeHero({ content }: { content: SC }) {
   const c = content as {
     eyebrow: string;
@@ -47,7 +80,6 @@ export function HomeHero({ content }: { content: SC }) {
     headlineEmphasis: string;
     body: string;
     primaryCta: Lnk;
-    secondaryCta: Lnk;
     microcopy: string;
     image: Img;
     stats: { value: string; label: string }[];
@@ -66,9 +98,7 @@ export function HomeHero({ content }: { content: SC }) {
           <Button asChild size="lg">
             <Link href={c.primaryCta.href}>{c.primaryCta.label}</Link>
           </Button>
-          <Button asChild size="lg" variant="outline">
-            <Link href={c.secondaryCta.href}>{c.secondaryCta.label}</Link>
-          </Button>
+          <NextCohortLink />
         </div>
         <div className="text-[13px] font-medium leading-[1.5] text-[#8a8fa3]">{c.microcopy}</div>
       </div>
