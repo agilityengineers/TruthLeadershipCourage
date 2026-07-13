@@ -1,9 +1,13 @@
 import { requireRole } from "@/lib/session";
-import { useListCohorts } from "@workspace/api-client-react";
+import { useListCohorts, useGetCohortFormOptions } from "@workspace/api-client-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { formatDate, formatPrice } from "@/lib/utils";
 import { CloneCohortDialog, CreateCohortDialog, EditCohortDialog } from "@/components/admin/admin-dialogs";
+import { useState } from "react";
+import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
 
 const STATUS_VARIANT: Record<string, "success" | "default" | "warning" | "neutral"> = {
   RUNNING: "success",
@@ -15,10 +19,49 @@ const STATUS_VARIANT: Record<string, "success" | "default" | "warning" | "neutra
 
 const PUBLIC_STATUSES = new Set(["ENROLLING", "RUNNING"]);
 
+function ProgramSetupBanner() {
+  const qc = useQueryClient();
+  const [loading, setLoading] = useState(false);
+
+  async function handleSetup() {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/admin/setup/bootstrap", { method: "POST" });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error((body as { message?: string }).message ?? "Setup failed");
+      }
+      toast.success("TLC program set up — you can now create cohorts.");
+      qc.invalidateQueries();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not set up the program.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <Card className="flex items-start gap-4 border-amber-200 bg-amber-50 p-5">
+      <div className="flex-1">
+        <p className="text-[14px] font-semibold text-amber-900">Program not set up yet</p>
+        <p className="mt-0.5 text-[13px] text-amber-800">
+          Before you can create cohorts, the TLC program content (modules, assessments, and live-it items) needs to be
+          initialized. This only needs to happen once.
+        </p>
+      </div>
+      <Button size="sm" variant="outline" onClick={handleSetup} disabled={loading} className="shrink-0 border-amber-300 bg-white hover:bg-amber-50">
+        {loading ? "Setting up…" : "Set up TLC program"}
+      </Button>
+    </Card>
+  );
+}
+
 export default function CohortsPage() {
   requireRole("ADMIN");
   const { data } = useListCohorts();
+  const { data: options } = useGetCohortFormOptions();
   const cohorts = data ?? [];
+  const noProgramYet = options !== undefined && options.programs.length === 0;
 
   return (
     <div className="flex flex-col gap-5">
@@ -34,11 +77,13 @@ export default function CohortsPage() {
           {cohorts.length > 0 && (
             <CloneCohortDialog cohorts={cohorts.map((c) => ({ id: c.id, name: c.name }))} />
           )}
-          <CreateCohortDialog />
+          {!noProgramYet && <CreateCohortDialog />}
         </div>
       </div>
 
-      {cohorts.length === 0 ? (
+      {noProgramYet && <ProgramSetupBanner />}
+
+      {cohorts.length === 0 && !noProgramYet ? (
         <Card className="flex flex-col items-center gap-3 p-10 text-center">
           <p className="font-display text-[17px] text-ink">No cohorts yet</p>
           <p className="max-w-[420px] text-[13px] text-muted-2">
@@ -47,7 +92,7 @@ export default function CohortsPage() {
           </p>
           <CreateCohortDialog />
         </Card>
-      ) : (
+      ) : cohorts.length > 0 ? (
         <Card className="overflow-hidden p-0">
           <div className="grid grid-cols-[1.5fr_1fr_1fr_0.7fr_0.7fr_0.8fr_1fr] border-b border-hair-3 bg-soft-2 px-5 py-2.5 text-[10.5px] font-semibold uppercase tracking-[.07em] text-muted-3">
             <span>Cohort</span>
@@ -103,7 +148,7 @@ export default function CohortsPage() {
             );
           })}
         </Card>
-      )}
+      ) : null}
     </div>
   );
 }

@@ -221,6 +221,131 @@ router.get(
   }),
 );
 
+/**
+ * Idempotent bootstrap: creates the default TLC program with its full
+ * supporting content (assessment, questions, modules, live-it items) if no
+ * program exists yet.  Safe to call multiple times — all inserts are
+ * onConflictDoNothing so re-runs have no effect.
+ */
+async function bootstrapTlcProgram(): Promise<string> {
+  const existing = await db.query.program.findFirst({ orderBy: [asc(schema.program.createdAt)] });
+  if (existing) return existing.id;
+
+  const now = new Date();
+  const PROGRAM_ID = "prog_tlc";
+
+  await db.insert(schema.program).values({
+    id: PROGRAM_ID,
+    name: "TLC",
+    slug: "tlc",
+    description: "Truth · Leadership · Courage — the Wisdom Tri flagship leadership program.",
+    createdAt: now,
+    updatedAt: now,
+  }).onConflictDoNothing();
+
+  await db.insert(schema.assessment).values({
+    id: "asmt_tlc",
+    programId: PROGRAM_ID,
+    title: "Leadership Assessment",
+    createdAt: now,
+  }).onConflictDoNothing();
+
+  const PILLAR_COLOR: Record<string, string> = { EQ: "#024794", IQ: "#262161", MQ: "#662d91" };
+  const questionSpecs = [
+    { theme: "Self-leadership", pillar: "EQ", prompt: "Under pressure, I lead from a grounded, steady place — not a reactive one.", benefit: "Lead from a steadier, grounded place and build deeper self-trust." },
+    { theme: "Communication", pillar: "IQ", prompt: "My team is clear on what's expected of them — and why it matters.", benefit: "Create clarity and clear expectations so execution holds." },
+    { theme: "Conflict", pillar: "IQ", prompt: "When a hard conversation is needed, I prepare for it and hold it with confidence.", benefit: "Prepare for and hold hard conversations with ease." },
+    { theme: "Accountability", pillar: "IQ", prompt: "Commitments on my team are owned and followed through — without me chasing.", benefit: "Raise team accountability and engagement — without chasing." },
+    { theme: "Developing others", pillar: "MQ", prompt: "I actively mentor and grow the next generation of leaders around me.", benefit: "Mentor and grow future leaders; build an employee-centered culture." },
+  ] as const;
+
+  await db.insert(schema.question).values(
+    questionSpecs.map((q, i) => ({
+      id: `q${i + 1}`,
+      assessmentId: "asmt_tlc",
+      order: i + 1,
+      theme: q.theme,
+      pillar: q.pillar as "EQ" | "IQ" | "MQ",
+      color: PILLAR_COLOR[q.pillar]!,
+      prompt: q.prompt,
+      benefit: q.benefit,
+      active: true,
+      createdAt: now,
+      updatedAt: now,
+    }))
+  ).onConflictDoNothing();
+
+  const moduleSpecs = [
+    { pillar: "EQ", segment: "SESSION_1", title: "Be You", summary: "Meet yourself on your best day — and name what gets in the way.", anchorLine: "Your best day is data, not accident." },
+    { pillar: "EQ", segment: "SESSION_1", title: "Be Wise", summary: "Read the room and yourself; respond instead of react.", anchorLine: "Wisdom is pausing long enough to choose." },
+    { pillar: "EQ", segment: "SESSION_1", title: "Be Bold", summary: "Stay with discomfort long enough to lead through it.", anchorLine: "Courage is staying in the room." },
+    { pillar: "IQ", segment: "SESSION_1", title: "Connect Authentically", summary: "Build the trust that makes hard things sayable.", anchorLine: "People follow leaders who see them." },
+    { pillar: "IQ", segment: "SESSION_1", title: "Drive Collaboration", summary: "Set expectations that hold without chasing.", anchorLine: "Clarity is kindness." },
+    { pillar: "IQ", segment: "SESSION_1", title: "Build Unity", summary: "Hold the line on accountability with care.", anchorLine: "Teams repeat what leaders tolerate." },
+    { pillar: "MQ", segment: "SESSION_2", title: "Guide Impact", summary: "Mentor the next generation of leaders around you.", anchorLine: "Leadership is measured in other people's growth." },
+    { pillar: "MQ", segment: "SESSION_2", title: "Inspire Potential", summary: "Turn your growth into a system that outlasts the program.", anchorLine: "Build leaders who build leaders." },
+  ] as const;
+
+  const modules = moduleSpecs.map((m, i) => {
+    const lessonWeekNo = i < 6 ? i * 2 + 1 : 21 + (i - 6) * 2;
+    return {
+      id: `mod_${i + 1}`,
+      programId: PROGRAM_ID,
+      pillar: m.pillar as "EQ" | "IQ" | "MQ",
+      order: i + 1,
+      weekNo: lessonWeekNo,
+      segment: m.segment as "SESSION_1" | "SESSION_2",
+      lessonWeekNo,
+      practiceWeekNo: lessonWeekNo + 1,
+      title: m.title,
+      summary: m.summary,
+      anchorLine: m.anchorLine,
+      createdAt: now,
+      updatedAt: now,
+    };
+  });
+
+  await db.insert(schema.module).values(modules).onConflictDoNothing();
+
+  const liveItSpecs: Record<number, readonly string[]> = {
+    1: ["Notice one best-day moment and write down what triggered it", "Ask one teammate what they need more of from you", "Two quiet minutes before your first meeting, three mornings"],
+    2: ["Pause three seconds before answering in one meeting", "Name the story you're telling yourself, out loud, once", "End one day by writing what you chose not to react to"],
+    3: ["Name one discomfort and stay with it 60 seconds", "Use the Boldness Loop before one hard conversation", "Sacred Council · five quiet minutes, three mornings"],
+    4: ["Open one 1:1 with a personal check-in, no agenda", "Reflect back what you heard before you respond, twice", "Thank one person specifically for how they worked"],
+    5: ["Restate one expectation as outcome, why, and when", "Invite the quietest voice in one meeting to go first", "Replace one status chase with a clarity question"],
+    6: ["Name one commitment that's slipping and reset it without blame", "Hold one accountability conversation from care, not heat", "Close one meeting by asking what we're not saying"],
+    7: ["Ask one person about their growth edge and just listen", "Hand one decision down with context, then stay out", "Tell one future leader what you see in them"],
+    8: ["Draft one page of your Personal Leadership Operating System", "Share your 90-day commitment with your partner", "Choose the one practice you'll keep after graduation"],
+  };
+
+  const liveItItems = modules.flatMap((m) =>
+    (liveItSpecs[m.order] ?? []).map((label, j) => ({
+      id: `lii_${m.order}_${j + 1}`,
+      moduleId: m.id,
+      order: j + 1,
+      label,
+      active: true,
+      createdAt: now,
+      updatedAt: now,
+    }))
+  );
+
+  await db.insert(schema.liveItItem).values(liveItItems).onConflictDoNothing();
+
+  return PROGRAM_ID;
+}
+
+/** Explicit bootstrap endpoint — sets up the TLC program if it hasn't been already. */
+router.post(
+  "/admin/setup/bootstrap",
+  asyncHandler(async (req, res) => {
+    await requireRole(req, "ADMIN");
+    const programId = await bootstrapTlcProgram();
+    const wasNew = programId === "prog_tlc";
+    res.json({ ok: true, programId, message: wasNew ? "TLC program bootstrapped." : "Program already exists." });
+  }),
+);
+
 async function uniqueCohortSlug(name: string) {
   let slug = slugify(name) || "cohort";
   if (await db.query.cohort.findFirst({ where: eq(schema.cohort.slug, slug) })) {
@@ -292,9 +417,7 @@ router.post(
 
     let programId = body.programId;
     if (!programId) {
-      const firstProgram = await db.query.program.findFirst({ orderBy: [asc(schema.program.createdAt)] });
-      if (!firstProgram) throw new HttpError(400, "No program exists yet — seed a program before creating a cohort.");
-      programId = firstProgram.id;
+      programId = await bootstrapTlcProgram();
     }
 
     const startDate = new Date(body.startDate);
