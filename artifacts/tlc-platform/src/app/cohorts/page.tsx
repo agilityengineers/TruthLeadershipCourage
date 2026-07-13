@@ -6,7 +6,7 @@ import { Footer } from "@/components/marketing/footer";
 import { Eyebrow } from "@/components/brand/primitives";
 import { Button } from "@/components/ui/button";
 import { usePageContent } from "@/lib/site-content";
-import { formatDate, formatPrice } from "@/lib/utils";
+import { formatDateOnly, formatPrice } from "@/lib/utils";
 
 type IntroCopy = { eyebrow: string; heading: string; intro: string; emptyState: string };
 
@@ -76,7 +76,7 @@ function CohortCard({ cohort }: { cohort: UpcomingCohort }) {
         <div>
           <dt className="label-caps mb-[5px]">Dates</dt>
           <dd className="text-[14px] leading-snug text-ink">
-            {formatDate(cohort.startDate)} – {formatDate(cohort.endDate)}
+            {formatDateOnly(cohort.startDate)} – {formatDateOnly(cohort.endDate)}
           </dd>
         </div>
         {schedule && (

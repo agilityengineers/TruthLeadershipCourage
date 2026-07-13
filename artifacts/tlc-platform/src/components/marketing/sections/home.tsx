@@ -5,7 +5,7 @@ import { OperatingSystemCard } from "@/components/marketing/operating-system-car
 import { FAQ } from "@/components/marketing/faq";
 import { Eyebrow } from "@/components/brand/primitives";
 import { Button } from "@/components/ui/button";
-import { formatDate } from "@/lib/utils";
+import { formatDateOnly } from "@/lib/utils";
 
 type Img = { src: string; alt: string };
 type Lnk = { label: string; href: string };
@@ -58,13 +58,13 @@ function NextCohortLink() {
     <Link
       href={`/cohort/${next.slug}`}
       className="group flex flex-col rounded-[12px] border border-[#d6d9e6] px-[18px] py-2.5 transition-colors hover:border-eq"
-      aria-label={`Next cohort begins ${formatDate(next.startDate)} — view ${next.name}`}
+      aria-label={`Next cohort begins ${formatDateOnly(next.startDate)} — view ${next.name}`}
     >
       <span className="text-[10px] font-semibold uppercase tracking-[.11em] text-[#8a8fa3]">
         Next cohort begins
       </span>
       <span className="mt-0.5 flex items-center gap-1.5 font-display text-[16px] leading-tight text-ink group-hover:text-eq">
-        {formatDate(next.startDate)}
+        {formatDateOnly(next.startDate)}
         <span aria-hidden className="transition-transform group-hover:translate-x-0.5">
           →
         </span>

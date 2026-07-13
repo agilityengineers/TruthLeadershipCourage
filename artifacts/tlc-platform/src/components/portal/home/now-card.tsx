@@ -3,7 +3,7 @@ import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRequestPrintedWorkbook, type NowCard } from "@workspace/api-client-react";
 import { Button } from "@/components/ui/button";
-import { formatDate } from "@/lib/utils";
+import { formatDate, formatDateOnly } from "@/lib/utils";
 
 /**
  * The Now card: a single card answering "what matters right now", with
@@ -55,7 +55,7 @@ function PreStartCard({ card }: { card: NowCard }) {
       <div className="text-[12px] font-medium text-[#b9c2e8]">Your cohort begins</div>
       <div className="mt-1 font-display text-[21px] leading-tight">
         {start
-          ? `${start.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })} · ${start.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}`
+          ? `${formatDateOnly(start, { weekday: "long", month: "long", day: "numeric" })} · ${start.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}`
           : "Soon"}
       </div>
       <Button asChild variant="light" className="mt-4 w-full">
@@ -156,7 +156,7 @@ function GraduationCard({ card }: { card: NowCard }) {
       </Button>
       {card.portalClosesAt && (
         <div className="mt-2.5 text-center text-[12px] text-[#b9c2e8]">
-          The portal closes {formatDate(card.portalClosesAt, { month: "long", day: "numeric" })}
+          The portal closes {formatDateOnly(card.portalClosesAt, { month: "long", day: "numeric" })}
         </div>
       )}
     </section>

@@ -7,7 +7,7 @@ import {
   useGetCoachingSlots,
   useGetParticipantContext,
 } from "@workspace/api-client-react";
-import { cn, formatDate } from "@/lib/utils";
+import { cn, formatDate, formatDateOnly } from "@/lib/utils";
 import { Card } from "@/components/ui/card";
 import { LabelCaps } from "@/components/brand/primitives";
 import { Button } from "@/components/ui/button";
@@ -154,9 +154,9 @@ function BookSlot() {
       <p className="text-[12.5px] text-muted-2">
         Times during your Intersession
         {slotsData.intersessionStart
-          ? ` (${formatDate(slotsData.intersessionStart, { month: "short", day: "numeric" })} – ${
+          ? ` (${formatDateOnly(slotsData.intersessionStart, { month: "short", day: "numeric" })} – ${
               slotsData.intersessionEnd
-                ? formatDate(slotsData.intersessionEnd, { month: "short", day: "numeric" })
+                ? formatDateOnly(slotsData.intersessionEnd, { month: "short", day: "numeric" })
                 : ""
             })`
           : ""}

@@ -2,8 +2,12 @@ import { requireRole } from "@/lib/session";
 import { useListCohorts, useGetCohortFormOptions } from "@workspace/api-client-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+<<<<<<< HEAD
 import { Button } from "@/components/ui/button";
 import { formatDate, formatPrice } from "@/lib/utils";
+=======
+import { formatDateOnly, formatPrice } from "@/lib/utils";
+>>>>>>> 5200816f00feec6a3cfad873d9fc42eb533f97f8
 import { CloneCohortDialog, CreateCohortDialog, EditCohortDialog } from "@/components/admin/admin-dialogs";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -115,8 +119,8 @@ export default function CohortsPage() {
                   {c.isPrivate && <span className="ml-1.5 text-[11px] font-normal text-mq">· private</span>}
                 </span>
                 <span className="text-[12px] text-muted">
-                  {formatDate(c.startDate, { month: "short", year: "numeric" })} –{" "}
-                  {formatDate(c.endDate, { month: "short", year: "numeric" })}
+                  {formatDateOnly(c.startDate, { month: "short", year: "numeric" })} –{" "}
+                  {formatDateOnly(c.endDate, { month: "short", year: "numeric" })}
                 </span>
                 <span className="text-[12.5px] text-muted">{c.trainerName ?? "—"}</span>
                 <span className="text-[12.5px] font-semibold text-ink">

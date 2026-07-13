@@ -33,10 +33,25 @@ export function formatDate(d: Date | string, opts?: Intl.DateTimeFormatOptions) 
   );
 }
 
+/**
+ * Format a date-only field (cohort/session boundaries, enroll-by, portal close)
+ * pinned to UTC, so the stored calendar day renders the same in every viewer
+ * timezone. Same opts contract as formatDate; timeZone is always forced to UTC.
+ */
+export function formatDateOnly(d: Date | string, opts?: Intl.DateTimeFormatOptions) {
+  return new Intl.DateTimeFormat("en-US", {
+    ...(opts ?? { month: "short", day: "numeric", year: "numeric" }),
+    timeZone: "UTC",
+  }).format(new Date(d));
+}
+
+/** Whole calendar days from the viewer's local today until a date-only field's UTC day (never negative). */
 export function daysUntil(d: Date | string) {
-  const target = new Date(d).getTime();
-  const now = Date.now();
-  return Math.max(0, Math.ceil((target - now) / (1000 * 60 * 60 * 24)));
+  const t = new Date(d);
+  const targetDay = Date.UTC(t.getUTCFullYear(), t.getUTCMonth(), t.getUTCDate());
+  const now = new Date();
+  const today = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
+  return Math.max(0, Math.round((targetDay - today) / 86_400_000));
 }
 
 export function initials(name?: string | null) {
