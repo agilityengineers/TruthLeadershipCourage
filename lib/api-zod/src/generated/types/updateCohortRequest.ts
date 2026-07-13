@@ -12,6 +12,12 @@ export interface UpdateCohortRequest {
   name?: string;
   startDate?: string;
   endDate?: string;
+  session1StartDate?: string | null;
+  session1EndDate?: string | null;
+  intersessionStartDate?: string | null;
+  intersessionEndDate?: string | null;
+  session2StartDate?: string | null;
+  session2EndDate?: string | null;
   sessionDay?: string;
   sessionTime?: string;
   timezone?: string;

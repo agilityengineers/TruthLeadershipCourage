@@ -23,6 +23,14 @@ export const cohort = pgTable("cohort", {
   slug: text("slug").notNull().unique(),
   startDate: timestamp("start_date", { withTimezone: true, mode: "date" }).notNull(),
   endDate: timestamp("end_date", { withTimezone: true, mode: "date" }).notNull(),
+  // ── The three phases every cohort runs through: Session 1 → Inter-session →
+  //    Session 2. Nullable so cohorts created before this existed still load. ──
+  session1StartDate: timestamp("session1_start_date", { withTimezone: true, mode: "date" }),
+  session1EndDate: timestamp("session1_end_date", { withTimezone: true, mode: "date" }),
+  intersessionStartDate: timestamp("intersession_start_date", { withTimezone: true, mode: "date" }),
+  intersessionEndDate: timestamp("intersession_end_date", { withTimezone: true, mode: "date" }),
+  session2StartDate: timestamp("session2_start_date", { withTimezone: true, mode: "date" }),
+  session2EndDate: timestamp("session2_end_date", { withTimezone: true, mode: "date" }),
   sessionDay: text("session_day"),
   sessionTime: text("session_time"),
   timezone: text("timezone"),

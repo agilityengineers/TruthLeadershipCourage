@@ -209,9 +209,18 @@ async function seed() {
   const welcomeNote =
     "You're not here to become someone new. You're here to return to the leader you already are on your best day. See you soon.";
 
+  // startDate/endDate plus the three phases of the cadence contract —
+  // Session 1 (weeks 1–12), Intersession (weeks 13–20), Session 2 (weeks
+  // 21–24) — and the portal close 30 days after the program ends.
   const cohortDates = (start: Date) => ({
     startDate: start,
     endDate: addWeeks(start, PROGRAM_WEEKS),
+    session1StartDate: start,
+    session1EndDate: addWeeks(start, 12),
+    intersessionStartDate: addWeeks(start, 12),
+    intersessionEndDate: addWeeks(start, 20),
+    session2StartDate: addWeeks(start, 20),
+    session2EndDate: addWeeks(start, PROGRAM_WEEKS),
     portalClosesAt: addDays(addWeeks(start, PROGRAM_WEEKS), 30),
   });
 

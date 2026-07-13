@@ -9,7 +9,11 @@ import { Label } from "@/components/ui/label";
 
 export function LoginForm({ callbackUrl }: { callbackUrl?: string }) {
   const [, navigate] = useLocation();
-  const [error, setError] = useState<string | null>(null);
+  const expired =
+    typeof window !== "undefined" && new URLSearchParams(window.location.search).get("expired") === "1";
+  const [error, setError] = useState<string | null>(
+    expired ? "Your session has expired — please sign in again." : null,
+  );
   const login = useLogin();
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {

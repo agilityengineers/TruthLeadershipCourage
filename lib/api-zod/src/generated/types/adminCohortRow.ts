@@ -12,6 +12,12 @@ export interface AdminCohortRow {
   name: string;
   startDate: Date;
   endDate: Date;
+  session1StartDate?: Date | null;
+  session1EndDate?: Date | null;
+  intersessionStartDate?: Date | null;
+  intersessionEndDate?: Date | null;
+  session2StartDate?: Date | null;
+  session2EndDate?: Date | null;
   trainerName?: string | null;
   price: number;
   currency: string;

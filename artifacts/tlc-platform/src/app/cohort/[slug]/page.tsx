@@ -64,12 +64,21 @@ export default function CohortLandingPage() {
   const enrollHref = `/enroll?cohort=${cohort.id}`;
   const closesIn = cohort.enrollByDate ? daysUntil(cohort.enrollByDate) : null;
 
+  const range = (start?: string | null, end?: string | null) =>
+    start && end ? `${formatDate(start)} – ${formatDate(end)}` : null;
+  const session1 = range(cohort.session1StartDate, cohort.session1EndDate);
+  const intersession = range(cohort.intersessionStartDate, cohort.intersessionEndDate);
+  const session2 = range(cohort.session2StartDate, cohort.session2EndDate);
+
   const facts: { icon: typeof Calendar; label: string; value: string }[] = [
     {
       icon: Calendar,
       label: "Runs",
       value: `${formatDate(cohort.startDate)} – ${formatDate(cohort.endDate)}`,
     },
+    ...(session1 ? [{ icon: Calendar, label: "Session 1", value: session1 }] : []),
+    ...(intersession ? [{ icon: Calendar, label: "Inter-session", value: intersession }] : []),
+    ...(session2 ? [{ icon: Calendar, label: "Session 2", value: session2 }] : []),
     ...(cohort.sessionDay || cohort.sessionTime
       ? [
           {

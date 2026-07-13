@@ -2259,6 +2259,12 @@ components:
         name: { type: string }
         startDate: { type: string, format: date-time }
         endDate: { type: string, format: date-time }
+        session1StartDate: { type: string, format: date-time, nullable: true }
+        session1EndDate: { type: string, format: date-time, nullable: true }
+        intersessionStartDate: { type: string, format: date-time, nullable: true }
+        intersessionEndDate: { type: string, format: date-time, nullable: true }
+        session2StartDate: { type: string, format: date-time, nullable: true }
+        session2EndDate: { type: string, format: date-time, nullable: true }
         trainerName: { type: string, nullable: true }
         price: { type: integer }
         currency: { type: string }
@@ -2293,6 +2299,12 @@ components:
         name: { type: string }
         startDate: { type: string }
         endDate: { type: string }
+        session1StartDate: { type: string }
+        session1EndDate: { type: string }
+        intersessionStartDate: { type: string }
+        intersessionEndDate: { type: string }
+        session2StartDate: { type: string }
+        session2EndDate: { type: string }
         sessionDay: { type: string }
         sessionTime: { type: string }
         timezone: { type: string }
@@ -2315,6 +2327,12 @@ components:
         name: { type: string }
         startDate: { type: string }
         endDate: { type: string }
+        session1StartDate: { type: string, nullable: true }
+        session1EndDate: { type: string, nullable: true }
+        intersessionStartDate: { type: string, nullable: true }
+        intersessionEndDate: { type: string, nullable: true }
+        session2StartDate: { type: string, nullable: true }
+        session2EndDate: { type: string, nullable: true }
         sessionDay: { type: string }
         sessionTime: { type: string }
         timezone: { type: string }
@@ -2373,6 +2391,12 @@ components:
         startDate: { type: string, format: date-time }
         endDate: { type: string, format: date-time }
         enrollByDate: { type: string, format: date-time, nullable: true }
+        session1StartDate: { type: string, format: date-time, nullable: true }
+        session1EndDate: { type: string, format: date-time, nullable: true }
+        intersessionStartDate: { type: string, format: date-time, nullable: true }
+        intersessionEndDate: { type: string, format: date-time, nullable: true }
+        session2StartDate: { type: string, format: date-time, nullable: true }
+        session2EndDate: { type: string, format: date-time, nullable: true }
         sessionDay: { type: string, nullable: true }
         sessionTime: { type: string, nullable: true }
         timezone: { type: string, nullable: true }

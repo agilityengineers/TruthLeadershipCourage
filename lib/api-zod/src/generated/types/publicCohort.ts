@@ -16,6 +16,12 @@ export interface PublicCohort {
   startDate: Date;
   endDate: Date;
   enrollByDate?: Date | null;
+  session1StartDate?: Date | null;
+  session1EndDate?: Date | null;
+  intersessionStartDate?: Date | null;
+  intersessionEndDate?: Date | null;
+  session2StartDate?: Date | null;
+  session2EndDate?: Date | null;
   sessionDay?: string | null;
   sessionTime?: string | null;
   timezone?: string | null;
