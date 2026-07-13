@@ -9,5 +9,6 @@
 export interface CompanyPersonEnrollment {
   cohortName: string;
   completedCount: number;
+  totalCount?: number;
   status: string;
 }

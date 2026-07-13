@@ -19,21 +19,19 @@ function readAsBase64(file: File): Promise<string> {
 }
 
 /**
- * Upload-or-paste image field. Drag/drop or pick a file to upload to the
- * configured blob store; or paste an image URL (works for existing /brand/*
- * assets and before S3 is provisioned). Shows a live thumbnail + alt text.
+ * Upload-or-paste image field. Drag/drop or pick a file to upload (stored in
+ * the database, or the S3 bucket when one is configured); or paste an image
+ * URL (works for existing /brand/* assets). Shows a live thumbnail + alt text.
  */
 export function ImageField({
   label,
   value,
   onChange,
-  uploadEnabled,
   help,
 }: {
   label: string;
   value: ImageValue;
   onChange: (v: ImageValue) => void;
-  uploadEnabled: boolean;
   help?: string;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -72,30 +70,28 @@ export function ImageField({
           <div
             onDragOver={(e) => {
               e.preventDefault();
-              if (uploadEnabled) setDragging(true);
+              setDragging(true);
             }}
             onDragLeave={() => setDragging(false)}
             onDrop={(e) => {
               e.preventDefault();
               setDragging(false);
               const file = e.dataTransfer.files?.[0];
-              if (file && uploadEnabled) doUpload(file);
+              if (file) doUpload(file);
             }}
             className={`flex items-center gap-2 rounded-[8px] border border-dashed px-3 py-2 text-[12px] ${
               dragging ? "border-eq bg-[#eaf2fc]" : "border-hair-1"
-            } ${uploadEnabled ? "" : "opacity-60"}`}
+            }`}
           >
             <button
               type="button"
-              disabled={!uploadEnabled || upload.isPending}
+              disabled={upload.isPending}
               onClick={() => inputRef.current?.click()}
               className="rounded-[7px] border border-hair-1 bg-white px-2.5 py-1 font-semibold text-ink hover:bg-soft-1 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {upload.isPending ? "Uploading…" : "Upload"}
             </button>
-            <span className="text-muted-2">
-              {uploadEnabled ? "or drag an image here" : "Uploads disabled — paste a URL above"}
-            </span>
+            <span className="text-muted-2">or drag an image here</span>
             <input
               ref={inputRef}
               type="file"

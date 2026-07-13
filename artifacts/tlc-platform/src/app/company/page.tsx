@@ -19,7 +19,10 @@ export default function CompanyOverview() {
     total === 0
       ? 0
       : Math.round(
-          enrollments.reduce((a, e) => a + Math.round((e.completedCount / 24) * 100), 0) / total,
+          enrollments.reduce(
+            (a, e) => a + Math.round((e.completedCount / Math.max(e.totalCount ?? 8, 1)) * 100),
+            0,
+          ) / total,
         );
   const engaged = enrollments.filter((e) => e.completedCount > 0).length;
 
@@ -44,7 +47,7 @@ export default function CompanyOverview() {
           <span>Status</span>
         </div>
         {enrollments.map((e) => {
-          const pct = Math.round((e.completedCount / 24) * 100);
+          const pct = Math.round((e.completedCount / Math.max(e.totalCount ?? 8, 1)) * 100);
           return (
             <div
               key={e.id}

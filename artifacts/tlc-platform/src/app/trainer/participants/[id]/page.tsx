@@ -24,8 +24,9 @@ export default function ParticipantDetailPage() {
   if (!enrollment) return <NotFound />;
 
   const completed = enrollment.moduleProgress.filter((m) => m.status === "COMPLETED").length;
+  const totalModules = Math.max(enrollment.moduleProgress.length, 1);
   const week = currentWeek(enrollment.cohort.startDate ?? new Date().toISOString(), TOTAL_WEEKS);
-  const stats = computeProgress(completed, week, TOTAL_WEEKS, enrollment.status === "COMPLETED");
+  const stats = computeProgress(completed, totalModules, week, TOTAL_WEEKS, enrollment.status === "COMPLETED");
   const name = enrollment.user.name ?? enrollment.user.email;
 
   return (
@@ -46,7 +47,7 @@ export default function ParticipantDetailPage() {
         <div className="ml-auto text-right">
           <div className="font-display text-[30px] leading-none text-eq">{stats.pct}%</div>
           <div className="mt-1 text-[11px] font-medium text-muted-2">
-            {completed} of {TOTAL_WEEKS} weeks
+            {completed} of {totalModules} modules
           </div>
         </div>
         <div className="w-full">

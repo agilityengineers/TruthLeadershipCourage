@@ -1,6 +1,6 @@
 import { Redirect } from "wouter";
 
-/** "This Week" lives on the Home dashboard's During phase. */
+/** "This Week" is the home screen itself — the Now card always holds it. */
 export default function ThisWeekPage() {
-  return <Redirect to="/portal?phase=during" />;
+  return <Redirect to="/portal" />;
 }

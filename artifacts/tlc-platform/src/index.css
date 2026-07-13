@@ -59,7 +59,7 @@
   --font-sans: var(--app-font-sans);
   --font-display: var(--app-font-display);
   --font-eyebrow: var(--app-font-eyebrow);
-  --font-serif: var(--app-font-display);
+  --font-serif: var(--app-font-serif);
   --font-mono: var(--app-font-mono);
 
   /* ── TLC brand color tokens ──────────────────────────────── */
@@ -68,6 +68,9 @@
   --color-iq: #262161;
   --color-mq: #662d91;
   --color-sky: #b8d8e6;
+  --color-teal: #17756d;
+  --color-teal-hover: #115c56;
+  --color-teal-soft: #e8f3f2;
   --color-indigo: #262161;
   --color-indigo-950: #1b1942;
   --color-indigo-975: #16142b;
@@ -169,6 +172,7 @@
   --app-font-sans: 'Montserrat', system-ui, sans-serif;
   --app-font-display: 'Aptos', 'Inter', system-ui, sans-serif;
   --app-font-eyebrow: 'Roboto', system-ui, sans-serif;
+  --app-font-serif: 'Source Serif 4', Georgia, serif;
   --app-font-mono: Menlo, monospace;
   --radius: 0.625rem; /* 10px */
   --tracking-normal: 0em;
@@ -250,6 +254,12 @@
   .lift:hover {
     transform: translateY(-0.25rem);
     box-shadow: 0 16px 38px rgba(26, 24, 48, 0.14);
+  }
+  /* The participant's own words — always italic serif, distinct from the portal voice */
+  .voice-participant {
+    font-family: var(--app-font-serif);
+    font-style: italic;
+    letter-spacing: 0.002em;
   }
 }
 

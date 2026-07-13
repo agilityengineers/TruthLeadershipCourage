@@ -26,7 +26,7 @@ export default function TrainerOverviewPage() {
   const resources = data?.resources ?? [];
 
   const rows = participants.map((p) => {
-    const stats = computeProgress(p.completedCount, week, TOTAL_WEEKS, p.status === "COMPLETED");
+    const stats = computeProgress(p.completedCount, p.totalCount ?? 8, week, TOTAL_WEEKS, p.status === "COMPLETED");
     return {
       id: p.id,
       name: p.name,

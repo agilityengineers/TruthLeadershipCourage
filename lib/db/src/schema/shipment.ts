@@ -15,6 +15,8 @@ export const shipment = pgTable("shipment", {
   carrier: text("carrier"),
   tracking: text("tracking"),
   address: jsonb("address"),
+  // Set when the participant requests a printed copy (NOT_REQUESTED → PENDING).
+  requestedAt: timestamp("requested_at", { withTimezone: true, mode: "date" }),
   shippedAt: timestamp("shipped_at", { withTimezone: true, mode: "date" }),
   deliveredAt: timestamp("delivered_at", { withTimezone: true, mode: "date" }),
   createdAt: createdAt(),

@@ -12,5 +12,6 @@ export interface CompanyEnrollmentRow {
   userEmail: string;
   cohortName: string;
   completedCount: number;
+  totalCount?: number;
   status: string;
 }

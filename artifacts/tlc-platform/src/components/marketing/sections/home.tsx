@@ -100,7 +100,9 @@ export function HomeHero({ content }: { content: SC }) {
           </Button>
           <NextCohortLink />
         </div>
-        <div className="text-[13px] font-medium leading-[1.5] text-[#8a8fa3]">{c.microcopy}</div>
+        {c.microcopy && (
+          <div className="text-[13px] font-medium leading-[1.5] text-[#8a8fa3]">{c.microcopy}</div>
+        )}
       </div>
       <div className="relative">
         <img

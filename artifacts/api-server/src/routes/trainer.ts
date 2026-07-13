@@ -81,6 +81,7 @@ router.get(
         company: e.user?.company?.name ?? "Independent",
         cohortName: cohort.name,
         completedCount: e.moduleProgress.filter((m) => m.status === "COMPLETED").length,
+        totalCount: e.moduleProgress.length,
         status: e.status,
       })),
       upcoming: upcoming.filter((e) => e.startAt >= now).slice(0, 3),
@@ -113,6 +114,7 @@ router.get(
         company: e.user?.company?.name ?? "Independent",
         cohortName: e.cohort?.name ?? "",
         completedCount: e.moduleProgress.filter((m) => m.status === "COMPLETED").length,
+        totalCount: e.moduleProgress.length,
         status: e.status,
       })),
     );

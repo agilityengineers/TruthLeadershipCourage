@@ -30,19 +30,8 @@ export function progressPct(completedWeeks: number, totalWeeks: number): number 
   return Math.round((completedWeeks / totalWeeks) * 100);
 }
 
-/** Minimal shape of the participant context needed to derive the journey. */
-type JourneyInput = {
-  status: string;
-  cohort: { startDate: Date | string; endDate: Date | string };
-  moduleProgress: { status: string }[];
-};
-
-/** Derive phase/week/progress for an enrollment. Honors an optional preview override. */
-export function deriveJourney(enr: JourneyInput, override?: Phase) {
-  const totalWeeks = 24;
-  const phase = override ?? derivePhase(enr.cohort.startDate, enr.cohort.endDate);
-  const week = currentWeek(enr.cohort.startDate, totalWeeks);
-  const completed = enr.moduleProgress.filter((m) => m.status === "COMPLETED").length;
-  const pct = enr.status === "COMPLETED" ? 100 : progressPct(completed, totalWeeks);
-  return { phase, week, totalWeeks, completed, pct };
-}
+// NOTE: the old deriveJourney(before/during/after + weeks-of-24) helper is
+// gone — the home screen's state now comes fully derived from the server
+// (GET /portal/home), which follows the program's real cadence: Session 1's
+// two-week module heartbeat, the Intersession, Session 2, graduation, and
+// the 30-day close.

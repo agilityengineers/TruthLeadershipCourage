@@ -217,17 +217,17 @@ export interface FulfillRequest {
   amount?: number;
 }
 
-export interface CompleteWeekRequest {
-  weekNo: number;
-}
-
 export interface ModuleLite {
   id: string;
   title: string;
   pillar: Pillar;
   order?: number;
   weekNo?: number | null;
+  segment?: string | null;
+  lessonWeekNo?: number | null;
+  practiceWeekNo?: number | null;
   summary?: string | null;
+  anchorLine?: string | null;
   programId?: string;
 }
 
@@ -267,6 +267,8 @@ export interface CohortContext {
   status: string;
   isPrivate: boolean;
   programId: string;
+  welcomeNote?: string | null;
+  portalClosesAt?: string | null;
   program: ProgramLite;
   trainer?: UserLite | null;
   events: EventLite[];
@@ -277,6 +279,7 @@ export interface ShipmentLite {
   status: string;
   carrier?: string | null;
   tracking?: string | null;
+  requestedAt?: string | null;
 }
 
 export interface ModuleProgressItem {
@@ -341,6 +344,243 @@ export interface ResourceItem {
 export interface LibraryResponse {
   modules: ModuleLite[];
   resources: ResourceItem[];
+}
+
+export type ReflectionKind = typeof ReflectionKind[keyof typeof ReflectionKind];
+
+
+export const ReflectionKind = {
+  SEED: 'SEED',
+  I_AM: 'I_AM',
+  LEADERSHIP_WHY: 'LEADERSHIP_WHY',
+  COMMITMENT: 'COMMITMENT',
+  MODULE_CLOSING: 'MODULE_CLOSING',
+  MONDAY_MORNING: 'MONDAY_MORNING',
+} as const;
+
+export interface ReflectionItem {
+  id: string;
+  kind: ReflectionKind;
+  promptKey?: string | null;
+  moduleId?: string | null;
+  moduleTitle?: string | null;
+  body: string;
+  createdAt: string;
+}
+
+export interface CreateReflectionRequest {
+  kind: ReflectionKind;
+  promptKey?: string | null;
+  moduleId?: string | null;
+  /**
+     * @minLength 1
+     * @maxLength 4000
+     */
+  body: string;
+}
+
+export interface PortalAnchor {
+  seeds: ReflectionItem[];
+  iAm?: ReflectionItem | null;
+  leadershipWhy?: ReflectionItem | null;
+}
+
+export type JourneySegmentItemKey = typeof JourneySegmentItemKey[keyof typeof JourneySegmentItemKey];
+
+
+export const JourneySegmentItemKey = {
+  BEGIN: 'BEGIN',
+  EQ: 'EQ',
+  IQ: 'IQ',
+  INTERSESSION: 'INTERSESSION',
+  MQ: 'MQ',
+} as const;
+
+export type JourneySegmentItemState = typeof JourneySegmentItemState[keyof typeof JourneySegmentItemState];
+
+
+export const JourneySegmentItemState = {
+  past: 'past',
+  current: 'current',
+  future: 'future',
+} as const;
+
+export interface JourneySegmentItem {
+  key: JourneySegmentItemKey;
+  label: string;
+  state: JourneySegmentItemState;
+  progress?: number | null;
+}
+
+export interface MirrorItem {
+  sourceKind: ReflectionKind;
+  label: string;
+  body: string;
+  question?: string | null;
+}
+
+export interface LiveItChecklistItem {
+  id: string;
+  order: number;
+  label: string;
+  checked: boolean;
+  note?: string | null;
+  checkedAt?: string | null;
+}
+
+export interface LiveItState {
+  moduleId: string;
+  moduleTitle: string;
+  moduleOrder: number;
+  items: LiveItChecklistItem[];
+}
+
+export interface PartnerState {
+  name: string;
+  checkedInThisWeek: boolean;
+  signal?: string | null;
+  threadId?: string | null;
+}
+
+export interface PartnerCandidate {
+  enrollmentId: string;
+  name: string;
+}
+
+export interface ChoosePartnerRequest {
+  enrollmentId: string;
+}
+
+export interface PartnerNoteResult {
+  ok: boolean;
+  threadId: string;
+}
+
+export type NowCardType = typeof NowCardType[keyof typeof NowCardType];
+
+
+export const NowCardType = {
+  PRE_START: 'PRE_START',
+  SESSION: 'SESSION',
+  LIVE_IT: 'LIVE_IT',
+  INTERSESSION: 'INTERSESSION',
+  GRADUATION: 'GRADUATION',
+  CLOSED: 'CLOSED',
+} as const;
+
+export type NowCardSessionKind = typeof NowCardSessionKind[keyof typeof NowCardSessionKind] | null;
+
+
+export const NowCardSessionKind = {
+  LESSON: 'LESSON',
+  PRACTICE: 'PRACTICE',
+} as const;
+
+export interface NowCard {
+  type: NowCardType;
+  cohortStartDate?: string | null;
+  workbookUrl?: string | null;
+  printStatus?: string | null;
+  printRequestable?: boolean | null;
+  sessionKind?: NowCardSessionKind;
+  moduleOrder?: number | null;
+  moduleTitle?: string | null;
+  startAt?: string | null;
+  endAt?: string | null;
+  joinUrl?: string | null;
+  isToday?: boolean | null;
+  intersessionWeek?: number | null;
+  intersessionWeeks?: number | null;
+  booking?: BookingItem | null;
+  portalClosesAt?: string | null;
+}
+
+export type PortalHomeStateSegment = typeof PortalHomeStateSegment[keyof typeof PortalHomeStateSegment];
+
+
+export const PortalHomeStateSegment = {
+  PRE_START: 'PRE_START',
+  SESSION_1: 'SESSION_1',
+  INTERSESSION: 'INTERSESSION',
+  SESSION_2: 'SESSION_2',
+  GRADUATED: 'GRADUATED',
+  CLOSED: 'CLOSED',
+} as const;
+
+export type PortalHomeStateCyclePhase = typeof PortalHomeStateCyclePhase[keyof typeof PortalHomeStateCyclePhase] | null;
+
+
+export const PortalHomeStateCyclePhase = {
+  BEFORE_LESSON: 'BEFORE_LESSON',
+  LIVE_IT: 'LIVE_IT',
+  BEFORE_PRACTICE: 'BEFORE_PRACTICE',
+  AFTER_PRACTICE: 'AFTER_PRACTICE',
+} as const;
+
+export interface PortalPrompts {
+  iAm: boolean;
+  commitment: boolean;
+}
+
+export interface PortalHomeState {
+  segment: PortalHomeStateSegment;
+  weekOfProgram?: number | null;
+  cyclePhase?: PortalHomeStateCyclePhase;
+  currentModule?: ModuleLite | null;
+  nowCard: NowCard;
+  journey: JourneySegmentItem[];
+  journeyLabel: string;
+  anchor: PortalAnchor;
+  mirror?: MirrorItem | null;
+  liveIt?: LiveItState | null;
+  partner?: PartnerState | null;
+  partnerPending?: boolean | null;
+  welcomeNote?: string | null;
+  trainerName?: string | null;
+  cohortName: string;
+  cohortStartDate?: string | null;
+  portalClosesAt?: string | null;
+  needsOnboarding: boolean;
+  prompts: PortalPrompts;
+}
+
+export interface CheckLiveItRequest {
+  /** @maxLength 1000 */
+  note?: string | null;
+}
+
+export interface CoachingSlotsResponse {
+  slots: string[];
+  intersessionStart?: string | null;
+  intersessionEnd?: string | null;
+  bookedCount: number;
+  includedSessions: number;
+}
+
+export interface BookCoachingRequest {
+  slot: string;
+}
+
+export interface PrintRequestResult {
+  ok: boolean;
+  status: string;
+  message?: string | null;
+}
+
+export interface PortalExportLiveIt {
+  moduleTitle: string;
+  label: string;
+  checkedAt: string | null;
+  note?: string | null;
+}
+
+export interface PortalExport {
+  participantName: string;
+  cohortName: string;
+  exportedAt: string;
+  portalClosesAt?: string | null;
+  reflections: ReflectionItem[];
+  liveIt: PortalExportLiveIt[];
 }
 
 export interface LastMessage {
@@ -513,6 +753,7 @@ export interface TrainerParticipantRow {
   company: string;
   cohortName?: string;
   completedCount: number;
+  totalCount?: number;
   status: string;
 }
 
@@ -909,6 +1150,7 @@ export interface AdminParticipantRow {
   companyName?: string | null;
   cohortName: string;
   completedCount: number;
+  totalCount?: number;
   status: string;
 }
 
@@ -980,6 +1222,7 @@ export interface CompanyEnrollmentRow {
   userEmail: string;
   cohortName: string;
   completedCount: number;
+  totalCount?: number;
   status: string;
 }
 
@@ -991,6 +1234,7 @@ export interface CompanyOverview {
 export interface CompanyPersonEnrollment {
   cohortName: string;
   completedCount: number;
+  totalCount?: number;
   status: string;
 }
 
@@ -1031,7 +1275,6 @@ export interface AdminSection {
 
 export interface AdminContent {
   sections: AdminSection[];
-  uploadEnabled: boolean;
 }
 
 export type UpdateSectionRequestContent = { [key: string]: unknown };
@@ -1064,6 +1307,10 @@ export interface UploadImageRequest {
 export interface UploadImageResult {
   url: string;
 }
+
+export type GetPortalHomeParams = {
+preview?: string;
+};
 
 export type GetThreadParams = {
 oversight?: boolean;

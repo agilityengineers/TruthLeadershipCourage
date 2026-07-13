@@ -49,6 +49,11 @@ export const cohort = pgTable("cohort", {
   format: text("format").notNull().default("online"),
   location: text("location"),
   enrollByDate: timestamp("enroll_by_date", { withTimezone: true, mode: "date" }),
+  // ── Participant portal ──
+  // Trainer's welcome note, shown in the portal's seed state before day one.
+  welcomeNote: text("welcome_note"),
+  // The portal closes 30 days after the last session; export stays reachable.
+  portalClosesAt: timestamp("portal_closes_at", { withTimezone: true, mode: "date" }),
   createdAt: createdAt(),
   updatedAt: updatedAt(),
 });

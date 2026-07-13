@@ -51,7 +51,32 @@ export const cohortStatusEnum = pgEnum("cohort_status", [
   "ARCHIVED",
 ]);
 
-export const eventTypeEnum = pgEnum("event_type", ["KICKOFF", "WEEKLY_SESSION", "COACHING_1ON1"]);
+export const eventTypeEnum = pgEnum("event_type", [
+  "KICKOFF",
+  "WEEKLY_SESSION",
+  "COACHING_1ON1",
+  "LESSON_SESSION",
+  "PRACTICE_SESSION",
+  "GRADUATION",
+]);
+
+/** Program arc segment a module belongs to (Intersession sits between the two). */
+export const programSegmentEnum = pgEnum("program_segment", [
+  "SESSION_1",
+  "SESSION_2",
+]);
+
+/** Kinds of structured participant writing. Only these are ever resurfaced. */
+export const reflectionKindEnum = pgEnum("reflection_kind", [
+  "SEED",
+  "I_AM",
+  "LEADERSHIP_WHY",
+  "COMMITMENT",
+  "MODULE_CLOSING",
+  "MONDAY_MORNING",
+]);
+
+export const partnerStatusEnum = pgEnum("partner_status", ["ACTIVE", "ENDED"]);
 
 export const resourceTypeEnum = pgEnum("resource_type", ["PDF", "MP4", "LINK", "WORKBOOK"]);
 
@@ -80,6 +105,7 @@ export const paymentStatusEnum = pgEnum("payment_status", [
 export const couponTypeEnum = pgEnum("coupon_type", ["PERCENT", "FIXED"]);
 
 export const shipmentStatusEnum = pgEnum("shipment_status", [
+  "NOT_REQUESTED",
   "PENDING",
   "PRINTING",
   "SHIPPED",

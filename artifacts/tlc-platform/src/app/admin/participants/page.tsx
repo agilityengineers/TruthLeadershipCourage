@@ -27,7 +27,7 @@ export default function AdminParticipantsPage() {
         </div>
         {enrollments.map((e) => {
           const done = e.completedCount;
-          const pct = Math.round((done / 24) * 100);
+          const pct = Math.round((done / Math.max(e.totalCount ?? 8, 1)) * 100);
           return (
             <div
               key={e.id}

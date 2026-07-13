@@ -181,7 +181,7 @@ export const SECTIONS: SectionDef[] = [
       headlineEmphasis: "worth following.",
       body: "You've done the trainings, read the books, collected the frameworks. So why does it still come apart in the moment that matters? By one well-known measure, only about 23% of how well you lead is what you do. The other 77% is who you are — and that's the part TLC works on.",
       primaryCta: { label: "Upcoming Cohort Dates →", href: "/cohorts" },
-      microcopy: "Six-month cohort · live and virtual · seats limited by design",
+      microcopy: "",
       image: { src: "/brand/tri_T.png", alt: "Forest canopy" },
       stats: [
         { value: "6 mo", label: "PROGRAM" },
