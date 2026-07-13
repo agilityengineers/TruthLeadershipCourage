@@ -6,6 +6,7 @@ import {
   AddUserDialog,
   EditUserDialog,
   DeleteUserButton,
+  ImpersonateUserButton,
 } from "@/components/admin/user-dialogs";
 
 const ROLE_STYLE: Record<string, string> = {
@@ -81,6 +82,7 @@ export default function UsersPage() {
               {u.companyName ?? "—"}
             </span>
             <span className="flex items-center justify-end gap-3">
+              <ImpersonateUserButton user={u} />
               <EditUserDialog
                 user={u}
                 companies={companies}

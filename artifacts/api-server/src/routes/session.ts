@@ -5,6 +5,7 @@ import { db, schema, eq, desc } from "../lib/db";
 import { asyncHandler, unauthorized } from "../lib/http";
 import { loadPrincipal, requirePrincipal } from "../lib/principal";
 import { verifyPassword } from "../lib/password";
+import { audit } from "../lib/services";
 
 const router: IRouter = Router();
 const SESSION_TTL_MS = 30 * 24 * 60 * 60 * 1000;
@@ -56,10 +57,24 @@ router.post(
       typeof auth === "string" && auth.toLowerCase().startsWith("bearer ")
         ? auth.slice(7).trim()
         : (req.headers["x-session-token"] as string | undefined);
-    if (token)
+    if (token) {
+      // Look the row up first: ending an impersonation session must leave an
+      // audit trail attributed to the admin who was driving it.
+      const row = await db.query.session.findFirst({
+        where: eq(schema.session.sessionToken, token),
+      });
       await db
         .delete(schema.session)
         .where(eq(schema.session.sessionToken, token));
+      if (row?.impersonatorId) {
+        await audit({
+          actorId: row.impersonatorId,
+          action: "impersonation.stop",
+          entity: "User",
+          entityId: row.userId,
+        });
+      }
+    }
     res.json({ ok: true });
   }),
 );
@@ -91,6 +106,7 @@ router.get(
         ? { id: user.company.id, name: user.company.name }
         : null,
       primaryCohortName: primary?.cohort?.name ?? null,
+      impersonatorId: p.impersonatorId ?? null,
     });
   }),
 );

@@ -50,7 +50,8 @@ export const GetMeResponse = zod.object({
   "id": zod.string(),
   "name": zod.string()
 }),zod.null()]).optional(),
-  "primaryCohortName": zod.string().nullish()
+  "primaryCohortName": zod.string().nullish(),
+  "impersonatorId": zod.string().nullish()
 })
 
 
@@ -1562,6 +1563,25 @@ export const RegenerateInviteResponse = zod.object({
   "id": zod.string(),
   "inviteToken": zod.string().nullish(),
   "invitePath": zod.string().nullish()
+})
+
+
+/**
+ * @summary Mint a short-lived session as another (non-admin) user
+ */
+export const ImpersonateUserParams = zod.object({
+  "id": zod.coerce.string()
+})
+
+export const ImpersonateUserResponse = zod.object({
+  "token": zod.string(),
+  "user": zod.object({
+  "id": zod.string(),
+  "role": zod.enum(['PARTICIPANT', 'COMPANY_VIEWER', 'TRAINER', 'ADMIN', 'SUPER_ADMIN']),
+  "companyId": zod.string().nullable(),
+  "name": zod.string().nullable(),
+  "email": zod.string()
+})
 })
 
 

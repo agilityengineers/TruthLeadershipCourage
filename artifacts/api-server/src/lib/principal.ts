@@ -7,6 +7,8 @@ export type Principal = {
   id: string;
   role: Role;
   companyId: string | null;
+  /** Set when this session is an admin impersonating `id`. */
+  impersonatorId: string | null;
 };
 
 declare global {
@@ -47,7 +49,12 @@ export async function loadPrincipal(req: Request): Promise<Principal | null> {
     req.principal = null;
     return null;
   }
-  req.principal = { id: row.user.id, role: row.user.role as Role, companyId: row.user.companyId ?? null };
+  req.principal = {
+    id: row.user.id,
+    role: row.user.role as Role,
+    companyId: row.user.companyId ?? null,
+    impersonatorId: row.impersonatorId ?? null,
+  };
   return req.principal;
 }
 

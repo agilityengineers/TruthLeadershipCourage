@@ -12,6 +12,10 @@ import { can, type Capability, homeForRole } from "./rbac";
 
 const KEY = "tlc.session";
 const TOKEN_KEY = "tlc.token";
+// While an admin impersonates another user, their own session is stashed
+// here so "Exit impersonation" can restore it without a fresh login.
+const IMPERSONATOR_KEY = "tlc.impersonator.session";
+const IMPERSONATOR_TOKEN_KEY = "tlc.impersonator.token";
 
 export type SessionUser = {
   id: string;
@@ -50,7 +54,46 @@ export function setSession(user: SessionUser, token: string) {
 export function clearSession() {
   window.localStorage.removeItem(KEY);
   window.localStorage.removeItem(TOKEN_KEY);
+  // Full sign-out must never leave a stale stashed admin token behind.
+  window.localStorage.removeItem(IMPERSONATOR_KEY);
+  window.localStorage.removeItem(IMPERSONATOR_TOKEN_KEY);
   window.dispatchEvent(new Event("tlc:session"));
+}
+
+export function isImpersonating(): boolean {
+  if (typeof window === "undefined") return false;
+  return window.localStorage.getItem(IMPERSONATOR_TOKEN_KEY) !== null;
+}
+
+export function getImpersonatorUser(): SessionUser | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.localStorage.getItem(IMPERSONATOR_KEY);
+    return raw ? (JSON.parse(raw) as SessionUser) : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Stash the current (admin) session, then swap the active session to the target's. */
+export function startImpersonation(user: SessionUser, token: string) {
+  if (isImpersonating()) throw new Error("Already impersonating another user.");
+  const current = getSessionUser();
+  const currentToken = getToken();
+  if (!current || !currentToken) throw new Error("No active session to return to.");
+  window.localStorage.setItem(IMPERSONATOR_KEY, JSON.stringify(current));
+  window.localStorage.setItem(IMPERSONATOR_TOKEN_KEY, currentToken);
+  setSession(user, token);
+}
+
+/** Drop the impersonated session and restore the stashed admin session. */
+export function stopImpersonation() {
+  const admin = getImpersonatorUser();
+  const adminToken = window.localStorage.getItem(IMPERSONATOR_TOKEN_KEY);
+  window.localStorage.removeItem(IMPERSONATOR_KEY);
+  window.localStorage.removeItem(IMPERSONATOR_TOKEN_KEY);
+  if (admin && adminToken) setSession(admin, adminToken);
+  else clearSession(); // corrupted stash — fail safe to signed-out
 }
 
 export function getPrincipal(): Principal | null {

@@ -5167,6 +5167,76 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       return useMutation(getRegenerateInviteMutationOptions(options));
     }
 
+export const getImpersonateUserUrl = (id: string,) => {
+
+
+
+
+  return `/api/admin/users/${id}/impersonate`
+}
+
+/**
+ * @summary Mint a short-lived session as another (non-admin) user
+ */
+export const impersonateUser = async (id: string, options?: RequestInit): Promise<LoginResponse> => {
+
+  return customFetch<LoginResponse>(getImpersonateUserUrl(id),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+export const getImpersonateUserMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof impersonateUser>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof impersonateUser>>, TError,{id: string}, TContext> => {
+
+const mutationKey = ['impersonateUser'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof impersonateUser>>, {id: string}> = (props) => {
+          const {id} = props ?? {};
+
+          return  impersonateUser(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ImpersonateUserMutationResult = NonNullable<Awaited<ReturnType<typeof impersonateUser>>>
+
+    export type ImpersonateUserMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Mint a short-lived session as another (non-admin) user
+ */
+export const useImpersonateUser = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof impersonateUser>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof impersonateUser>>,
+        TError,
+        {id: string},
+        TContext
+      > => {
+      return useMutation(getImpersonateUserMutationOptions(options));
+    }
+
 export const getGetInviteUrl = (token: string,) => {
 
 

@@ -100,7 +100,7 @@ router.post(
       .insert(schema.partnerLink)
       .values({ cohortId: enr.cohortId, enrollmentAId: enr.id, enrollmentBId: otherId, createdBy: p.id })
       .returning();
-    await audit({ actorId: p.id, action: "partner.link", entity: "PartnerLink", entityId: link!.id });
+    await audit({ actorId: p.id, impersonatorId: p.impersonatorId, action: "partner.link", entity: "PartnerLink", entityId: link!.id });
     if (other.user) {
       await notify({
         userId: other.user.id,

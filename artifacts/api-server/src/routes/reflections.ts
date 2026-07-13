@@ -71,6 +71,7 @@ router.post(
       .returning();
     await audit({
       actorId: p.id,
+      impersonatorId: p.impersonatorId,
       action: "reflection.write",
       entity: "Reflection",
       entityId: row!.id,

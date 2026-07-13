@@ -2,6 +2,7 @@ import { Link, useLocation } from "wouter";
 import { Logo } from "./logo";
 import { Avatar } from "@/components/ui/avatar";
 import { SignOut } from "./sign-out";
+import { ImpersonationBanner } from "./impersonation-banner";
 import { cn } from "@/lib/utils";
 
 export type NavItem = {
@@ -109,6 +110,7 @@ export function DashboardShell({
 
       {/* Main column */}
       <div className="flex min-w-0 flex-col">
+        <ImpersonationBanner />
         <div className="flex flex-wrap items-center gap-3.5 border-b border-hair-1 bg-white px-[clamp(18px,3vw,30px)] py-3.5">
           {topbar}
         </div>

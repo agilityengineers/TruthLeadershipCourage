@@ -16,6 +16,8 @@ export const session = pgTable("session", {
   userId: text("user_id")
     .notNull()
     .references(() => user.id),
+  /** Set when this session was minted by an admin impersonating `userId`. */
+  impersonatorId: text("impersonator_id").references(() => user.id),
   expires: timestamp("expires", { withTimezone: true, mode: "date" }).notNull(),
   createdAt: createdAt(),
 });

@@ -1003,6 +1003,19 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/InviteResult" }
+  /admin/users/{id}/impersonate:
+    post:
+      operationId: impersonateUser
+      tags: [admin]
+      summary: Mint a short-lived session as another (non-admin) user
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: Impersonation session
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/LoginResponse" }
   /invite/{token}:
     get:
       operationId: getInvite
@@ -1252,6 +1265,7 @@ components:
         company:
           oneOf: [{ $ref: "#/components/schemas/CompanyLite" }, { type: "null" }]
         primaryCohortName: { type: string, nullable: true }
+        impersonatorId: { type: string, nullable: true }
 
     UserLite:
       type: object
