@@ -125,7 +125,7 @@ router.post(
         sequence: active.length + 1,
       })
       .returning();
-    await audit({ actorId: p.id, action: "coaching.book", entity: "CoachingBooking", entityId: booking!.id, meta: { slot } });
+    await audit({ actorId: p.id, impersonatorId: p.impersonatorId, action: "coaching.book", entity: "CoachingBooking", entityId: booking!.id, meta: { slot } });
     if (trainerId) {
       await notify({
         userId: trainerId,
@@ -172,7 +172,7 @@ router.post(
       .update(schema.coachingBooking)
       .set({ slot: when, status: "RESCHEDULED" })
       .where(eq(schema.coachingBooking.id, bookingId));
-    await audit({ actorId: p.id, action: "coaching.reschedule", entity: "CoachingBooking", entityId: bookingId, meta: { slot } });
+    await audit({ actorId: p.id, impersonatorId: p.impersonatorId, action: "coaching.reschedule", entity: "CoachingBooking", entityId: bookingId, meta: { slot } });
     res.json({ ok: true });
   }),
 );

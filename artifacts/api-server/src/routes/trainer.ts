@@ -214,7 +214,7 @@ router.post(
         moduleId: input.moduleId || null,
       })
       .returning();
-    await audit({ actorId: p.id, action: "event.create", entity: "Event", entityId: event!.id, meta: { cohortId: input.cohortId } });
+    await audit({ actorId: p.id, impersonatorId: p.impersonatorId, action: "event.create", entity: "Event", entityId: event!.id, meta: { cohortId: input.cohortId } });
     res.json({ ok: true, id: event!.id });
   }),
 );
@@ -266,7 +266,7 @@ router.post(
         uploadedById: p.id,
       })
       .returning();
-    await audit({ actorId: p.id, action: "resource.create", entity: "Resource", entityId: resource!.id, meta: { cohortId: input.cohortId } });
+    await audit({ actorId: p.id, impersonatorId: p.impersonatorId, action: "resource.create", entity: "Resource", entityId: resource!.id, meta: { cohortId: input.cohortId } });
     res.json({ ok: true, id: resource!.id });
   }),
 );
@@ -286,7 +286,7 @@ router.post(
       .update(schema.resource)
       .set({ status: status as typeof schema.resource.$inferInsert["status"] })
       .where(eq(schema.resource.id, String(req.params.id)));
-    await audit({ actorId: p.id, action: "resource.setStatus", entity: "Resource", entityId: String(req.params.id), meta: { status } });
+    await audit({ actorId: p.id, impersonatorId: p.impersonatorId, action: "resource.setStatus", entity: "Resource", entityId: String(req.params.id), meta: { status } });
     res.json({ ok: true });
   }),
 );
@@ -310,7 +310,7 @@ router.post(
       return;
     }
     const cert = await issueCertificate(enr.id);
-    await audit({ actorId: p.id, action: "certificate.issue", entity: "Certificate", entityId: cert!.id, meta: { enrollmentId: enr.id } });
+    await audit({ actorId: p.id, impersonatorId: p.impersonatorId, action: "certificate.issue", entity: "Certificate", entityId: cert!.id, meta: { enrollmentId: enr.id } });
     res.json({ ok: true, serial: cert!.serial });
   }),
 );

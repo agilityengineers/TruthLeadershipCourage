@@ -65,6 +65,7 @@ router.post(
     });
     await audit({
       actorId: p.id,
+      impersonatorId: p.impersonatorId,
       action: granted ? "consent.grant" : "consent.revoke",
       entity: "User",
       entityId: p.id,
@@ -79,7 +80,7 @@ router.post(
   asyncHandler(async (req, res) => {
     const p = await requirePrincipal(req);
     await db.update(schema.user).set({ status: "deletion_requested" }).where(eq(schema.user.id, p.id));
-    await audit({ actorId: p.id, action: "gdpr.deletion_request", entity: "User", entityId: p.id });
+    await audit({ actorId: p.id, impersonatorId: p.impersonatorId, action: "gdpr.deletion_request", entity: "User", entityId: p.id });
     res.json({ ok: true });
   }),
 );

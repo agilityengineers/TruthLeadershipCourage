@@ -125,7 +125,7 @@ router.post(
       .update(schema.shipment)
       .set({ status: "PENDING", requestedAt: new Date(), address: shipment.address ?? enr.shippingAddress ?? null })
       .where(eq(schema.shipment.id, shipment.id));
-    await audit({ actorId: p.id, action: "shipment.requested", entity: "Shipment", entityId: shipment.id });
+    await audit({ actorId: p.id, impersonatorId: p.impersonatorId, action: "shipment.requested", entity: "Shipment", entityId: shipment.id });
     await notify({
       userId: enr.userId,
       type: "SHIPMENT_UPDATE",
@@ -165,7 +165,7 @@ router.get(
       where: eq(schema.liveItProgress.enrollmentId, enr.id),
       with: { item: { with: { module: { columns: { title: true } } } } },
     });
-    await audit({ actorId: p.id, action: "portal.export", entity: "Enrollment", entityId: enr.id });
+    await audit({ actorId: p.id, impersonatorId: p.impersonatorId, action: "portal.export", entity: "Enrollment", entityId: enr.id });
     res.json({
       participantName: enr.user.name ?? enr.user.email,
       cohortName: enr.cohort.name,

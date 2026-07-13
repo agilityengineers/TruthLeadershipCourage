@@ -51,6 +51,7 @@ router.post(
     }
     await audit({
       actorId: p.id,
+      impersonatorId: p.impersonatorId,
       action: "liveit.check",
       entity: "LiveItItem",
       entityId: item.id,

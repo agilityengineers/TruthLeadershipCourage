@@ -8,14 +8,19 @@ export async function audit(args: {
   entityId?: string;
   meta?: Record<string, unknown>;
   ip?: string;
+  /** When the actor's session is impersonated, the admin driving it. */
+  impersonatorId?: string | null;
 }) {
   try {
+    const meta = args.impersonatorId
+      ? { ...(args.meta ?? {}), impersonatorId: args.impersonatorId }
+      : args.meta;
     await db.insert(schema.auditLog).values({
       actorId: args.actorId ?? null,
       action: args.action,
       entity: args.entity,
       entityId: args.entityId ?? null,
-      meta: (args.meta as object) ?? null,
+      meta: (meta as object) ?? null,
       ip: args.ip ?? null,
     });
   } catch (e) {

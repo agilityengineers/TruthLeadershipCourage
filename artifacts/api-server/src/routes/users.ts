@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { randomBytes } from "node:crypto";
+import { randomBytes, randomUUID } from "node:crypto";
 import { CreateUserBody, UpdateUserBody } from "@workspace/api-zod";
 import { db, schema, eq, and, ne, or, inArray, asc, count } from "../lib/db";
 import { asyncHandler, HttpError, forbidden } from "../lib/http";
@@ -12,6 +12,7 @@ const router: IRouter = Router();
 
 const ADMIN_ROLES = ["ADMIN", "SUPER_ADMIN"] as const;
 const INVITE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+const IMPERSONATION_TTL_MS = 60 * 60 * 1000;
 const MIN_PASSWORD_LEN = 8;
 
 const isAdminRole = (role: string) =>
@@ -169,6 +170,59 @@ router.post(
       id: target.id,
       inviteToken: invite.token,
       invitePath: invite.path,
+    });
+  }),
+);
+
+/**
+ * Mint a short-lived session as another (non-admin) user so an admin can see
+ * the platform exactly as they do. The admin's own session stays untouched;
+ * the new session records who is driving it via `impersonatorId`.
+ */
+router.post(
+  "/admin/users/:id/impersonate",
+  asyncHandler(async (req, res) => {
+    const principal = await requireCapability(req, "user:impersonate");
+    if (principal.impersonatorId) {
+      throw forbidden("You cannot impersonate while already impersonating.");
+    }
+    const target = await db.query.user.findFirst({
+      where: eq(schema.user.id, String(req.params.id)),
+    });
+    if (!target) throw new HttpError(404, "User not found.");
+    if (target.id === principal.id) {
+      throw forbidden("You cannot impersonate yourself.");
+    }
+    if (isAdminRole(target.role)) {
+      throw forbidden("Administrators cannot be impersonated.");
+    }
+    if (target.status !== "active") {
+      throw new HttpError(409, "Only active accounts can be impersonated.");
+    }
+
+    const token = randomUUID();
+    await db.insert(schema.session).values({
+      sessionToken: token,
+      userId: target.id,
+      expires: new Date(Date.now() + IMPERSONATION_TTL_MS),
+      impersonatorId: principal.id,
+    });
+    await audit({
+      actorId: principal.id,
+      action: "impersonation.start",
+      entity: "User",
+      entityId: target.id,
+      meta: { targetEmail: target.email, targetRole: target.role },
+    });
+    res.json({
+      token,
+      user: {
+        id: target.id,
+        role: target.role,
+        companyId: target.companyId ?? null,
+        name: target.name,
+        email: target.email,
+      },
     });
   }),
 );
@@ -354,7 +408,14 @@ router.delete(
 
     // Clean up owned auxiliary rows, preserve audit history (actor set to null), then delete.
     await db.transaction(async (tx) => {
-      await tx.delete(schema.session).where(eq(schema.session.userId, id));
+      await tx
+        .delete(schema.session)
+        .where(
+          or(
+            eq(schema.session.userId, id),
+            eq(schema.session.impersonatorId, id),
+          ),
+        );
       await tx.delete(schema.account).where(eq(schema.account.userId, id));
       await tx
         .delete(schema.notification)

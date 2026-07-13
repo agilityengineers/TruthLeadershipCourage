@@ -5,10 +5,17 @@ import {
   useCreateUser,
   useUpdateUser,
   useDeleteUser,
+  useImpersonateUser,
   useRegenerateInvite,
   type AdminUserRow,
   type Role,
 } from "@workspace/api-client-react";
+import {
+  getPrincipal,
+  isImpersonating,
+  startImpersonation,
+} from "@/lib/session";
+import { homeForRole } from "@/lib/rbac";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -439,6 +446,71 @@ export function EditUserDialog({
         </form>
       </DialogContent>
     </Dialog>
+  );
+}
+
+export function ImpersonateUserButton({ user }: { user: AdminUserRow }) {
+  const impersonate = useImpersonateUser();
+  const self = getPrincipal();
+  // Mirrors the server's guards: active, non-admin, not yourself, one at a time.
+  const eligible =
+    user.status === "active" &&
+    user.role !== "ADMIN" &&
+    user.role !== "SUPER_ADMIN" &&
+    user.id !== self?.id &&
+    !isImpersonating();
+  if (!eligible) return null;
+  const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+
+  return (
+    <AlertDialog>
+      <AlertDialogTrigger asChild>
+        <button className="text-[12px] font-semibold text-mq">
+          Impersonate
+        </button>
+      </AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>
+            Impersonate {user.name ?? user.email}?
+          </AlertDialogTitle>
+          <AlertDialogDescription>
+            You'll see the platform exactly as this user does for up to one
+            hour. Anything you do is real, attributed to them, and flagged with
+            your admin account in the audit log. Use "Exit impersonation" in
+            the banner to return.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogAction
+            onClick={async (e) => {
+              e.preventDefault();
+              try {
+                const res = await impersonate.mutateAsync({ id: user.id });
+                startImpersonation(
+                  {
+                    id: res.user.id,
+                    role: res.user.role,
+                    companyId: res.user.companyId ?? null,
+                    name: res.user.name ?? null,
+                    email: res.user.email,
+                  },
+                  res.token,
+                );
+                // Full page navigation: fresh react-query cache, guards
+                // re-run against the impersonated session.
+                window.location.assign(base + homeForRole(res.user.role));
+              } catch (err) {
+                toast.error(errMsg(err));
+              }
+            }}
+          >
+            Impersonate
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }
 

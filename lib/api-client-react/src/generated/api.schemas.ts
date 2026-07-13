@@ -71,6 +71,7 @@ export interface MeResponse {
   companyId?: string | null;
   company?: CompanyLite | null;
   primaryCohortName?: string | null;
+  impersonatorId?: string | null;
 }
 
 export interface UserLite {

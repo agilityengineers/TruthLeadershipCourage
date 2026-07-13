@@ -21,6 +21,7 @@ export type Capability =
   | "email:send"
   | "analytics:view"
   | "user:manage"
+  | "user:impersonate"
   | "admin:all";
 
 const MATRIX: Record<Role, Capability[]> = {
@@ -49,6 +50,7 @@ const MATRIX: Record<Role, Capability[]> = {
     "email:send",
     "analytics:view",
     "user:manage",
+    "user:impersonate",
   ],
   SUPER_ADMIN: ["admin:all"],
 };

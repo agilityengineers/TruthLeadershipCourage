@@ -16,9 +16,11 @@ export type Capability =
   | "trainer:manage"
   | "assessment:manage"
   | "billing:manage"
+  | "content:manage"
   | "email:send"
   | "analytics:view"
   | "user:manage" // create/edit/deactivate/delete platform users
+  | "user:impersonate" // troubleshoot as another (non-admin) user
   | "admin:all";
 
 const MATRIX: Record<Role, Capability[]> = {
@@ -43,9 +45,11 @@ const MATRIX: Record<Role, Capability[]> = {
     "trainer:manage",
     "assessment:manage",
     "billing:manage",
+    "content:manage",
     "email:send",
     "analytics:view",
     "user:manage",
+    "user:impersonate",
   ],
   SUPER_ADMIN: ["admin:all"],
 };

@@ -117,6 +117,7 @@ router.post(
 
     await audit({
       actorId: principal.id,
+      impersonatorId: principal.impersonatorId,
       action: "email.campaign",
       entity: "EmailCampaign",
       entityId: campaign!.id,
