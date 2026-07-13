@@ -11,4 +11,5 @@ export interface ShipmentLite {
   status: string;
   carrier?: string | null;
   tracking?: string | null;
+  requestedAt?: Date | null;
 }

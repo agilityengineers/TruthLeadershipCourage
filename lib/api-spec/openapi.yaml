@@ -156,24 +156,6 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Ok" }
-  /enrollments/{id}/complete-week:
-    post:
-      operationId: markWeekComplete
-      tags: [progress]
-      parameters:
-        - { name: id, in: path, required: true, schema: { type: string } }
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema: { $ref: "#/components/schemas/CompleteWeekRequest" }
-      responses:
-        "200":
-          description: Completed
-          content:
-            application/json:
-              schema: { $ref: "#/components/schemas/Ok" }
-
   # ------------------------------------------------------------------ portal
   /portal/context:
     get:
@@ -210,6 +192,151 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/LibraryResponse" }
+  /portal/home:
+    get:
+      operationId: getPortalHome
+      tags: [portal]
+      parameters:
+        # Dev/demo override for the derived state, mirroring the old ?phase= toggle.
+        - { name: preview, in: query, required: false, schema: { type: string } }
+      responses:
+        "200":
+          description: Home screen state (or null when no active enrollment)
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - { $ref: "#/components/schemas/PortalHomeState" }
+                  - { type: "null" }
+  /portal/reflections:
+    get:
+      operationId: listMyReflections
+      tags: [portal]
+      responses:
+        "200":
+          description: Everything the participant has written (self only)
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/ReflectionItem" }
+    post:
+      operationId: createReflection
+      tags: [portal]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreateReflectionRequest" }
+      responses:
+        "200":
+          description: Saved (append-only; a new version row)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ReflectionItem" }
+  /portal/live-it/{itemId}/check:
+    post:
+      operationId: checkLiveItItem
+      tags: [portal]
+      parameters:
+        - { name: itemId, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CheckLiveItRequest" }
+      responses:
+        "200":
+          description: Lived it
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Ok" }
+  /portal/live-it/{itemId}/uncheck:
+    post:
+      operationId: uncheckLiveItItem
+      tags: [portal]
+      parameters:
+        - { name: itemId, in: path, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: Unchecked
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Ok" }
+  /portal/partner:
+    get:
+      operationId: getMyPartner
+      tags: [portal]
+      responses:
+        "200":
+          description: Partner presence (or null when unpartnered)
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - { $ref: "#/components/schemas/PartnerState" }
+                  - { type: "null" }
+    post:
+      operationId: choosePartner
+      tags: [portal]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ChoosePartnerRequest" }
+      responses:
+        "200":
+          description: Partner linked
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Ok" }
+  /portal/partner/candidates:
+    get:
+      operationId: listPartnerCandidates
+      tags: [portal]
+      responses:
+        "200":
+          description: Unpartnered cohort peers (names only)
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/PartnerCandidate" }
+  /portal/partner/note:
+    post:
+      operationId: sendPartnerNote
+      tags: [portal]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/SendMessageRequest" }
+      responses:
+        "200":
+          description: Note sent (via the partners' direct thread)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PartnerNoteResult" }
+  /portal/shipment/request:
+    post:
+      operationId: requestPrintedWorkbook
+      tags: [portal]
+      responses:
+        "200":
+          description: Print request outcome (honors the mailing lead-time cutoff)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PrintRequestResult" }
+  /portal/export:
+    get:
+      operationId: getPortalExport
+      tags: [portal]
+      responses:
+        "200":
+          description: Everything the participant wrote, bundled for download
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PortalExport" }
 
   # -------------------------------------------------------------------- chat
   /chat/threads:
@@ -342,6 +469,31 @@ paths:
               schema: { $ref: "#/components/schemas/Ok" }
 
   # ---------------------------------------------------------------- coaching
+  /coaching/slots:
+    get:
+      operationId: getCoachingSlots
+      tags: [coaching]
+      responses:
+        "200":
+          description: Bookable Intersession coaching slots for the participant
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CoachingSlotsResponse" }
+  /coaching/bookings:
+    post:
+      operationId: bookCoachingSession
+      tags: [coaching]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/BookCoachingRequest" }
+      responses:
+        "200":
+          description: Booked
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/BookingItem" }
   /coaching/bookings/{id}/reschedule:
     post:
       operationId: rescheduleBooking
@@ -1253,12 +1405,6 @@ components:
         externalId: { type: string }
         processor: { type: string, enum: [STRIPE, THRIVECART, MANUAL] }
         amount: { type: integer }
-    CompleteWeekRequest:
-      type: object
-      required: [weekNo]
-      properties:
-        weekNo: { type: integer }
-
     ModuleLite:
       type: object
       required: [id, title, pillar]
@@ -1268,7 +1414,11 @@ components:
         pillar: { $ref: "#/components/schemas/Pillar" }
         order: { type: integer }
         weekNo: { type: integer, nullable: true }
+        segment: { type: string, nullable: true }
+        lessonWeekNo: { type: integer, nullable: true }
+        practiceWeekNo: { type: integer, nullable: true }
         summary: { type: string, nullable: true }
+        anchorLine: { type: string, nullable: true }
         programId: { type: string }
     EventLite:
       type: object
@@ -1313,6 +1463,8 @@ components:
         status: { type: string }
         isPrivate: { type: boolean }
         programId: { type: string }
+        welcomeNote: { type: string, nullable: true }
+        portalClosesAt: { type: string, format: date-time, nullable: true }
         program: { $ref: "#/components/schemas/ProgramLite" }
         trainer:
           oneOf: [{ $ref: "#/components/schemas/UserLite" }, { type: "null" }]
@@ -1327,6 +1479,7 @@ components:
         status: { type: string }
         carrier: { type: string, nullable: true }
         tracking: { type: string, nullable: true }
+        requestedAt: { type: string, format: date-time, nullable: true }
     ModuleProgressItem:
       type: object
       required: [id, enrollmentId, weekNo, status]
@@ -1408,6 +1561,232 @@ components:
         resources:
           type: array
           items: { $ref: "#/components/schemas/ResourceItem" }
+
+    # ---------------------------------------------------- portal home screen
+    ReflectionKind:
+      type: string
+      enum: [SEED, I_AM, LEADERSHIP_WHY, COMMITMENT, MODULE_CLOSING, MONDAY_MORNING]
+    ReflectionItem:
+      type: object
+      required: [id, kind, body, createdAt]
+      properties:
+        id: { type: string }
+        kind: { $ref: "#/components/schemas/ReflectionKind" }
+        promptKey: { type: string, nullable: true }
+        moduleId: { type: string, nullable: true }
+        moduleTitle: { type: string, nullable: true }
+        body: { type: string }
+        createdAt: { type: string, format: date-time }
+    CreateReflectionRequest:
+      type: object
+      required: [kind, body]
+      properties:
+        kind: { $ref: "#/components/schemas/ReflectionKind" }
+        promptKey: { type: string, nullable: true }
+        moduleId: { type: string, nullable: true }
+        body: { type: string, minLength: 1, maxLength: 4000 }
+    PortalAnchor:
+      type: object
+      required: [seeds]
+      properties:
+        seeds:
+          type: array
+          items: { $ref: "#/components/schemas/ReflectionItem" }
+        iAm:
+          oneOf: [{ $ref: "#/components/schemas/ReflectionItem" }, { type: "null" }]
+        leadershipWhy:
+          oneOf: [{ $ref: "#/components/schemas/ReflectionItem" }, { type: "null" }]
+    JourneySegmentItem:
+      type: object
+      required: [key, label, state]
+      properties:
+        key: { type: string, enum: [BEGIN, EQ, IQ, INTERSESSION, MQ] }
+        label: { type: string }
+        state: { type: string, enum: [past, current, future] }
+        # 0..1 position of the marker within the current segment.
+        progress: { type: number, nullable: true }
+    MirrorItem:
+      type: object
+      required: [sourceKind, label, body]
+      properties:
+        sourceKind: { $ref: "#/components/schemas/ReflectionKind" }
+        # e.g. "Before tonight — from your Module 1 closing reflection"
+        label: { type: string }
+        body: { type: string }
+        # Optional gentle follow-up, e.g. "Where did that show up this week?"
+        question: { type: string, nullable: true }
+    LiveItChecklistItem:
+      type: object
+      required: [id, order, label, checked]
+      properties:
+        id: { type: string }
+        order: { type: integer }
+        label: { type: string }
+        checked: { type: boolean }
+        note: { type: string, nullable: true }
+        checkedAt: { type: string, format: date-time, nullable: true }
+    LiveItState:
+      type: object
+      required: [moduleId, moduleTitle, moduleOrder, items]
+      properties:
+        moduleId: { type: string }
+        moduleTitle: { type: string }
+        moduleOrder: { type: integer }
+        items:
+          type: array
+          items: { $ref: "#/components/schemas/LiveItChecklistItem" }
+    PartnerState:
+      type: object
+      required: [name, checkedInThisWeek]
+      properties:
+        name: { type: string }
+        # True when the partner lived at least one practice in the current
+        # module window. Presence only — never what they wrote.
+        checkedInThisWeek: { type: boolean }
+        # A short presence line, e.g. "Maya lived one practice yesterday" or
+        # "Maya booked her session for July 21".
+        signal: { type: string, nullable: true }
+        threadId: { type: string, nullable: true }
+    PartnerCandidate:
+      type: object
+      required: [enrollmentId, name]
+      properties:
+        enrollmentId: { type: string }
+        name: { type: string }
+    ChoosePartnerRequest:
+      type: object
+      required: [enrollmentId]
+      properties:
+        enrollmentId: { type: string }
+    PartnerNoteResult:
+      type: object
+      required: [ok, threadId]
+      properties:
+        ok: { type: boolean }
+        threadId: { type: string }
+    NowCard:
+      type: object
+      required: [type]
+      properties:
+        type:
+          type: string
+          enum: [PRE_START, SESSION, LIVE_IT, INTERSESSION, GRADUATION, CLOSED]
+        # PRE_START — countdown + workbook
+        cohortStartDate: { type: string, format: date-time, nullable: true }
+        workbookUrl: { type: string, nullable: true }
+        printStatus: { type: string, nullable: true }
+        printRequestable: { type: boolean, nullable: true }
+        # SESSION — the join card (lesson or practice)
+        sessionKind: { type: string, enum: [LESSON, PRACTICE], nullable: true }
+        moduleOrder: { type: integer, nullable: true }
+        moduleTitle: { type: string, nullable: true }
+        startAt: { type: string, format: date-time, nullable: true }
+        endAt: { type: string, format: date-time, nullable: true }
+        joinUrl: { type: string, nullable: true }
+        isToday: { type: boolean, nullable: true }
+        # INTERSESSION — the coaching booking card
+        intersessionWeek: { type: integer, nullable: true }
+        intersessionWeeks: { type: integer, nullable: true }
+        booking:
+          oneOf: [{ $ref: "#/components/schemas/BookingItem" }, { type: "null" }]
+        # GRADUATION / CLOSED — the download window
+        portalClosesAt: { type: string, format: date-time, nullable: true }
+    PortalHomeState:
+      type: object
+      required: [segment, journey, journeyLabel, anchor, nowCard, needsOnboarding, prompts, cohortName]
+      properties:
+        segment:
+          type: string
+          enum: [PRE_START, SESSION_1, INTERSESSION, SESSION_2, GRADUATED, CLOSED]
+        weekOfProgram: { type: integer, nullable: true }
+        cyclePhase:
+          type: string
+          enum: [BEFORE_LESSON, LIVE_IT, BEFORE_PRACTICE, AFTER_PRACTICE]
+          nullable: true
+        currentModule:
+          oneOf: [{ $ref: "#/components/schemas/ModuleLite" }, { type: "null" }]
+        nowCard: { $ref: "#/components/schemas/NowCard" }
+        journey:
+          type: array
+          items: { $ref: "#/components/schemas/JourneySegmentItem" }
+        # The quiet position line, e.g. "EQ · Be Wise" or "Intersession · wk 3".
+        journeyLabel: { type: string }
+        anchor: { $ref: "#/components/schemas/PortalAnchor" }
+        mirror:
+          oneOf: [{ $ref: "#/components/schemas/MirrorItem" }, { type: "null" }]
+        liveIt:
+          oneOf: [{ $ref: "#/components/schemas/LiveItState" }, { type: "null" }]
+        partner:
+          oneOf: [{ $ref: "#/components/schemas/PartnerState" }, { type: "null" }]
+        # True before the first practice session while unpartnered — the row
+        # previews what is coming rather than sitting blank.
+        partnerPending: { type: boolean, nullable: true }
+        welcomeNote: { type: string, nullable: true }
+        trainerName: { type: string, nullable: true }
+        cohortName: { type: string }
+        cohortStartDate: { type: string, format: date-time, nullable: true }
+        portalClosesAt: { type: string, format: date-time, nullable: true }
+        needsOnboarding: { type: boolean }
+        prompts: { $ref: "#/components/schemas/PortalPrompts" }
+    PortalPrompts:
+      type: object
+      required: [iAm, commitment]
+      properties:
+        # Invite the participant to write/refine their I AM (after the Module 1
+        # lesson, when none exists yet).
+        iAm: { type: boolean }
+        # Invite them to record their lesson-session commitment for the current
+        # module (during Live It, when none exists yet).
+        commitment: { type: boolean }
+    CheckLiveItRequest:
+      type: object
+      properties:
+        note: { type: string, nullable: true, maxLength: 1000 }
+    CoachingSlotsResponse:
+      type: object
+      required: [slots, bookedCount, includedSessions]
+      properties:
+        slots:
+          type: array
+          items: { type: string, format: date-time }
+        intersessionStart: { type: string, format: date-time, nullable: true }
+        intersessionEnd: { type: string, format: date-time, nullable: true }
+        bookedCount: { type: integer }
+        includedSessions: { type: integer }
+    BookCoachingRequest:
+      type: object
+      required: [slot]
+      properties:
+        slot: { type: string, format: date-time }
+    PrintRequestResult:
+      type: object
+      required: [ok, status]
+      properties:
+        ok: { type: boolean }
+        status: { type: string }
+        message: { type: string, nullable: true }
+    PortalExportLiveIt:
+      type: object
+      required: [moduleTitle, label, checkedAt]
+      properties:
+        moduleTitle: { type: string }
+        label: { type: string }
+        checkedAt: { type: string, format: date-time, nullable: true }
+        note: { type: string, nullable: true }
+    PortalExport:
+      type: object
+      required: [participantName, cohortName, exportedAt, reflections, liveIt]
+      properties:
+        participantName: { type: string }
+        cohortName: { type: string }
+        exportedAt: { type: string, format: date-time }
+        portalClosesAt: { type: string, format: date-time, nullable: true }
+        reflections:
+          type: array
+          items: { $ref: "#/components/schemas/ReflectionItem" }
+        liveIt:
+          type: array
+          items: { $ref: "#/components/schemas/PortalExportLiveIt" }
 
     LastMessage:
       type: object
@@ -1621,6 +2000,7 @@ components:
         company: { type: string }
         cohortName: { type: string }
         completedCount: { type: integer }
+        totalCount: { type: integer }
         status: { type: string }
     TrainerOverview:
       type: object
@@ -2020,6 +2400,7 @@ components:
         companyName: { type: string, nullable: true }
         cohortName: { type: string }
         completedCount: { type: integer }
+        totalCount: { type: integer }
         status: { type: string }
     AdminResourceRow:
       type: object
@@ -2112,6 +2493,7 @@ components:
         userEmail: { type: string }
         cohortName: { type: string }
         completedCount: { type: integer }
+        totalCount: { type: integer }
         status: { type: string }
     CompanyOverview:
       type: object
@@ -2128,6 +2510,7 @@ components:
       properties:
         cohortName: { type: string }
         completedCount: { type: integer }
+        totalCount: { type: integer }
         status: { type: string }
     CompanyPersonRow:
       type: object

@@ -39,6 +39,7 @@ import PortalProgress from "@/app/portal/progress/page";
 import PortalSettings from "@/app/portal/settings/page";
 import PortalWorkbook from "@/app/portal/workbook/page";
 import PortalCertificate from "@/app/portal/certificate/page";
+import PortalKeepsake from "@/app/portal/keepsake/page";
 
 // Admin pages
 import AdminHome from "@/app/admin/page";
@@ -134,6 +135,7 @@ function Router() {
         ["/portal/settings", PortalSettings],
         ["/portal/workbook", PortalWorkbook],
         ["/portal/certificate", PortalCertificate],
+        ["/portal/keepsake", PortalKeepsake],
       ])}
 
       {/* Admin */}

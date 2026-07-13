@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { CreateEnrollmentBody, FulfillEnrollmentBody, MarkWeekCompleteBody } from "@workspace/api-zod";
+import { CreateEnrollmentBody, FulfillEnrollmentBody } from "@workspace/api-zod";
 import { db, schema, eq, and, or, ne, inArray, asc, count, gte, sql } from "../lib/db";
 import { asyncHandler, HttpError, notFound, forbidden } from "../lib/http";
 import { requirePrincipal } from "../lib/principal";
@@ -276,9 +276,11 @@ router.post(
         where: eq(schema.shipment.enrollmentId, enrollment.id),
       });
       if (!shipment) {
+        // Printed copies are requested, not automatic (the portal's pre-start
+        // Now card offers "request a printed copy").
         await tx.insert(schema.shipment).values({
           enrollmentId: enrollment.id,
-          status: "PENDING",
+          status: "NOT_REQUESTED",
           address: enrollment.shippingAddress ?? null,
         });
       }
@@ -291,17 +293,19 @@ router.post(
           where: eq(schema.module.programId, enrollment.cohort.programId),
           orderBy: [asc(schema.module.order)],
         });
-        await tx.insert(schema.moduleProgress).values(
-          Array.from({ length: 24 }, (_u, i) => {
-            const w = i + 1;
-            return {
+        if (modules.length) {
+          // One row per module. Status follows the program schedule from here
+          // on (synced by the portal-state machinery), so a mid-program
+          // joiner starts in the right place immediately.
+          await tx.insert(schema.moduleProgress).values(
+            modules.map((m, i) => ({
               enrollmentId: enrollment.id,
-              weekNo: w,
-              moduleId: modules[(w - 1) % Math.max(modules.length, 1)]?.id ?? null,
-              status: (w === 1 ? "AVAILABLE" : "LOCKED") as "AVAILABLE" | "LOCKED",
-            };
-          }),
-        );
+              weekNo: m.lessonWeekNo ?? m.weekNo ?? i * 2 + 1,
+              moduleId: m.id,
+              status: (i === 0 ? "AVAILABLE" : "LOCKED") as "AVAILABLE" | "LOCKED",
+            })),
+          );
+        }
       }
     });
 
@@ -336,59 +340,9 @@ router.post(
   }),
 );
 
-/** Mark a participant's week complete; unlock the next week. */
-router.post(
-  "/enrollments/:id/complete-week",
-  asyncHandler(async (req, res) => {
-    const principal = await requirePrincipal(req);
-    const { weekNo } = MarkWeekCompleteBody.parse(req.body);
-    const enrollmentId = String(req.params.id);
-    const enr = await db.query.enrollment.findFirst({ where: eq(schema.enrollment.id, enrollmentId) });
-    if (!enr) throw notFound("Enrollment not found");
-    const isStaff = principal.role === "ADMIN" || principal.role === "SUPER_ADMIN";
-    if (enr.userId !== principal.id && !isStaff) throw forbidden();
-
-    const completed = await db
-      .update(schema.moduleProgress)
-      .set({ status: "COMPLETED", completedAt: new Date() })
-      .where(
-        and(
-          eq(schema.moduleProgress.enrollmentId, enrollmentId),
-          eq(schema.moduleProgress.weekNo, weekNo),
-          ...(isStaff ? [] : [eq(schema.moduleProgress.status, "AVAILABLE")]),
-        ),
-      )
-      .returning({ id: schema.moduleProgress.id });
-    if (completed.length === 0) throw new HttpError(400, "That week isn't available to complete yet.");
-
-    await db
-      .update(schema.moduleProgress)
-      .set({ status: "AVAILABLE" })
-      .where(
-        and(
-          eq(schema.moduleProgress.enrollmentId, enrollmentId),
-          eq(schema.moduleProgress.weekNo, weekNo + 1),
-          eq(schema.moduleProgress.status, "LOCKED"),
-        ),
-      );
-
-    const [{ remaining } = { remaining: 0 }] = await db
-      .select({ remaining: count() })
-      .from(schema.moduleProgress)
-      .where(
-        and(
-          eq(schema.moduleProgress.enrollmentId, enrollmentId),
-          ne(schema.moduleProgress.status, "COMPLETED"),
-        ),
-      );
-    if (Number(remaining) === 0) {
-      await db
-        .update(schema.enrollment)
-        .set({ status: "COMPLETED", completedAt: new Date() })
-        .where(eq(schema.enrollment.id, enrollmentId));
-    }
-    res.json({ ok: true });
-  }),
-);
+// NOTE: the old POST /enrollments/:id/complete-week endpoint is gone by
+// design — module completion follows the program schedule (the cadence
+// contract), synced server-side; the portal never asks anyone to mark a week
+// done.
 
 export default router;

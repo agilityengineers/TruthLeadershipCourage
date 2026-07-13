@@ -12,6 +12,8 @@ import { shipment } from "./shipment";
 import { certificate } from "./certificate";
 import { moduleProgress } from "./moduleProgress";
 import { coachingBooking } from "./coachingBooking";
+import { reflection } from "./reflection";
+import { liveItProgress } from "./liveItProgress";
 
 export const enrollment = pgTable(
   "enrollment",
@@ -47,6 +49,8 @@ export const enrollmentRelations = relations(enrollment, ({ one, many }) => ({
   certificate: one(certificate),
   moduleProgress: many(moduleProgress),
   bookings: many(coachingBooking),
+  reflections: many(reflection),
+  liveItProgress: many(liveItProgress),
 }));
 
 export const insertEnrollmentSchema = createInsertSchema(enrollment);

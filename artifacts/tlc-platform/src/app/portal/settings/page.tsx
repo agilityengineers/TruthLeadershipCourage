@@ -1,3 +1,4 @@
+import { Link } from "wouter";
 import { requireRole } from "@/lib/session";
 import { useGetAccountSettings } from "@workspace/api-client-react";
 import { Card } from "@/components/ui/card";
@@ -24,6 +25,17 @@ export default function SettingsPage() {
           <dt className="text-muted-2">Status</dt>
           <dd className="text-ink capitalize">{user?.status?.replace("_", " ")}</dd>
         </dl>
+      </Card>
+
+      <Card className="p-6">
+        <LabelCaps className="mb-2">Everything you wrote</LabelCaps>
+        <p className="mb-4 text-[13.5px] leading-relaxed text-muted">
+          Your reflections, every version of your I AM, your commitments and noticings — bundled to
+          read, print, or download. Offered at graduation and available until the portal closes.
+        </p>
+        <Button asChild variant="outline">
+          <Link href="/portal/keepsake">Open your record</Link>
+        </Button>
       </Card>
 
       <Card className="p-6">

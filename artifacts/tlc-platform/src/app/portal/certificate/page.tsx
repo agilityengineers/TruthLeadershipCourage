@@ -11,7 +11,7 @@ export default function CertificatePage() {
   if (!enr || !cert) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-soft-3 text-muted">
-        Certificate not available yet — complete all 24 weeks to unlock it.
+        Certificate not available yet — it's issued at graduation.
       </div>
     );
   }

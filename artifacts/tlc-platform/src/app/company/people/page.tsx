@@ -18,7 +18,7 @@ export default function CompanyPeoplePage() {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {people.map((p) => {
           const enr = p.enrollments[0];
-          const pct = enr ? Math.round((enr.completedCount / 24) * 100) : 0;
+          const pct = enr ? Math.round((enr.completedCount / Math.max(enr.totalCount ?? 8, 1)) * 100) : 0;
           return (
             <Card key={p.id} className="p-5">
               <div className="flex items-center gap-3">

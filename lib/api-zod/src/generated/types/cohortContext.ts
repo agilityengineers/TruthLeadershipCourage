@@ -24,6 +24,8 @@ export interface CohortContext {
   status: string;
   isPrivate: boolean;
   programId: string;
+  welcomeNote?: string | null;
+  portalClosesAt?: Date | null;
   program: ProgramLite;
   trainer?: UserLite | null;
   events: EventLite[];
