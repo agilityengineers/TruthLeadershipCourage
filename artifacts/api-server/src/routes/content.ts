@@ -1,5 +1,4 @@
 import { Router, type IRouter } from "express";
-import express from "express";
 import { randomUUID } from "node:crypto";
 import {
   SECTIONS,
@@ -89,6 +88,28 @@ router.get(
   }),
 );
 
+/**
+ * Public: serve an admin-uploaded image stored in Postgres. Every upload gets
+ * a fresh id and rows are never rewritten, so responses cache as immutable.
+ */
+router.get(
+  "/content/images/:id",
+  asyncHandler(async (req, res) => {
+    const row = await db.query.siteImage.findFirst({
+      where: eq(schema.siteImage.id, String(req.params.id)),
+    });
+    if (!row) throw notFound("Image not found.");
+    res.set({
+      "Content-Type": row.contentType,
+      "Cache-Control": "public, max-age=31536000, immutable",
+      "X-Content-Type-Options": "nosniff",
+      // Keeps scripts inert if an uploaded SVG is opened as a document.
+      "Content-Security-Policy": "default-src 'none'; style-src 'unsafe-inline'",
+    });
+    res.send(row.data);
+  }),
+);
+
 // ─────────────────────────────── Admin read ─────────────────────────────────
 
 /** Admin: every section resolved, with field descriptors for the editor. */
@@ -115,7 +136,7 @@ router.get(
       };
     });
 
-    res.json({ sections, uploadEnabled: isBlobConfigured() });
+    res.json({ sections });
   }),
 );
 
@@ -225,15 +246,15 @@ const ALLOWED: Record<string, string> = {
 };
 const MAX_BYTES = 5 * 1024 * 1024;
 
-/** Authenticated image upload (base64 JSON) to the configured S3 bucket. */
+/**
+ * Authenticated image upload (base64 JSON). Stored in the S3 bucket when S3_*
+ * env is configured; otherwise persisted in Postgres and served from
+ * `/api/content/images/:id`, so admins can always upload.
+ */
 router.post(
   "/admin/content/upload",
-  express.json({ limit: "8mb" }),
   asyncHandler(async (req, res) => {
     const principal = await requireCapability(req, "content:manage");
-    if (!isBlobConfigured()) {
-      throw new HttpError(503, "Image storage isn't configured yet. Paste an image URL instead, or set S3_* env.");
-    }
     const { contentType, dataBase64 } = (req.body ?? {}) as { contentType?: string; dataBase64?: string };
     const ext = contentType ? ALLOWED[contentType] : undefined;
     if (!ext) throw badRequest("Unsupported image type. Use PNG, JPG, WebP, GIF, AVIF, or SVG.");
@@ -243,9 +264,20 @@ router.post(
     if (buffer.length === 0) throw badRequest("Empty image.");
     if (buffer.length > MAX_BYTES) throw new HttpError(413, "Image is too large (max 5 MB).");
 
-    const key = `site-content/${randomUUID()}.${ext}`;
-    const url = await putObject(key, buffer, contentType!);
-    await audit({ actorId: principal.id, action: "image.upload", entity: "SiteSection", meta: { key } });
+    let url: string;
+    let ref: string;
+    if (isBlobConfigured()) {
+      ref = `site-content/${randomUUID()}.${ext}`;
+      url = await putObject(ref, buffer, contentType!);
+    } else {
+      const [row] = await db
+        .insert(schema.siteImage)
+        .values({ contentType: contentType!, data: buffer, uploadedBy: principal.id })
+        .returning({ id: schema.siteImage.id });
+      ref = row!.id;
+      url = `/api/content/images/${ref}`;
+    }
+    await audit({ actorId: principal.id, action: "image.upload", entity: "SiteImage", entityId: ref });
     res.json({ url });
   }),
 );

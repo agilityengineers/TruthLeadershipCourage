@@ -1302,6 +1302,13 @@ export const GetPublicContentResponse = zod.object({
 })
 
 
+export const GetContentImageParams = zod.object({
+  "id": zod.coerce.string()
+})
+
+export const GetContentImageResponse = zod.unknown()
+
+
 export const GetAdminContentResponse = zod.object({
   "sections": zod.array(zod.object({
   "key": zod.string(),
@@ -1314,8 +1321,7 @@ export const GetAdminContentResponse = zod.object({
   "visible": zod.boolean(),
   "fields": zod.array(zod.record(zod.string(), zod.unknown())),
   "content": zod.record(zod.string(), zod.unknown())
-})),
-  "uploadEnabled": zod.boolean()
+}))
 })
 
 

@@ -918,6 +918,19 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/PublicContent" }
 
+  /content/images/{id}:
+    get:
+      operationId: getContentImage
+      tags: [content]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: An admin-uploaded image stored in the database
+          content:
+            image/*:
+              schema: { type: string, format: binary }
+
   /admin/content:
     get:
       operationId: getAdminContent
@@ -2157,12 +2170,11 @@ components:
         content: { type: object, additionalProperties: true }
     AdminContent:
       type: object
-      required: [sections, uploadEnabled]
+      required: [sections]
       properties:
         sections:
           type: array
           items: { $ref: "#/components/schemas/AdminSection" }
-        uploadEnabled: { type: boolean }
     UpdateSectionRequest:
       type: object
       required: [content]

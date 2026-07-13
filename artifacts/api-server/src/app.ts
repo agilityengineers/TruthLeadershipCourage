@@ -27,7 +27,8 @@ app.use(
   }),
 );
 app.use(cors());
-app.use(express.json());
+// 8mb: image uploads arrive as base64 JSON (5 MB image ≈ 6.7 MB encoded).
+app.use(express.json({ limit: "8mb" }));
 app.use(express.urlencoded({ extended: true }));
 
 app.use("/api", router);
