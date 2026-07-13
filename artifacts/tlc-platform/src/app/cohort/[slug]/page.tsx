@@ -1,6 +1,6 @@
 import { Link, useParams } from "wouter";
 import { useGetPublicCohort } from "@workspace/api-client-react";
-import { formatDate, formatPrice, daysUntil } from "@/lib/utils";
+import { formatDateOnly, formatPrice, daysUntil } from "@/lib/utils";
 import { Calendar, Clock, MapPin, Users, GraduationCap, ArrowRight } from "lucide-react";
 
 const FORMAT_LABEL: Record<string, string> = {
@@ -65,7 +65,7 @@ export default function CohortLandingPage() {
   const closesIn = cohort.enrollByDate ? daysUntil(cohort.enrollByDate) : null;
 
   const range = (start?: string | null, end?: string | null) =>
-    start && end ? `${formatDate(start)} – ${formatDate(end)}` : null;
+    start && end ? `${formatDateOnly(start)} – ${formatDateOnly(end)}` : null;
   const session1 = range(cohort.session1StartDate, cohort.session1EndDate);
   const intersession = range(cohort.intersessionStartDate, cohort.intersessionEndDate);
   const session2 = range(cohort.session2StartDate, cohort.session2EndDate);
@@ -74,7 +74,7 @@ export default function CohortLandingPage() {
     {
       icon: Calendar,
       label: "Runs",
-      value: `${formatDate(cohort.startDate)} – ${formatDate(cohort.endDate)}`,
+      value: `${formatDateOnly(cohort.startDate)} – ${formatDateOnly(cohort.endDate)}`,
     },
     ...(session1 ? [{ icon: Calendar, label: "Session 1", value: session1 }] : []),
     ...(intersession ? [{ icon: Calendar, label: "Inter-session", value: intersession }] : []),

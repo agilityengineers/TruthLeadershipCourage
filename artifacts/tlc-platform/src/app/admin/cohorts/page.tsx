@@ -2,7 +2,7 @@ import { requireRole } from "@/lib/session";
 import { useListCohorts } from "@workspace/api-client-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { formatDate, formatPrice } from "@/lib/utils";
+import { formatDateOnly, formatPrice } from "@/lib/utils";
 import { CloneCohortDialog, CreateCohortDialog, EditCohortDialog } from "@/components/admin/admin-dialogs";
 
 const STATUS_VARIANT: Record<string, "success" | "default" | "warning" | "neutral"> = {
@@ -70,8 +70,8 @@ export default function CohortsPage() {
                   {c.isPrivate && <span className="ml-1.5 text-[11px] font-normal text-mq">· private</span>}
                 </span>
                 <span className="text-[12px] text-muted">
-                  {formatDate(c.startDate, { month: "short", year: "numeric" })} –{" "}
-                  {formatDate(c.endDate, { month: "short", year: "numeric" })}
+                  {formatDateOnly(c.startDate, { month: "short", year: "numeric" })} –{" "}
+                  {formatDateOnly(c.endDate, { month: "short", year: "numeric" })}
                 </span>
                 <span className="text-[12.5px] text-muted">{c.trainerName ?? "—"}</span>
                 <span className="text-[12.5px] font-semibold text-ink">

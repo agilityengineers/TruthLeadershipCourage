@@ -3,7 +3,7 @@ import { useGetPortalExport, type ReflectionItem } from "@workspace/api-client-r
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { PrintButton } from "@/components/print-button";
-import { formatDate } from "@/lib/utils";
+import { formatDate, formatDateOnly } from "@/lib/utils";
 
 const KIND_LABEL: Record<string, string> = {
   SEED: "Where you started",
@@ -41,7 +41,7 @@ export default function KeepsakePage() {
           <h2 className="mt-0.5 font-display text-[20px] text-ink">Your record of the six months</h2>
           {data.portalClosesAt && (
             <p className="mt-1 text-[12.5px] text-muted-2">
-              The portal closes {formatDate(data.portalClosesAt)} — this page and the download stay
+              The portal closes {formatDateOnly(data.portalClosesAt)} — this page and the download stay
               available until then.
             </p>
           )}
