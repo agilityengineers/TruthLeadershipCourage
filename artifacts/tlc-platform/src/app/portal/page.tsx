@@ -3,7 +3,7 @@ import { requireRole } from "@/lib/session";
 import { useGetPortalHome, type PortalHomeState } from "@workspace/api-client-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { formatDate } from "@/lib/utils";
+import { formatDateOnly } from "@/lib/utils";
 import { Anchor } from "@/components/portal/home/anchor";
 import { JourneyLine } from "@/components/portal/home/journey-line";
 import { NowCardView } from "@/components/portal/home/now-card";
@@ -119,7 +119,7 @@ function ClosedScreen({ home, preview }: { home: PortalHomeState; preview: strin
         <h2 className="mt-2 font-display text-[20px] text-ink">The portal has closed</h2>
         <p className="mx-auto mt-2 max-w-[36ch] text-[13.5px] leading-relaxed text-muted-2">
           Your six months are complete
-          {home.portalClosesAt ? ` and the portal closed ${formatDate(home.portalClosesAt)}` : ""}.
+          {home.portalClosesAt ? ` and the portal closed ${formatDateOnly(home.portalClosesAt)}` : ""}.
           Everything you wrote is still yours to take with you.
         </p>
         <Button asChild className="mt-5">
