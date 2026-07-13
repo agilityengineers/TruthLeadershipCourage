@@ -30,6 +30,7 @@ router.get(
         userEmail: e.user?.email ?? "",
         cohortName: e.cohort?.name ?? "",
         completedCount: e.moduleProgress.filter((m) => m.status === "COMPLETED").length,
+        totalCount: e.moduleProgress.length,
         status: e.status,
       })),
     });
@@ -56,6 +57,7 @@ router.get(
         enrollments: u.enrollments.map((e) => ({
           cohortName: e.cohort?.name ?? "",
           completedCount: e.moduleProgress.filter((m) => m.status === "COMPLETED").length,
+        totalCount: e.moduleProgress.length,
           status: e.status,
         })),
       })),

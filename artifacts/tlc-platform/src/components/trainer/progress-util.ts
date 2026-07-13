@@ -2,19 +2,22 @@ import { progressPct } from "@/lib/cohort";
 
 /**
  * Compute a participant's progress percentage and whether they're "behind"
- * relative to the cohort's current week. A participant is behind when their
- * completion lags the expected pace by more than ~15 percentage points.
+ * relative to the cohort's current week. Completion counts modules (the
+ * program's 8-module map); the expected pace still runs on the 24-week
+ * clock. A participant is behind when completion lags the pace by more than
+ * ~15 percentage points.
  */
 export function computeProgress(
-  completedWeeks: number,
+  completedModules: number,
+  totalModules: number,
   currentWk: number,
   totalWeeks: number,
   isCompleted = false,
 ) {
-  const pct = isCompleted ? 100 : progressPct(completedWeeks, totalWeeks);
+  const pct = isCompleted ? 100 : progressPct(completedModules, Math.max(totalModules, 1));
   const expectedPct = Math.round((currentWk / totalWeeks) * 100);
   const behind = !isCompleted && pct < expectedPct - 15;
-  return { pct, expectedPct, behind, completedWeeks };
+  return { pct, expectedPct, behind, completedModules };
 }
 
 const PALETTES = [

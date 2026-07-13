@@ -13,5 +13,6 @@ export interface TrainerParticipantRow {
   company: string;
   cohortName?: string;
   completedCount: number;
+  totalCount?: number;
   status: string;
 }

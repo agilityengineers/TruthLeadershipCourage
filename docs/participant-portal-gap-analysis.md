@@ -194,3 +194,20 @@ Plus the design doc's own softer questions to settle in review: Leadership Why t
 ---
 
 *Prepared as a build-readiness assessment of the uploaded home-screen design; file paths reference this repository at the commit noted above.*
+
+---
+
+## 9. Implementation status (addendum)
+
+All phases (0–8) of Section 5 were subsequently implemented on this branch, participant-facing scope:
+
+- **Phase 0–1:** teal + serif "participant voice" tokens; `LESSON_SESSION`/`PRACTICE_SESSION`/`GRADUATION` event types; module segments + lesson/practice weeks; 8-module seed ("Be You/Be Wise/Be Bold" EQ → "Connect Authentically/Drive Collaboration/Build Unity" IQ → Intersession → "Guide Impact/Inspire Potential" MQ — working names pending the canonical list, decision #1); server-side `derivePortalState()` (`artifacts/api-server/src/lib/portalState.ts`) behind `GET /portal/home` with a `?preview=` state toggle; schedule-synced module progress (the manual "mark week complete" endpoint is gone); 24-week assumptions swept (trainer/company/admin denominators now come from the data).
+- **Phase 2:** home screen rebuilt (`src/app/portal/page.tsx` + `src/components/portal/home/*`): Anchor (seeds → I AM versions → Leadership Why), Now card (indigo sessions / teal Intersession), journey line with labeled Intersession, quiet row; post-first-login seed-question onboarding gate; I AM capture + refine (append-only `reflection` table keeps every version); data-driven welcome note (`cohort.welcomeNote`).
+- **Phase 3:** `liveItItem`/`liveItProgress` tables + seeded per-module practices; checklist card with per-item "what did you notice" note, "Lived it" state, undo, no guilt styling; lesson-session commitment capture.
+- **Phase 4:** mirror strip with deterministic timing (prev-module closing before lesson; commitment during Live It; week-one seed line in Intersession; anchor carries the seed's return at graduation) and the visible "Only you see this" promise.
+- **Phase 5:** `partnerLink` pairing (choose flow), practiced-this-week signal derived from Live It activity (Intersession: booking signal), one-tap note via existing direct-message threads. Reflections/notes are never joined into trainer, company, or admin reads.
+- **Phase 6:** Intersession coaching self-booking (`GET /coaching/slots`, `POST /coaching/bookings` with clash/2-session validation) + booking UI on the coaching page and Intersession Now card.
+- **Phase 7:** printed-workbook request (`NOT_REQUESTED` default, `POST /portal/shipment/request` with lead-time messaging) on the pre-start Now card and workbook page.
+- **Phase 8:** `GET /portal/export` + `/portal/keepsake` printable record of everything written, graduated home state, and the 30-day close gate (`cohort.portalClosesAt`; closed screen keeps the download reachable).
+
+Verified end-to-end against a seeded local Postgres: all seven home states via the preview toggle, the onboarding gate (both questions saved as SEED reflections), Live It check/uncheck with notes, I AM versioning, partner notes (lazy direct-thread creation), slot booking + double-book rejection, print-request idempotence, export contents, and that trainer/company payloads contain no participant writing.

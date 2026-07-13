@@ -13,5 +13,6 @@ export interface AdminParticipantRow {
   companyName?: string | null;
   cohortName: string;
   completedCount: number;
+  totalCount?: number;
   status: string;
 }

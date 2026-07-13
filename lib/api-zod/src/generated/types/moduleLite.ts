@@ -13,6 +13,10 @@ export interface ModuleLite {
   pillar: Pillar;
   order?: number;
   weekNo?: number | null;
+  segment?: string | null;
+  lessonWeekNo?: number | null;
+  practiceWeekNo?: number | null;
   summary?: string | null;
+  anchorLine?: string | null;
   programId?: string;
 }

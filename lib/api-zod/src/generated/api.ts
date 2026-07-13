@@ -162,19 +162,6 @@ export const FulfillEnrollmentResponse = zod.object({
 })
 
 
-export const MarkWeekCompleteParams = zod.object({
-  "id": zod.coerce.string()
-})
-
-export const MarkWeekCompleteBody = zod.object({
-  "weekNo": zod.number()
-})
-
-export const MarkWeekCompleteResponse = zod.object({
-  "ok": zod.boolean()
-})
-
-
 export const GetParticipantContextResponse = zod.union([zod.object({
   "id": zod.string(),
   "userId": zod.string(),
@@ -206,6 +193,8 @@ export const GetParticipantContextResponse = zod.union([zod.object({
   "status": zod.string(),
   "isPrivate": zod.boolean(),
   "programId": zod.string(),
+  "welcomeNote": zod.string().nullish(),
+  "portalClosesAt": zod.coerce.date().nullish(),
   "program": zod.object({
   "id": zod.string(),
   "name": zod.string(),
@@ -216,7 +205,11 @@ export const GetParticipantContextResponse = zod.union([zod.object({
   "pillar": zod.enum(['EQ', 'IQ', 'MQ']),
   "order": zod.number().optional(),
   "weekNo": zod.number().nullish(),
+  "segment": zod.string().nullish(),
+  "lessonWeekNo": zod.number().nullish(),
+  "practiceWeekNo": zod.number().nullish(),
   "summary": zod.string().nullish(),
+  "anchorLine": zod.string().nullish(),
   "programId": zod.string().optional()
 }))
 }),
@@ -245,7 +238,8 @@ export const GetParticipantContextResponse = zod.union([zod.object({
   "id": zod.string(),
   "status": zod.string(),
   "carrier": zod.string().nullish(),
-  "tracking": zod.string().nullish()
+  "tracking": zod.string().nullish(),
+  "requestedAt": zod.coerce.date().nullish()
 }),zod.null()]).optional(),
   "moduleProgress": zod.array(zod.object({
   "id": zod.string(),
@@ -260,7 +254,11 @@ export const GetParticipantContextResponse = zod.union([zod.object({
   "pillar": zod.enum(['EQ', 'IQ', 'MQ']),
   "order": zod.number().optional(),
   "weekNo": zod.number().nullish(),
+  "segment": zod.string().nullish(),
+  "lessonWeekNo": zod.number().nullish(),
+  "practiceWeekNo": zod.number().nullish(),
   "summary": zod.string().nullish(),
+  "anchorLine": zod.string().nullish(),
   "programId": zod.string().optional()
 }),zod.null()]).optional()
 })),
@@ -304,7 +302,11 @@ export const GetPortalMaterialsResponseItem = zod.object({
   "pillar": zod.enum(['EQ', 'IQ', 'MQ']),
   "order": zod.number().optional(),
   "weekNo": zod.number().nullish(),
+  "segment": zod.string().nullish(),
+  "lessonWeekNo": zod.number().nullish(),
+  "practiceWeekNo": zod.number().nullish(),
   "summary": zod.string().nullish(),
+  "anchorLine": zod.string().nullish(),
   "programId": zod.string().optional()
 }),zod.null()]).optional()
 })
@@ -318,7 +320,11 @@ export const GetPortalLibraryResponse = zod.object({
   "pillar": zod.enum(['EQ', 'IQ', 'MQ']),
   "order": zod.number().optional(),
   "weekNo": zod.number().nullish(),
+  "segment": zod.string().nullish(),
+  "lessonWeekNo": zod.number().nullish(),
+  "practiceWeekNo": zod.number().nullish(),
   "summary": zod.string().nullish(),
+  "anchorLine": zod.string().nullish(),
   "programId": zod.string().optional()
 })),
   "resources": zod.array(zod.object({
@@ -340,9 +346,263 @@ export const GetPortalLibraryResponse = zod.object({
   "pillar": zod.enum(['EQ', 'IQ', 'MQ']),
   "order": zod.number().optional(),
   "weekNo": zod.number().nullish(),
+  "segment": zod.string().nullish(),
+  "lessonWeekNo": zod.number().nullish(),
+  "practiceWeekNo": zod.number().nullish(),
   "summary": zod.string().nullish(),
+  "anchorLine": zod.string().nullish(),
   "programId": zod.string().optional()
 }),zod.null()]).optional()
+}))
+})
+
+
+export const GetPortalHomeQueryParams = zod.object({
+  "preview": zod.coerce.string().optional()
+})
+
+export const GetPortalHomeResponse = zod.union([zod.object({
+  "segment": zod.enum(['PRE_START', 'SESSION_1', 'INTERSESSION', 'SESSION_2', 'GRADUATED', 'CLOSED']),
+  "weekOfProgram": zod.number().nullish(),
+  "cyclePhase": zod.enum(['BEFORE_LESSON', 'LIVE_IT', 'BEFORE_PRACTICE', 'AFTER_PRACTICE']).nullish(),
+  "currentModule": zod.union([zod.object({
+  "id": zod.string(),
+  "title": zod.string(),
+  "pillar": zod.enum(['EQ', 'IQ', 'MQ']),
+  "order": zod.number().optional(),
+  "weekNo": zod.number().nullish(),
+  "segment": zod.string().nullish(),
+  "lessonWeekNo": zod.number().nullish(),
+  "practiceWeekNo": zod.number().nullish(),
+  "summary": zod.string().nullish(),
+  "anchorLine": zod.string().nullish(),
+  "programId": zod.string().optional()
+}),zod.null()]).optional(),
+  "nowCard": zod.object({
+  "type": zod.enum(['PRE_START', 'SESSION', 'LIVE_IT', 'INTERSESSION', 'GRADUATION', 'CLOSED']),
+  "cohortStartDate": zod.coerce.date().nullish(),
+  "workbookUrl": zod.string().nullish(),
+  "printStatus": zod.string().nullish(),
+  "printRequestable": zod.boolean().nullish(),
+  "sessionKind": zod.enum(['LESSON', 'PRACTICE']).nullish(),
+  "moduleOrder": zod.number().nullish(),
+  "moduleTitle": zod.string().nullish(),
+  "startAt": zod.coerce.date().nullish(),
+  "endAt": zod.coerce.date().nullish(),
+  "joinUrl": zod.string().nullish(),
+  "isToday": zod.boolean().nullish(),
+  "intersessionWeek": zod.number().nullish(),
+  "intersessionWeeks": zod.number().nullish(),
+  "booking": zod.union([zod.object({
+  "id": zod.string(),
+  "slot": zod.coerce.date(),
+  "status": zod.string(),
+  "sequence": zod.number().nullish(),
+  "trainer": zod.union([zod.object({
+  "id": zod.string(),
+  "name": zod.string().nullish(),
+  "email": zod.string(),
+  "image": zod.string().nullish(),
+  "title": zod.string().nullish()
+}),zod.null()]).optional()
+}),zod.null()]).optional(),
+  "portalClosesAt": zod.coerce.date().nullish()
+}),
+  "journey": zod.array(zod.object({
+  "key": zod.enum(['BEGIN', 'EQ', 'IQ', 'INTERSESSION', 'MQ']),
+  "label": zod.string(),
+  "state": zod.enum(['past', 'current', 'future']),
+  "progress": zod.number().nullish()
+})),
+  "journeyLabel": zod.string(),
+  "anchor": zod.object({
+  "seeds": zod.array(zod.object({
+  "id": zod.string(),
+  "kind": zod.enum(['SEED', 'I_AM', 'LEADERSHIP_WHY', 'COMMITMENT', 'MODULE_CLOSING', 'MONDAY_MORNING']),
+  "promptKey": zod.string().nullish(),
+  "moduleId": zod.string().nullish(),
+  "moduleTitle": zod.string().nullish(),
+  "body": zod.string(),
+  "createdAt": zod.coerce.date()
+})),
+  "iAm": zod.union([zod.object({
+  "id": zod.string(),
+  "kind": zod.enum(['SEED', 'I_AM', 'LEADERSHIP_WHY', 'COMMITMENT', 'MODULE_CLOSING', 'MONDAY_MORNING']),
+  "promptKey": zod.string().nullish(),
+  "moduleId": zod.string().nullish(),
+  "moduleTitle": zod.string().nullish(),
+  "body": zod.string(),
+  "createdAt": zod.coerce.date()
+}),zod.null()]).optional(),
+  "leadershipWhy": zod.union([zod.object({
+  "id": zod.string(),
+  "kind": zod.enum(['SEED', 'I_AM', 'LEADERSHIP_WHY', 'COMMITMENT', 'MODULE_CLOSING', 'MONDAY_MORNING']),
+  "promptKey": zod.string().nullish(),
+  "moduleId": zod.string().nullish(),
+  "moduleTitle": zod.string().nullish(),
+  "body": zod.string(),
+  "createdAt": zod.coerce.date()
+}),zod.null()]).optional()
+}),
+  "mirror": zod.union([zod.object({
+  "sourceKind": zod.enum(['SEED', 'I_AM', 'LEADERSHIP_WHY', 'COMMITMENT', 'MODULE_CLOSING', 'MONDAY_MORNING']),
+  "label": zod.string(),
+  "body": zod.string(),
+  "question": zod.string().nullish()
+}),zod.null()]).optional(),
+  "liveIt": zod.union([zod.object({
+  "moduleId": zod.string(),
+  "moduleTitle": zod.string(),
+  "moduleOrder": zod.number(),
+  "items": zod.array(zod.object({
+  "id": zod.string(),
+  "order": zod.number(),
+  "label": zod.string(),
+  "checked": zod.boolean(),
+  "note": zod.string().nullish(),
+  "checkedAt": zod.coerce.date().nullish()
+}))
+}),zod.null()]).optional(),
+  "partner": zod.union([zod.object({
+  "name": zod.string(),
+  "checkedInThisWeek": zod.boolean(),
+  "signal": zod.string().nullish(),
+  "threadId": zod.string().nullish()
+}),zod.null()]).optional(),
+  "partnerPending": zod.boolean().nullish(),
+  "welcomeNote": zod.string().nullish(),
+  "trainerName": zod.string().nullish(),
+  "cohortName": zod.string(),
+  "cohortStartDate": zod.coerce.date().nullish(),
+  "portalClosesAt": zod.coerce.date().nullish(),
+  "needsOnboarding": zod.boolean(),
+  "prompts": zod.object({
+  "iAm": zod.boolean(),
+  "commitment": zod.boolean()
+})
+}),zod.null()])
+
+
+export const ListMyReflectionsResponseItem = zod.object({
+  "id": zod.string(),
+  "kind": zod.enum(['SEED', 'I_AM', 'LEADERSHIP_WHY', 'COMMITMENT', 'MODULE_CLOSING', 'MONDAY_MORNING']),
+  "promptKey": zod.string().nullish(),
+  "moduleId": zod.string().nullish(),
+  "moduleTitle": zod.string().nullish(),
+  "body": zod.string(),
+  "createdAt": zod.coerce.date()
+})
+export const ListMyReflectionsResponse = zod.array(ListMyReflectionsResponseItem)
+
+
+export const createReflectionBodyBodyMax = 4000;
+
+
+
+export const CreateReflectionBody = zod.object({
+  "kind": zod.enum(['SEED', 'I_AM', 'LEADERSHIP_WHY', 'COMMITMENT', 'MODULE_CLOSING', 'MONDAY_MORNING']),
+  "promptKey": zod.string().nullish(),
+  "moduleId": zod.string().nullish(),
+  "body": zod.string().min(1).max(createReflectionBodyBodyMax)
+})
+
+export const CreateReflectionResponse = zod.object({
+  "id": zod.string(),
+  "kind": zod.enum(['SEED', 'I_AM', 'LEADERSHIP_WHY', 'COMMITMENT', 'MODULE_CLOSING', 'MONDAY_MORNING']),
+  "promptKey": zod.string().nullish(),
+  "moduleId": zod.string().nullish(),
+  "moduleTitle": zod.string().nullish(),
+  "body": zod.string(),
+  "createdAt": zod.coerce.date()
+})
+
+
+export const CheckLiveItItemParams = zod.object({
+  "itemId": zod.coerce.string()
+})
+
+export const checkLiveItItemBodyNoteMax = 1000;
+
+
+
+export const CheckLiveItItemBody = zod.object({
+  "note": zod.string().max(checkLiveItItemBodyNoteMax).nullish()
+})
+
+export const CheckLiveItItemResponse = zod.object({
+  "ok": zod.boolean()
+})
+
+
+export const UncheckLiveItItemParams = zod.object({
+  "itemId": zod.coerce.string()
+})
+
+export const UncheckLiveItItemResponse = zod.object({
+  "ok": zod.boolean()
+})
+
+
+export const GetMyPartnerResponse = zod.union([zod.object({
+  "name": zod.string(),
+  "checkedInThisWeek": zod.boolean(),
+  "signal": zod.string().nullish(),
+  "threadId": zod.string().nullish()
+}),zod.null()])
+
+
+export const ChoosePartnerBody = zod.object({
+  "enrollmentId": zod.string()
+})
+
+export const ChoosePartnerResponse = zod.object({
+  "ok": zod.boolean()
+})
+
+
+export const ListPartnerCandidatesResponseItem = zod.object({
+  "enrollmentId": zod.string(),
+  "name": zod.string()
+})
+export const ListPartnerCandidatesResponse = zod.array(ListPartnerCandidatesResponseItem)
+
+
+export const SendPartnerNoteBody = zod.object({
+  "body": zod.string()
+})
+
+export const SendPartnerNoteResponse = zod.object({
+  "ok": zod.boolean(),
+  "threadId": zod.string()
+})
+
+
+export const RequestPrintedWorkbookResponse = zod.object({
+  "ok": zod.boolean(),
+  "status": zod.string(),
+  "message": zod.string().nullish()
+})
+
+
+export const GetPortalExportResponse = zod.object({
+  "participantName": zod.string(),
+  "cohortName": zod.string(),
+  "exportedAt": zod.coerce.date(),
+  "portalClosesAt": zod.coerce.date().nullish(),
+  "reflections": zod.array(zod.object({
+  "id": zod.string(),
+  "kind": zod.enum(['SEED', 'I_AM', 'LEADERSHIP_WHY', 'COMMITMENT', 'MODULE_CLOSING', 'MONDAY_MORNING']),
+  "promptKey": zod.string().nullish(),
+  "moduleId": zod.string().nullish(),
+  "moduleTitle": zod.string().nullish(),
+  "body": zod.string(),
+  "createdAt": zod.coerce.date()
+})),
+  "liveIt": zod.array(zod.object({
+  "moduleTitle": zod.string(),
+  "label": zod.string(),
+  "checkedAt": zod.coerce.date().nullable(),
+  "note": zod.string().nullish()
 }))
 })
 
@@ -468,6 +728,34 @@ export const RequestAccountDeletionResponse = zod.object({
 })
 
 
+export const GetCoachingSlotsResponse = zod.object({
+  "slots": zod.array(zod.coerce.date()),
+  "intersessionStart": zod.coerce.date().nullish(),
+  "intersessionEnd": zod.coerce.date().nullish(),
+  "bookedCount": zod.number(),
+  "includedSessions": zod.number()
+})
+
+
+export const BookCoachingSessionBody = zod.object({
+  "slot": zod.coerce.date()
+})
+
+export const BookCoachingSessionResponse = zod.object({
+  "id": zod.string(),
+  "slot": zod.coerce.date(),
+  "status": zod.string(),
+  "sequence": zod.number().nullish(),
+  "trainer": zod.union([zod.object({
+  "id": zod.string(),
+  "name": zod.string().nullish(),
+  "email": zod.string(),
+  "image": zod.string().nullish(),
+  "title": zod.string().nullish()
+}),zod.null()]).optional()
+})
+
+
 export const RescheduleBookingParams = zod.object({
   "id": zod.coerce.string()
 })
@@ -590,6 +878,7 @@ export const GetTrainerOverviewResponse = zod.object({
   "company": zod.string(),
   "cohortName": zod.string().optional(),
   "completedCount": zod.number(),
+  "totalCount": zod.number().optional(),
   "status": zod.string()
 })),
   "upcoming": zod.array(zod.object({
@@ -624,7 +913,11 @@ export const GetTrainerOverviewResponse = zod.object({
   "pillar": zod.enum(['EQ', 'IQ', 'MQ']),
   "order": zod.number().optional(),
   "weekNo": zod.number().nullish(),
+  "segment": zod.string().nullish(),
+  "lessonWeekNo": zod.number().nullish(),
+  "practiceWeekNo": zod.number().nullish(),
   "summary": zod.string().nullish(),
+  "anchorLine": zod.string().nullish(),
   "programId": zod.string().optional()
 }),zod.null()]).optional()
 }))
@@ -638,6 +931,7 @@ export const ListTrainerParticipantsResponseItem = zod.object({
   "company": zod.string(),
   "cohortName": zod.string().optional(),
   "completedCount": zod.number(),
+  "totalCount": zod.number().optional(),
   "status": zod.string()
 })
 export const ListTrainerParticipantsResponse = zod.array(ListTrainerParticipantsResponseItem)
@@ -680,7 +974,11 @@ export const GetTrainerParticipantResponse = zod.union([zod.object({
   "pillar": zod.enum(['EQ', 'IQ', 'MQ']),
   "order": zod.number().optional(),
   "weekNo": zod.number().nullish(),
+  "segment": zod.string().nullish(),
+  "lessonWeekNo": zod.number().nullish(),
+  "practiceWeekNo": zod.number().nullish(),
   "summary": zod.string().nullish(),
+  "anchorLine": zod.string().nullish(),
   "programId": zod.string().optional()
 }),zod.null()]).optional()
 })),
@@ -763,7 +1061,11 @@ export const GetTrainerResourcesDataResponse = zod.object({
   "pillar": zod.enum(['EQ', 'IQ', 'MQ']),
   "order": zod.number().optional(),
   "weekNo": zod.number().nullish(),
+  "segment": zod.string().nullish(),
+  "lessonWeekNo": zod.number().nullish(),
+  "practiceWeekNo": zod.number().nullish(),
   "summary": zod.string().nullish(),
+  "anchorLine": zod.string().nullish(),
   "programId": zod.string().optional()
 }),zod.null()]).optional()
 }).and(zod.object({
@@ -1059,6 +1361,7 @@ export const ListParticipantsResponseItem = zod.object({
   "companyName": zod.string().nullish(),
   "cohortName": zod.string(),
   "completedCount": zod.number(),
+  "totalCount": zod.number().optional(),
   "status": zod.string()
 })
 export const ListParticipantsResponse = zod.array(ListParticipantsResponseItem)
@@ -1272,6 +1575,7 @@ export const GetCompanyOverviewResponse = zod.object({
   "userEmail": zod.string(),
   "cohortName": zod.string(),
   "completedCount": zod.number(),
+  "totalCount": zod.number().optional(),
   "status": zod.string()
 }))
 })
@@ -1284,6 +1588,7 @@ export const ListCompanyPeopleResponseItem = zod.object({
   "enrollments": zod.array(zod.object({
   "cohortName": zod.string(),
   "completedCount": zod.number(),
+  "totalCount": zod.number().optional(),
   "status": zod.string()
 }))
 })
