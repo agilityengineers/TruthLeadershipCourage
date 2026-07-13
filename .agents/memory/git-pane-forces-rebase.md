@@ -28,6 +28,12 @@ git push origin main
 Shell merge + push to align branches; prefer Shell `git pull` (merges) over the pane button while
 branches are diverged.
 
+## Rebases here can commit unresolved conflict markers
+A completed rebase in this repo has ended with `<<<<<<<`/`=======`/`>>>>>>>` markers committed
+into a source file (working tree "clean" per git status, but Vite failing with a Babel syntax
+error on the markers). **How to apply:** After any rebase/merge finishes, grep the repo for
+conflict markers before trusting `git status` — a clean tree does not mean a clean resolution.
+
 ## Agent cannot run destructive git here
 The main agent's bash AND the isolated Project Task environment both hard-block destructive git:
 `rebase --continue/--abort`, `merge`, `checkout`, `commit`, `reset`, and even `rm` of

@@ -2,12 +2,8 @@ import { requireRole } from "@/lib/session";
 import { useListCohorts, useGetCohortFormOptions } from "@workspace/api-client-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-<<<<<<< HEAD
 import { Button } from "@/components/ui/button";
-import { formatDate, formatPrice } from "@/lib/utils";
-=======
 import { formatDateOnly, formatPrice } from "@/lib/utils";
->>>>>>> 5200816f00feec6a3cfad873d9fc42eb533f97f8
 import { CloneCohortDialog, CreateCohortDialog, EditCohortDialog } from "@/components/admin/admin-dialogs";
 import { useState } from "react";
 import { toast } from "sonner";
