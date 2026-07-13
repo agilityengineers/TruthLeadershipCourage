@@ -15,6 +15,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { DatePickerField } from "@/components/ui/date-picker";
 import {
   Dialog,
   DialogContent,
@@ -33,11 +34,77 @@ const COHORT_FORMATS = [
   { value: "hybrid", label: "Hybrid" },
 ] as const;
 
-/** ISO datetime → yyyy-mm-dd for <input type="date">. */
+const DAYS_OF_WEEK = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"] as const;
+
+/** 30-minute steps from 6:00 AM to 9:30 PM — plenty for live-session scheduling. */
+const TIME_OPTIONS: string[] = (() => {
+  const out: string[] = [];
+  for (let m = 6 * 60; m <= 21 * 60 + 30; m += 30) {
+    const h24 = Math.floor(m / 60);
+    const mins = String(m % 60).padStart(2, "0");
+    const meridiem = h24 >= 12 ? "PM" : "AM";
+    const h12 = h24 % 12 === 0 ? 12 : h24 % 12;
+    out.push(`${h12}:${mins} ${meridiem}`);
+  }
+  return out;
+})();
+
+const TIMEZONES = [
+  { value: "America/Los_Angeles", label: "Pacific — Los Angeles" },
+  { value: "America/Denver", label: "Mountain — Denver" },
+  { value: "America/Phoenix", label: "Arizona — Phoenix" },
+  { value: "America/Chicago", label: "Central — Chicago" },
+  { value: "America/New_York", label: "Eastern — New York" },
+  { value: "America/Anchorage", label: "Alaska — Anchorage" },
+  { value: "Pacific/Honolulu", label: "Hawaii — Honolulu" },
+  { value: "UTC", label: "UTC" },
+  { value: "Europe/London", label: "UK — London" },
+  { value: "Europe/Paris", label: "Central Europe — Paris" },
+  { value: "Asia/Dubai", label: "Gulf — Dubai" },
+  { value: "Asia/Kolkata", label: "India — Kolkata" },
+  { value: "Asia/Singapore", label: "Singapore" },
+  { value: "Asia/Tokyo", label: "Japan — Tokyo" },
+  { value: "Australia/Sydney", label: "Australia — Sydney" },
+] as const;
+
+/** ISO datetime → yyyy-mm-dd for date pickers. */
 function toDateInput(v: string | Date | null | undefined): string {
   if (!v) return "";
   const d = new Date(v);
   return Number.isNaN(d.getTime()) ? "" : d.toISOString().slice(0, 10);
+}
+
+/**
+ * The server always answers errors as `{ error: string }` (see the API's
+ * errorMiddleware), and the fetch client surfaces that as `err.data`. Show the
+ * real reason — "End date must be after the start date." beats a shrug.
+ */
+function apiErrorMessage(err: unknown, fallback: string): string {
+  const e = err as { data?: { error?: string } | null; message?: string };
+  return e?.data?.error ?? e?.message ?? fallback;
+}
+
+/** "1:00 PM" + "3:00 PM" → "1:00–3:00 PM"; "11:00 AM" + "1:00 PM" → "11:00 AM–1:00 PM". */
+function composeSessionTime(start?: string, end?: string): string | undefined {
+  if (!start && !end) return undefined;
+  if (!start || !end) return start || end;
+  const meridiem = (t: string) => t.slice(-2);
+  const bare = (t: string) => t.slice(0, -3);
+  return meridiem(start) === meridiem(end) ? `${bare(start)}–${end}` : `${start}–${end}`;
+}
+
+/** Best-effort inverse of composeSessionTime for prefilling the edit form. */
+function parseSessionTime(stored: string | null | undefined): { start: string; end: string } {
+  if (!stored) return { start: "", end: "" };
+  const parts = stored.split(/[–—-]/).map((p) => p.trim());
+  if (parts.length !== 2) return { start: "", end: "" };
+  let [start, end] = parts as [string, string];
+  const endMeridiem = /(AM|PM)$/i.exec(end)?.[1]?.toUpperCase();
+  if (!/(AM|PM)$/i.test(start) && endMeridiem) start = `${start} ${endMeridiem}`;
+  start = start.toUpperCase().replace(/\s+/g, " ");
+  end = end.toUpperCase().replace(/\s+/g, " ");
+  if (!TIME_OPTIONS.includes(start) || !TIME_OPTIONS.includes(end)) return { start: "", end: "" };
+  return { start, end };
 }
 
 export function AddCompanyDialog({
@@ -66,16 +133,20 @@ export function AddCompanyDialog({
             e.preventDefault();
             setError(null);
             const fd = new FormData(e.currentTarget);
-            const res = await createCompany.mutateAsync({
-              data: {
-                name: String(fd.get("name")),
-                billingEmail: String(fd.get("billingEmail") || ""),
-              },
-            });
-            if (!res.ok) return;
-            setOpen(false);
-            toast.success("Company created");
-            qc.invalidateQueries();
+            try {
+              const res = await createCompany.mutateAsync({
+                data: {
+                  name: String(fd.get("name")),
+                  billingEmail: String(fd.get("billingEmail") || ""),
+                },
+              });
+              if (!res.ok) return;
+              setOpen(false);
+              toast.success("Company created");
+              qc.invalidateQueries();
+            } catch (err) {
+              setError(apiErrorMessage(err, "Could not create the company."));
+            }
           }}
           className="flex flex-col gap-4"
         >
@@ -107,16 +178,29 @@ function collectCohort(fd: FormData) {
     return v === undefined ? undefined : Number(v);
   };
   const dollars = num("price");
+  const session1StartDate = str("session1StartDate");
+  const session1EndDate = str("session1EndDate");
+  const intersessionStartDate = str("intersessionStartDate");
+  const intersessionEndDate = str("intersessionEndDate");
+  const session2StartDate = str("session2StartDate");
+  const session2EndDate = str("session2EndDate");
   return {
     programId: str("programId"),
     name: String(fd.get("name") ?? "").trim(),
     tagline: str("tagline"),
     description: str("description"),
     heroImageUrl: str("heroImageUrl"),
-    startDate: String(fd.get("startDate") ?? ""),
-    endDate: String(fd.get("endDate") ?? ""),
+    // The cohort runs from the first day of Session 1 to the last day of Session 2.
+    startDate: session1StartDate ?? "",
+    endDate: session2EndDate ?? "",
+    session1StartDate,
+    session1EndDate,
+    intersessionStartDate,
+    intersessionEndDate,
+    session2StartDate,
+    session2EndDate,
     sessionDay: str("sessionDay"),
-    sessionTime: str("sessionTime"),
+    sessionTime: composeSessionTime(str("sessionStartTime"), str("sessionEndTime")),
     timezone: str("timezone"),
     format: (str("format") ?? "online") as CreateCohortRequest["format"],
     location: str("location"),
@@ -131,11 +215,74 @@ function collectCohort(fd: FormData) {
   };
 }
 
+/**
+ * Client-side sanity checks with actionable messages, mirrored by the server.
+ * yyyy-mm-dd strings compare correctly as plain strings.
+ */
+function cohortFormProblem(v: ReturnType<typeof collectCohort>): string | null {
+  if (!v.name) return "Cohort name is required.";
+  if (!v.session1StartDate) return "Session 1 needs a start date — it's the day the cohort begins.";
+  if (!v.session2EndDate) return "Session 2 needs an end date — it's the day the cohort finishes.";
+  const sequence: Array<[string, string | undefined]> = [
+    ["Session 1 start", v.session1StartDate],
+    ["Session 1 end", v.session1EndDate],
+    ["Inter-session start", v.intersessionStartDate],
+    ["Inter-session end", v.intersessionEndDate],
+    ["Session 2 start", v.session2StartDate],
+    ["Session 2 end", v.session2EndDate],
+  ];
+  const provided = sequence.filter((entry): entry is [string, string] => Boolean(entry[1]));
+  for (let i = 1; i < provided.length; i++) {
+    if (provided[i][1] < provided[i - 1][1]) {
+      return `${provided[i][0]} date can't be before the ${provided[i - 1][0].toLowerCase()} date.`;
+    }
+  }
+  if (v.endDate <= v.startDate) return "Session 2 must end after Session 1 starts.";
+  return null;
+}
+
 type CohortFormOptions = {
   programs: { id: string; name: string }[];
   trainers: { id: string; name: string | null }[];
   companies: { id: string; name: string }[];
 };
+
+function SectionHeading({ children }: { children: React.ReactNode }) {
+  return (
+    <p className="mt-1.5 border-t border-[#eef0f6] pt-3.5 text-[11px] font-semibold uppercase tracking-[.08em] text-muted-3">
+      {children}
+    </p>
+  );
+}
+
+function SessionRange({
+  label,
+  hint,
+  startName,
+  endName,
+  startDefault,
+  endDefault,
+}: {
+  label: string;
+  hint?: string;
+  startName: string;
+  endName: string;
+  startDefault?: string;
+  endDefault?: string;
+}) {
+  return (
+    <div className="flex flex-col gap-1.5">
+      <Label htmlFor={startName}>
+        {label}
+        {hint && <span className="ml-1.5 font-normal text-muted-3">{hint}</span>}
+      </Label>
+      <div className="grid grid-cols-2 gap-3">
+        <DatePickerField id={startName} name={startName} placeholder="Start date" defaultValue={startDefault} />
+        <DatePickerField id={endName} name={endName} placeholder="End date" defaultValue={endDefault} />
+      </div>
+    </div>
+  );
+}
 
 /** All the fields that describe a cohort and drive its public landing page. */
 function CohortFields({
@@ -148,6 +295,11 @@ function CohortFields({
   const programs = options?.programs ?? [];
   const trainers = options?.trainers ?? [];
   const companies = options?.companies ?? [];
+  const storedTime = parseSessionTime(defaults?.sessionTime);
+  const timezoneOptions =
+    defaults?.timezone && !TIMEZONES.some((tz) => tz.value === defaults.timezone)
+      ? [{ value: defaults.timezone, label: defaults.timezone }, ...TIMEZONES]
+      : TIMEZONES;
 
   return (
     <div className="flex max-h-[60vh] flex-col gap-4 overflow-y-auto pr-1">
@@ -183,27 +335,90 @@ function CohortFields({
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <Field label="Start date" name="startDate" type="date" required defaultValue={toDateInput(defaults?.startDate)} />
-        <Field label="End date" name="endDate" type="date" required defaultValue={toDateInput(defaults?.endDate)} />
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
-        <Field label="Session day" name="sessionDay" placeholder="e.g. Tuesday" defaultValue={defaults?.sessionDay ?? undefined} />
-        <Field
-          label="Session time"
-          name="sessionTime"
-          placeholder="e.g. 1:00–3:00 PM"
-          defaultValue={defaults?.sessionTime ?? undefined}
-        />
-      </div>
-      <Field
-        label="Timezone"
-        name="timezone"
-        placeholder="e.g. America/Los_Angeles"
-        defaultValue={defaults?.timezone ?? undefined}
+      <SectionHeading>Session dates</SectionHeading>
+      <p className="-mt-2 text-[12px] leading-relaxed text-muted-2">
+        Every cohort runs in three phases. The cohort's public start and end dates come from Session 1's start and
+        Session 2's end.
+      </p>
+      <SessionRange
+        label="Session 1"
+        startName="session1StartDate"
+        endName="session1EndDate"
+        startDefault={toDateInput(defaults?.session1StartDate ?? defaults?.startDate)}
+        endDefault={toDateInput(defaults?.session1EndDate)}
+      />
+      <SessionRange
+        label="Inter-session"
+        hint="guided practice between sessions"
+        startName="intersessionStartDate"
+        endName="intersessionEndDate"
+        startDefault={toDateInput(defaults?.intersessionStartDate)}
+        endDefault={toDateInput(defaults?.intersessionEndDate)}
+      />
+      <SessionRange
+        label="Session 2"
+        startName="session2StartDate"
+        endName="session2EndDate"
+        startDefault={toDateInput(defaults?.session2StartDate)}
+        endDefault={toDateInput(defaults?.session2EndDate ?? defaults?.endDate)}
       />
 
+      <SectionHeading>Weekly live session</SectionHeading>
+      <div className="grid grid-cols-2 gap-4">
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="sessionDay">Day of week</Label>
+          <select id="sessionDay" name="sessionDay" className={SELECT_CLASS} defaultValue={defaults?.sessionDay ?? ""}>
+            <option value="">— Not set —</option>
+            {DAYS_OF_WEEK.map((d) => (
+              <option key={d} value={d}>
+                {d}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="timezone">Timezone</Label>
+          <select id="timezone" name="timezone" className={SELECT_CLASS} defaultValue={defaults?.timezone ?? ""}>
+            <option value="">— Not set —</option>
+            {timezoneOptions.map((tz) => (
+              <option key={tz.value} value={tz.value}>
+                {tz.label}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="sessionStartTime">Starts at</Label>
+          <select
+            id="sessionStartTime"
+            name="sessionStartTime"
+            className={SELECT_CLASS}
+            defaultValue={storedTime.start}
+          >
+            <option value="">— Not set —</option>
+            {TIME_OPTIONS.map((t) => (
+              <option key={t} value={t}>
+                {t}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="sessionEndTime">Ends at</Label>
+          <select id="sessionEndTime" name="sessionEndTime" className={SELECT_CLASS} defaultValue={storedTime.end}>
+            <option value="">— Not set —</option>
+            {TIME_OPTIONS.map((t) => (
+              <option key={t} value={t}>
+                {t}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      <SectionHeading>Format & enrollment</SectionHeading>
       <div className="grid grid-cols-2 gap-4">
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="format">Format</Label>
@@ -239,12 +454,15 @@ function CohortFields({
         />
       </div>
 
-      <Field
-        label="Enrollment closes (optional)"
-        name="enrollByDate"
-        type="date"
-        defaultValue={toDateInput(defaults?.enrollByDate)}
-      />
+      <div className="flex flex-col gap-1.5">
+        <Label htmlFor="enrollByDate">Enrollment closes (optional)</Label>
+        <DatePickerField
+          id="enrollByDate"
+          name="enrollByDate"
+          placeholder="No deadline"
+          defaultValue={toDateInput(defaults?.enrollByDate)}
+        />
+      </div>
 
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="trainerId">Trainer</Label>
@@ -329,8 +547,9 @@ export function CreateCohortDialog() {
             e.preventDefault();
             setError(null);
             const v = collectCohort(new FormData(e.currentTarget));
-            if (!v.name || !v.startDate || !v.endDate) {
-              setError("Name, start date, and end date are required.");
+            const problem = cohortFormProblem(v);
+            if (problem) {
+              setError(problem);
               return;
             }
             try {
@@ -339,8 +558,8 @@ export function CreateCohortDialog() {
               setOpen(false);
               toast.success("Cohort created");
               qc.invalidateQueries();
-            } catch {
-              setError("Could not create the cohort. Please check the fields and try again.");
+            } catch (err) {
+              setError(apiErrorMessage(err, "Could not create the cohort. Please check the fields and try again."));
             }
           }}
           className="flex flex-col gap-4"
@@ -380,11 +599,7 @@ export function EditCohortDialog({ cohort }: { cohort: AdminCohortRow }) {
       toast.success("Cohort deleted");
       qc.invalidateQueries();
     } catch (err) {
-      const message =
-        (err as { data?: { error?: string } })?.data?.error ??
-        (err as { message?: string })?.message ??
-        "Could not delete this cohort.";
-      setError(message);
+      setError(apiErrorMessage(err, "Could not delete this cohort."));
       setConfirmingDelete(false);
     }
   }
@@ -412,8 +627,9 @@ export function EditCohortDialog({ cohort }: { cohort: AdminCohortRow }) {
             e.preventDefault();
             setError(null);
             const v = collectCohort(new FormData(e.currentTarget));
-            if (!v.name || !v.startDate || !v.endDate) {
-              setError("Name, start date, and end date are required.");
+            const problem = cohortFormProblem(v);
+            if (problem) {
+              setError(problem);
               return;
             }
             // Send empty optionals as null/"" so the admin can also *clear* a field.
@@ -426,6 +642,12 @@ export function EditCohortDialog({ cohort }: { cohort: AdminCohortRow }) {
               sessionDay: v.sessionDay ?? "",
               sessionTime: v.sessionTime ?? "",
               timezone: v.timezone ?? "",
+              session1StartDate: v.session1StartDate ?? null,
+              session1EndDate: v.session1EndDate ?? null,
+              intersessionStartDate: v.intersessionStartDate ?? null,
+              intersessionEndDate: v.intersessionEndDate ?? null,
+              session2StartDate: v.session2StartDate ?? null,
+              session2EndDate: v.session2EndDate ?? null,
               trainerId: v.trainerId ?? null,
               companyId: v.companyId ?? null,
               enrollByDate: v.enrollByDate ?? null,
@@ -436,8 +658,8 @@ export function EditCohortDialog({ cohort }: { cohort: AdminCohortRow }) {
               setOpen(false);
               toast.success("Cohort updated");
               qc.invalidateQueries();
-            } catch {
-              setError("Could not save your changes. Please try again.");
+            } catch (err) {
+              setError(apiErrorMessage(err, "Could not save your changes. Please try again."));
             }
           }}
           className="flex flex-col gap-4"
@@ -499,12 +721,15 @@ export function CloneCohortDialog({
   const qc = useQueryClient();
   const cloneCohort = useCloneCohort();
   const [open, setOpen] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const pending = cloneCohort.isPending;
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="sm">+ New cohort (clone)</Button>
+        <Button size="sm" variant="outline">
+          Clone a cohort
+        </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
@@ -516,17 +741,27 @@ export function CloneCohortDialog({
         <form
           onSubmit={async (e) => {
             e.preventDefault();
+            setError(null);
             const fd = new FormData(e.currentTarget);
-            await cloneCohort.mutateAsync({
-              data: {
-                sourceId: String(fd.get("sourceId")),
-                name: String(fd.get("name")),
-                startDate: String(fd.get("startDate")),
-              },
-            });
-            setOpen(false);
-            toast.success("Cohort created");
-            qc.invalidateQueries();
+            const startDate = String(fd.get("startDate") ?? "");
+            if (!startDate) {
+              setError("Pick a start date for the new cohort.");
+              return;
+            }
+            try {
+              await cloneCohort.mutateAsync({
+                data: {
+                  sourceId: String(fd.get("sourceId")),
+                  name: String(fd.get("name")),
+                  startDate,
+                },
+              });
+              setOpen(false);
+              toast.success("Cohort created");
+              qc.invalidateQueries();
+            } catch (err) {
+              setError(apiErrorMessage(err, "Could not clone the cohort. Please try again."));
+            }
           }}
           className="flex flex-col gap-4"
         >
@@ -548,8 +783,9 @@ export function CloneCohortDialog({
           <Field label="New cohort name" name="name" placeholder="e.g. Spring 2027" required />
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="startDate">Start date</Label>
-            <Input id="startDate" name="startDate" type="date" required />
+            <DatePickerField id="startDate" name="startDate" placeholder="Select the kickoff date" />
           </div>
+          {error && <p className="text-[13px] text-danger">{error}</p>}
           <div className="flex justify-end gap-2.5">
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>
               Cancel
@@ -574,6 +810,7 @@ export function PurchaseSeatsDialog({
   const qc = useQueryClient();
   const purchaseSeats = usePurchaseSeats();
   const [open, setOpen] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const pending = purchaseSeats.isPending;
 
   return (
@@ -591,17 +828,22 @@ export function PurchaseSeatsDialog({
         <form
           onSubmit={async (e) => {
             e.preventDefault();
+            setError(null);
             const fd = new FormData(e.currentTarget);
-            await purchaseSeats.mutateAsync({
-              data: {
-                companyId,
-                cohortId: String(fd.get("cohortId")),
-                quantity: Number(fd.get("quantity")),
-              },
-            });
-            setOpen(false);
-            toast.success("Seats purchased");
-            qc.invalidateQueries();
+            try {
+              await purchaseSeats.mutateAsync({
+                data: {
+                  companyId,
+                  cohortId: String(fd.get("cohortId")),
+                  quantity: Number(fd.get("quantity")),
+                },
+              });
+              setOpen(false);
+              toast.success("Seats purchased");
+              qc.invalidateQueries();
+            } catch (err) {
+              setError(apiErrorMessage(err, "Could not purchase seats. Please try again."));
+            }
           }}
           className="flex flex-col gap-4"
         >
@@ -621,6 +863,7 @@ export function PurchaseSeatsDialog({
             </select>
           </div>
           <Field label="Number of seats" name="quantity" type="number" required />
+          {error && <p className="text-[13px] text-danger">{error}</p>}
           <div className="flex justify-end gap-2.5">
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>
               Cancel

@@ -13,6 +13,12 @@ export interface CreateCohortRequest {
   name: string;
   startDate: string;
   endDate: string;
+  session1StartDate?: string;
+  session1EndDate?: string;
+  intersessionStartDate?: string;
+  intersessionEndDate?: string;
+  session2StartDate?: string;
+  session2EndDate?: string;
   sessionDay?: string;
   sessionTime?: string;
   timezone?: string;

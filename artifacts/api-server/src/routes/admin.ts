@@ -173,6 +173,12 @@ router.get(
         name: c.name,
         startDate: c.startDate,
         endDate: c.endDate,
+        session1StartDate: c.session1StartDate,
+        session1EndDate: c.session1EndDate,
+        intersessionStartDate: c.intersessionStartDate,
+        intersessionEndDate: c.intersessionEndDate,
+        session2StartDate: c.session2StartDate,
+        session2EndDate: c.session2EndDate,
         trainerName: c.trainer?.name ?? null,
         price: c.price,
         currency: c.currency,
@@ -223,6 +229,60 @@ async function uniqueCohortSlug(name: string) {
   return slug;
 }
 
+/**
+ * Parse and order-check the three session ranges (Session 1 → Inter-session →
+ * Session 2). Each field is optional; whatever is provided must be a valid
+ * date, each range must end on/after it starts, and the phases must not run
+ * backwards. Throws a 400 with a message the admin can act on.
+ */
+function parseSessionDates(body: {
+  session1StartDate?: string | null;
+  session1EndDate?: string | null;
+  intersessionStartDate?: string | null;
+  intersessionEndDate?: string | null;
+  session2StartDate?: string | null;
+  session2EndDate?: string | null;
+}) {
+  const parse = (value: string | null | undefined, label: string): Date | null => {
+    if (!value) return null;
+    const d = new Date(value);
+    if (Number.isNaN(d.getTime())) throw new HttpError(400, `${label} is not a valid date.`);
+    return d;
+  };
+  const dates = {
+    session1StartDate: parse(body.session1StartDate, "Session 1 start date"),
+    session1EndDate: parse(body.session1EndDate, "Session 1 end date"),
+    intersessionStartDate: parse(body.intersessionStartDate, "Inter-session start date"),
+    intersessionEndDate: parse(body.intersessionEndDate, "Inter-session end date"),
+    session2StartDate: parse(body.session2StartDate, "Session 2 start date"),
+    session2EndDate: parse(body.session2EndDate, "Session 2 end date"),
+  };
+  const pairs: Array<[Date | null, Date | null, string]> = [
+    [dates.session1StartDate, dates.session1EndDate, "Session 1"],
+    [dates.intersessionStartDate, dates.intersessionEndDate, "Inter-session"],
+    [dates.session2StartDate, dates.session2EndDate, "Session 2"],
+  ];
+  for (const [start, end, label] of pairs) {
+    if (start && end && end < start) {
+      throw new HttpError(400, `${label} must end on or after its start date.`);
+    }
+  }
+  const sequence = [
+    dates.session1StartDate,
+    dates.session1EndDate,
+    dates.intersessionStartDate,
+    dates.intersessionEndDate,
+    dates.session2StartDate,
+    dates.session2EndDate,
+  ].filter((d): d is Date => d !== null);
+  for (let i = 1; i < sequence.length; i++) {
+    if (sequence[i]! < sequence[i - 1]!) {
+      throw new HttpError(400, "Session dates must run in order: Session 1, then Inter-session, then Session 2.");
+    }
+  }
+  return dates;
+}
+
 /** Create a cohort from scratch — the way the very first cohort is born. */
 router.post(
   "/admin/cohorts",
@@ -243,6 +303,7 @@ router.post(
       throw new HttpError(400, "Invalid start or end date.");
     }
     if (endDate <= startDate) throw new HttpError(400, "End date must be after the start date.");
+    const sessionDates = parseSessionDates(body);
 
     const slug = await uniqueCohortSlug(body.name);
     const [created] = await db
@@ -253,6 +314,7 @@ router.post(
         slug,
         startDate,
         endDate,
+        ...sessionDates,
         sessionDay: body.sessionDay ?? null,
         sessionTime: body.sessionTime ?? null,
         timezone: body.timezone ?? null,
@@ -291,6 +353,25 @@ router.patch(
     if (body.name !== undefined) patch.name = body.name;
     if (body.startDate !== undefined) patch.startDate = new Date(body.startDate);
     if (body.endDate !== undefined) patch.endDate = new Date(body.endDate);
+    const sessionKeys = [
+      "session1StartDate",
+      "session1EndDate",
+      "intersessionStartDate",
+      "intersessionEndDate",
+      "session2StartDate",
+      "session2EndDate",
+    ] as const;
+    if (sessionKeys.some((k) => body[k] !== undefined)) {
+      // Validate the full picture: fields the request doesn't touch keep their
+      // stored value, so ordering is checked against what will actually persist.
+      const merged = Object.fromEntries(
+        sessionKeys.map((k) => [k, body[k] !== undefined ? body[k] : existing[k]?.toISOString()]),
+      );
+      const sessionDates = parseSessionDates(merged);
+      for (const k of sessionKeys) {
+        if (body[k] !== undefined) patch[k] = sessionDates[k];
+      }
+    }
     if (body.sessionDay !== undefined) patch.sessionDay = body.sessionDay;
     if (body.sessionTime !== undefined) patch.sessionTime = body.sessionTime;
     if (body.timezone !== undefined) patch.timezone = body.timezone;
@@ -389,8 +470,10 @@ router.post(
     });
     if (!source) throw new HttpError(404, "Source cohort not found");
     const newStart = new Date(startDate);
+    if (Number.isNaN(newStart.getTime())) throw new HttpError(400, "Invalid start date.");
     const shiftMs = newStart.getTime() - new Date(source.startDate).getTime();
     const newEnd = new Date(new Date(source.endDate).getTime() + shiftMs);
+    const shift = (d: Date | null) => (d ? new Date(d.getTime() + shiftMs) : null);
     let slug = slugify(name);
     if (await db.query.cohort.findFirst({ where: eq(schema.cohort.slug, slug) })) {
       slug = `${slug}-${Date.now().toString(36)}`;
@@ -404,6 +487,12 @@ router.post(
           slug,
           startDate: newStart,
           endDate: newEnd,
+          session1StartDate: shift(source.session1StartDate),
+          session1EndDate: shift(source.session1EndDate),
+          intersessionStartDate: shift(source.intersessionStartDate),
+          intersessionEndDate: shift(source.intersessionEndDate),
+          session2StartDate: shift(source.session2StartDate),
+          session2EndDate: shift(source.session2EndDate),
           sessionDay: source.sessionDay,
           sessionTime: source.sessionTime,
           timezone: source.timezone,

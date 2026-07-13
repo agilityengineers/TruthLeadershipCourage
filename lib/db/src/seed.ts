@@ -127,9 +127,21 @@ async function seed() {
   const fallName = MONTH_YEAR.format(fallStart);
   const springName = MONTH_YEAR.format(springStart);
 
-  const fall = { id: "coh_fall", programId: program.id, name: fallName, slug: cohortSlug(fallName), startDate: fallStart, endDate: addWeeks(fallStart, 26), sessionDay: "Thursday", sessionTime: "9:00–11:00 AM", timezone: "America/Los_Angeles", price: 550000, currency: "usd", capacity: 84, status: "RUNNING" as const, isPrivate: false, trainerId: tri.id, companyId: null, tagline: "Lead with truth. Grow with courage.", description: "Six months of guided leadership growth with a small cohort of peers — weekly live sessions, a physical workbook, and 1:1 coaching across the Truth, Leadership, and Courage pillars.", format: "online", location: "Live on Zoom", createdAt: now, updatedAt: now };
-  const spring = { id: "coh_spring", programId: program.id, name: springName, slug: cohortSlug(springName), startDate: springStart, endDate: addWeeks(springStart, 26), enrollByDate: demoDate(now, 21), sessionDay: "Thursday", sessionTime: "9:00–11:00 AM", timezone: "America/Los_Angeles", price: 550000, currency: "usd", capacity: 62, status: "ENROLLING" as const, isPrivate: false, trainerId: tri.id, companyId: null, tagline: "The next chapter of your leadership starts here.", description: "Reserve your seat in the next TLC cohort and move through the full six-month journey alongside a committed group of leaders — weekly live sessions, a physical workbook, and personal 1:1 coaching.", format: "online", location: "Live on Zoom", createdAt: now, updatedAt: now };
-  const meridianCohort = { id: "coh_meridian", programId: program.id, name: "Meridian — Private", slug: "meridian-private", startDate: meridianStart, endDate: addWeeks(meridianStart, 26), sessionDay: "Tuesday", sessionTime: "1:00–3:00 PM", timezone: "America/Los_Angeles", price: 0, currency: "usd", capacity: 12, status: "RUNNING" as const, isPrivate: true, trainerId: tri.id, companyId: meridian.id, createdAt: now, updatedAt: now };
+  // Every cohort runs Session 1 → Inter-session → Session 2 across its 26
+  // weeks: 8 weeks together, 9 weeks of guided inter-session practice, then
+  // 9 weeks together to finish.
+  const sessionPhases = (start: Date) => ({
+    session1StartDate: start,
+    session1EndDate: addWeeks(start, 8),
+    intersessionStartDate: addWeeks(start, 8),
+    intersessionEndDate: addWeeks(start, 17),
+    session2StartDate: addWeeks(start, 17),
+    session2EndDate: addWeeks(start, 26),
+  });
+
+  const fall = { id: "coh_fall", programId: program.id, name: fallName, slug: cohortSlug(fallName), startDate: fallStart, endDate: addWeeks(fallStart, 26), ...sessionPhases(fallStart), sessionDay: "Thursday", sessionTime: "9:00–11:00 AM", timezone: "America/Los_Angeles", price: 550000, currency: "usd", capacity: 84, status: "RUNNING" as const, isPrivate: false, trainerId: tri.id, companyId: null, tagline: "Lead with truth. Grow with courage.", description: "Six months of guided leadership growth with a small cohort of peers — weekly live sessions, a physical workbook, and 1:1 coaching across the Truth, Leadership, and Courage pillars.", format: "online", location: "Live on Zoom", createdAt: now, updatedAt: now };
+  const spring = { id: "coh_spring", programId: program.id, name: springName, slug: cohortSlug(springName), startDate: springStart, endDate: addWeeks(springStart, 26), ...sessionPhases(springStart), enrollByDate: demoDate(now, 21), sessionDay: "Thursday", sessionTime: "9:00–11:00 AM", timezone: "America/Los_Angeles", price: 550000, currency: "usd", capacity: 62, status: "ENROLLING" as const, isPrivate: false, trainerId: tri.id, companyId: null, tagline: "The next chapter of your leadership starts here.", description: "Reserve your seat in the next TLC cohort and move through the full six-month journey alongside a committed group of leaders — weekly live sessions, a physical workbook, and personal 1:1 coaching.", format: "online", location: "Live on Zoom", createdAt: now, updatedAt: now };
+  const meridianCohort = { id: "coh_meridian", programId: program.id, name: "Meridian — Private", slug: "meridian-private", startDate: meridianStart, endDate: addWeeks(meridianStart, 26), ...sessionPhases(meridianStart), sessionDay: "Tuesday", sessionTime: "1:00–3:00 PM", timezone: "America/Los_Angeles", price: 0, currency: "usd", capacity: 12, status: "RUNNING" as const, isPrivate: true, trainerId: tri.id, companyId: meridian.id, createdAt: now, updatedAt: now };
 
   // ---- Fall weekly events ----
   const events = [] as s.InsertEvent[];
