@@ -73,13 +73,7 @@ function groupBlurb(group: string): string {
   }
 }
 
-export function ContentBuilder({
-  sections,
-  uploadEnabled,
-}: {
-  sections: AdminSection[];
-  uploadEnabled: boolean;
-}) {
+export function ContentBuilder({ sections }: { sections: AdminSection[] }) {
   const qc = useQueryClient();
   const [editing, setEditing] = useState<AdminSection | null>(null);
 
@@ -214,7 +208,6 @@ export function ContentBuilder({
       {editing && (
         <SectionDialog
           section={editing}
-          uploadEnabled={uploadEnabled}
           pending={update.isPending}
           onReset={() => onReset(editing)}
           onClose={() => setEditing(null)}
@@ -236,14 +229,12 @@ export function ContentBuilder({
 
 function SectionDialog({
   section,
-  uploadEnabled,
   onSave,
   onClose,
   onReset,
   pending,
 }: {
   section: AdminSection;
-  uploadEnabled: boolean;
   onSave: (value: Record<string, unknown>) => void;
   onClose: () => void;
   onReset: () => void;
@@ -275,7 +266,6 @@ function SectionDialog({
               field={field}
               value={value[field.name]}
               onChange={(v) => setField(field.name, v)}
-              uploadEnabled={uploadEnabled}
             />
           ))}
           <div className="flex items-center justify-between gap-2.5 border-t border-hair-2 pt-4">
@@ -305,12 +295,10 @@ function FieldEditor({
   field,
   value,
   onChange,
-  uploadEnabled,
 }: {
   field: FieldDef;
   value: unknown;
   onChange: (v: unknown) => void;
-  uploadEnabled: boolean;
 }) {
   switch (field.kind) {
     case "text":
@@ -335,7 +323,6 @@ function FieldEditor({
         <ImageField
           label={field.label}
           help={field.help}
-          uploadEnabled={uploadEnabled}
           value={(value as ImageValue) ?? { src: "", alt: "" }}
           onChange={(v) => onChange(v)}
         />
@@ -357,14 +344,7 @@ function FieldEditor({
       );
     }
     case "list":
-      return (
-        <ListEditor
-          field={field}
-          value={(value as Record<string, unknown>[]) ?? []}
-          onChange={onChange}
-          uploadEnabled={uploadEnabled}
-        />
-      );
+      return <ListEditor field={field} value={(value as Record<string, unknown>[]) ?? []} onChange={onChange} />;
   }
 }
 
@@ -372,12 +352,10 @@ function ListEditor({
   field,
   value,
   onChange,
-  uploadEnabled,
 }: {
   field: Extract<FieldDef, { kind: "list" }>;
   value: Record<string, unknown>[];
   onChange: (v: unknown) => void;
-  uploadEnabled: boolean;
 }) {
   function emptyItem(): Record<string, unknown> {
     const obj: Record<string, unknown> = {};
@@ -447,7 +425,6 @@ function ListEditor({
                   field={sub}
                   value={item[sub.name]}
                   onChange={(v) => setItem(i, { ...item, [sub.name]: v })}
-                  uploadEnabled={uploadEnabled}
                 />
               ))}
             </div>

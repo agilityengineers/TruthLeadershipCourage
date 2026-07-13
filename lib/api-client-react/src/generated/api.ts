@@ -4686,6 +4686,77 @@ export function useGetPublicContent<TData = Awaited<ReturnType<typeof getPublicC
 
 
 
+export const getGetContentImageUrl = (id: string,) => {
+
+
+
+
+  return `/api/content/images/${id}`
+}
+
+export const getContentImage = async (id: string, options?: RequestInit): Promise<Blob> => {
+
+  return customFetch<Blob>(getGetContentImageUrl(id),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetContentImageQueryKey = (id: string,) => {
+    return [
+    `/api/content/images/${id}`
+    ] as const;
+    }
+
+
+export const getGetContentImageQueryOptions = <TData = Awaited<ReturnType<typeof getContentImage>>, TError = ErrorType<unknown>>(id: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getContentImage>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetContentImageQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getContentImage>>> = ({ signal }) => getContentImage(id, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getContentImage>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetContentImageQueryResult = NonNullable<Awaited<ReturnType<typeof getContentImage>>>
+export type GetContentImageQueryError = ErrorType<unknown>
+
+
+
+export function useGetContentImage<TData = Awaited<ReturnType<typeof getContentImage>>, TError = ErrorType<unknown>>(
+ id: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getContentImage>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetContentImageQueryOptions(id,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
 export const getGetAdminContentUrl = () => {
 
 

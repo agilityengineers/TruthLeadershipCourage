@@ -8,7 +8,6 @@ export default function AdminContentPage() {
   requireRole("ADMIN");
   const { data } = useGetAdminContent();
   const sections = (data?.sections ?? []) as AdminSection[];
-  const uploadEnabled = data?.uploadEnabled ?? false;
 
   return (
     <div className="flex flex-col gap-5">
@@ -19,18 +18,10 @@ export default function AdminContentPage() {
           Edit the words, images, links, and order of every section on the marketing site — and turn
           sections on or off. Changes go live right away. Each section keeps an original you can
           restore at any time.
-          {!uploadEnabled && (
-            <>
-              {" "}
-              <span className="font-semibold text-[#b3651b]">
-                Image uploads aren’t configured yet — you can still paste an image URL.
-              </span>
-            </>
-          )}
         </p>
       </Card>
 
-      <ContentBuilder sections={sections} uploadEnabled={uploadEnabled} />
+      <ContentBuilder sections={sections} />
     </div>
   );
 }

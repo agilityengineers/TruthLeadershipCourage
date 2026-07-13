@@ -9,5 +9,4 @@ import type { AdminSection } from './adminSection';
 
 export interface AdminContent {
   sections: AdminSection[];
-  uploadEnabled: boolean;
 }

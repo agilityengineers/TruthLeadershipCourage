@@ -1007,7 +1007,6 @@ export interface AdminSection {
 
 export interface AdminContent {
   sections: AdminSection[];
-  uploadEnabled: boolean;
 }
 
 export type UpdateSectionRequestContent = { [key: string]: unknown };
