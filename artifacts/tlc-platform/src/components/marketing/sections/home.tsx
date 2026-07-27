@@ -6,6 +6,7 @@ import { FAQ } from "@/components/marketing/faq";
 import { Eyebrow } from "@/components/brand/primitives";
 import { Button } from "@/components/ui/button";
 import { formatDateOnly } from "@/lib/utils";
+import { useSiteSettings } from "@/lib/site-content";
 
 type Img = { src: string; alt: string };
 type Lnk = { label: string; href: string };
@@ -474,6 +475,10 @@ export function HomeFinalCta({ content }: { content: SC }) {
     secondaryCta: Lnk;
     faqs: { q: string; a: string }[];
   };
+  const { assessmentEnabled } = useSiteSettings();
+  // Hide a call-to-action that points at the assessment while it's turned off.
+  const showPrimary = assessmentEnabled || c.primaryCta.href !== "/assessment";
+  const showSecondary = assessmentEnabled || c.secondaryCta.href !== "/assessment";
   return (
     <div className="bg-[linear-gradient(160deg,#1b1942,#262161_55%,#024794)] text-white">
       <div className="shell grid items-start gap-[clamp(30px,5vw,64px)] py-[clamp(56px,7vw,92px)] lg:grid-cols-2">
@@ -486,16 +491,20 @@ export function HomeFinalCta({ content }: { content: SC }) {
           </h2>
           <p className="mb-[30px] max-w-[26em] text-[17px] leading-[1.55] text-[#cdd6ee]">{c.body}</p>
           <div className="flex flex-wrap gap-3.5">
-            <Button asChild size="lg" variant="light" className="font-bold">
-              <Link href={c.primaryCta.href}>{c.primaryCta.label}</Link>
-            </Button>
-            <Button
-              asChild
-              size="lg"
-              className="border border-white/40 bg-transparent text-white hover:bg-white/10"
-            >
-              <Link href={c.secondaryCta.href}>{c.secondaryCta.label}</Link>
-            </Button>
+            {showPrimary && (
+              <Button asChild size="lg" variant="light" className="font-bold">
+                <Link href={c.primaryCta.href}>{c.primaryCta.label}</Link>
+              </Button>
+            )}
+            {showSecondary && (
+              <Button
+                asChild
+                size="lg"
+                className="border border-white/40 bg-transparent text-white hover:bg-white/10"
+              >
+                <Link href={c.secondaryCta.href}>{c.secondaryCta.label}</Link>
+              </Button>
+            )}
           </div>
         </div>
         <FAQ items={c.faqs} />

@@ -38,3 +38,14 @@ export function usePageContent(page: string) {
     content: (key: string): Content | undefined => byKey.get(key),
   };
 }
+
+/**
+ * Site-wide feature switches, edited under Site Content → "Site settings"
+ * (the `global.settings` section). Global sections ride along in every page's
+ * content payload, so `"global"` is the lightest page to fetch them from.
+ */
+export function useSiteSettings() {
+  const { content } = usePageContent("global");
+  const s = (content("global.settings") ?? {}) as { assessmentEnabled?: boolean };
+  return { assessmentEnabled: s.assessmentEnabled === true };
+}

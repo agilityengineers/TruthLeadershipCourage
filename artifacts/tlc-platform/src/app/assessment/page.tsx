@@ -1,9 +1,12 @@
-import { Link } from "wouter";
+import { Link, Redirect } from "wouter";
 import { useGetAssessment } from "@workspace/api-client-react";
 import { AssessmentFlow } from "./assessment-flow";
+import { useSiteSettings } from "@/lib/site-content";
 import type { QuestionLite } from "@/lib/assessment";
 
 export default function AssessmentPage() {
+  // The assessment is a marketing tool that is off unless an admin turns it on.
+  const { assessmentEnabled } = useSiteSettings();
   const { data: assessment } = useGetAssessment();
 
   const questions: QuestionLite[] = (assessment?.questions ?? []).map((q) => ({
@@ -14,6 +17,8 @@ export default function AssessmentPage() {
     prompt: q.prompt,
     benefit: q.benefit,
   }));
+
+  if (!assessmentEnabled) return <Redirect to="/cohorts" />;
 
   if (questions.length === 0) {
     return (

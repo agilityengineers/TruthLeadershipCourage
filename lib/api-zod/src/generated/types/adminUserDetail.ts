@@ -5,9 +5,10 @@
  * TLC platform API
  * OpenAPI spec version: 0.1.0
  */
+import type { AdminUserEnrollment } from './adminUserEnrollment';
 import type { Role } from './role';
 
-export interface AdminUserRow {
+export interface AdminUserDetail {
   id: string;
   name?: string | null;
   email: string;
@@ -19,4 +20,5 @@ export interface AdminUserRow {
   companyName?: string | null;
   hasPassword: boolean;
   createdAt: Date;
+  enrollments: AdminUserEnrollment[];
 }

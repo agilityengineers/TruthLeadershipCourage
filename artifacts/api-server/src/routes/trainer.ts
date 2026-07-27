@@ -7,7 +7,7 @@ import { cohortScope, enrollmentScope } from "../lib/scope";
 import { audit, issueCertificate } from "../lib/services";
 
 const router: IRouter = Router();
-const userCols = { id: true, name: true, email: true, image: true, title: true } as const;
+const userCols = { id: true, name: true, email: true, image: true, title: true, phone: true } as const;
 const TOTAL_WEEKS = 24;
 
 function currentWeek(startDate: Date, totalWeeks = TOTAL_WEEKS): number {
@@ -142,7 +142,7 @@ router.get(
     res.json({
       id: enr.id,
       status: enr.status,
-      user: { id: enr.user!.id, name: enr.user!.name, email: enr.user!.email, image: enr.user!.image, title: enr.user!.title },
+      user: { id: enr.user!.id, name: enr.user!.name, email: enr.user!.email, image: enr.user!.image, title: enr.user!.title, phone: enr.user!.phone ?? null },
       companyName: enr.user?.company?.name ?? null,
       cohort: enr.cohort,
       moduleProgress: enr.moduleProgress,

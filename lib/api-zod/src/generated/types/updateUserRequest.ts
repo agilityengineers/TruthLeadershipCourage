@@ -10,6 +10,7 @@ import type { Role } from './role';
 export interface UpdateUserRequest {
   name?: string | null;
   title?: string | null;
+  phone?: string | null;
   role?: Role;
   status?: string;
   companyId?: string | null;

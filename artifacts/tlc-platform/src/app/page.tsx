@@ -25,10 +25,9 @@ export default function LandingPage() {
       })}
 
       {footer && (
-        <Footer
-          content={footer as Parameters<typeof Footer>[0]["content"]}
-          crossLink={{ label: "Leading a team? See TLC for Organizations →", href: "/organizations" }}
-        />
+        // The Organizations page is toggled off for now (its nav + footer links
+        // are removed); re-add a crossLink here when it's turned back on.
+        <Footer content={footer as Parameters<typeof Footer>[0]["content"]} />
       )}
     </div>
   );

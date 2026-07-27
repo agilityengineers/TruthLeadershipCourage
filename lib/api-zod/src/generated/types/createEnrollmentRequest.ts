@@ -10,7 +10,8 @@ import type { ShippingAddress } from './shippingAddress';
 export interface CreateEnrollmentRequest {
   name: string;
   email: string;
-  companyId?: string;
+  phone?: string;
+  companyName: string;
   cohortId: string;
   responseId?: string;
   coupon?: string;

@@ -13,6 +13,7 @@ export interface CreateUserRequest {
   email: string;
   role: Role;
   title?: string;
+  phone?: string;
   companyId?: string | null;
   mode?: CreateUserRequestMode;
   password?: string;

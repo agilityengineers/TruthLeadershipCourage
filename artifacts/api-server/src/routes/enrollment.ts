@@ -1,4 +1,5 @@
 import { Router, type IRouter } from "express";
+import { randomUUID } from "node:crypto";
 import { CreateEnrollmentBody, FulfillEnrollmentBody } from "@workspace/api-zod";
 import { db, schema, eq, and, or, ne, inArray, asc, count, gte, sql } from "../lib/db";
 import { asyncHandler, HttpError, notFound, forbidden } from "../lib/http";
@@ -14,6 +15,38 @@ import {
 import { rateLimit, clientIp } from "../lib/ratelimit";
 
 const router: IRouter = Router();
+
+function slugify(s: string): string {
+  return (
+    s
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "")
+      .slice(0, 60) || "company"
+  );
+}
+
+/**
+ * Resolve a free-form company name to a company row id, creating the company
+ * the first time a name is seen (case-insensitive match). Keeps the admin CRM
+ * and company dashboards populated from self-service signups.
+ */
+async function findOrCreateCompanyByName(name: string): Promise<string> {
+  const trimmed = name.trim();
+  const existing = await db.query.company.findFirst({
+    where: sql`lower(${schema.company.name}) = ${trimmed.toLowerCase()}`,
+  });
+  if (existing) return existing.id;
+  let slug = slugify(trimmed);
+  const taken = await db.query.company.findFirst({ where: eq(schema.company.slug, slug) });
+  if (taken) slug = `${slug}-${randomUUID().slice(0, 6)}`;
+  const [created] = await db
+    .insert(schema.company)
+    .values({ name: trimmed, slug, status: "ACTIVE" })
+    .returning();
+  return created!.id;
+}
 
 /** Public: cohorts open for enrollment + active companies. */
 router.get(
@@ -107,6 +140,9 @@ router.post(
       return;
     }
 
+    const companyId = await findOrCreateCompanyByName(data.companyName);
+    const phone = data.phone?.trim() || null;
+
     let user = await db.query.user.findFirst({ where: eq(schema.user.email, email) });
     if (!user) {
       [user] = await db
@@ -117,9 +153,18 @@ router.post(
           role: "PARTICIPANT",
           status: "invited",
           passwordHash: "demo-hash",
-          companyId: data.companyId || null,
+          companyId,
+          phone,
         })
         .returning();
+    } else {
+      // Keep the CRM record current with what they just entered.
+      const patch: Record<string, unknown> = {};
+      if (phone && phone !== user.phone) patch.phone = phone;
+      if (companyId !== user.companyId) patch.companyId = companyId;
+      if (Object.keys(patch).length) {
+        await db.update(schema.user).set(patch).where(eq(schema.user.id, user.id));
+      }
     }
 
     if (data.responseId) {
@@ -185,7 +230,7 @@ router.post(
         .insert(schema.seat)
         .values({
           cohortId: cohort.id,
-          companyId: data.companyId || null,
+          companyId,
           status: "ASSIGNED",
           assignedUserId: user!.id,
         })
@@ -195,7 +240,7 @@ router.post(
         .values({
           userId: user!.id,
           cohortId: cohort.id,
-          companyId: data.companyId || null,
+          companyId,
           seatId: seat!.id,
           status: "PENDING",
           shippingAddress: data.shipping,
@@ -204,7 +249,7 @@ router.post(
       await tx.insert(schema.shipment).values({ enrollmentId: enr!.id, status: "PENDING", address: data.shipping });
       await tx.insert(schema.payment).values({
         enrollmentId: enr!.id,
-        companyId: data.companyId || null,
+        companyId,
         processor: "STRIPE",
         amount,
         currency: cohort.currency,

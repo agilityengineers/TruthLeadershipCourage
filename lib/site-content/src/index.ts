@@ -19,6 +19,7 @@ export type FieldDef =
   | { kind: "text"; name: string; label: string; help?: string }
   | { kind: "textarea"; name: string; label: string; help?: string }
   | { kind: "url"; name: string; label: string; help?: string }
+  | { kind: "toggle"; name: string; label: string; help?: string } // boolean on/off switch
   | { kind: "image"; name: string; label: string; help?: string } // { src, alt }
   | { kind: "link"; name: string; label: string; help?: string } // { label, href }
   | {
@@ -58,6 +59,8 @@ function fieldSchema(f: FieldDef): z.ZodTypeAny {
     case "textarea":
     case "url":
       return z.string();
+    case "toggle":
+      return z.boolean();
     case "image":
       return z.object({ src: z.string(), alt: z.string() });
     case "link":
@@ -119,7 +122,6 @@ export const SECTIONS: SectionDef[] = [
       logoAlt: "The Wisdom Tri",
       links: [
         { label: "TLC for Leaders", href: "/" },
-        { label: "TLC for Organizations", href: "/organizations" },
         { label: "About Tri", href: "/about-tri" },
         { label: "Stories", href: "#stories" },
       ],
@@ -143,6 +145,26 @@ export const SECTIONS: SectionDef[] = [
       brandName: "The Wisdom Tri",
       contact: "thewisdomtri.com · tri.nguyen@thewisdomtri.com",
       copyright: "© 2026 The Wisdom Tri · Do Good While Doing Well.",
+    },
+  },
+  {
+    key: "global.settings",
+    page: "global",
+    group: "Global",
+    label: "Site settings",
+    description:
+      "Feature switches for the public site. The leadership assessment is a marketing tool that is off by default — turn it on to open its page and show its buttons across the site.",
+    order: 3,
+    fields: [
+      {
+        kind: "toggle",
+        name: "assessmentEnabled",
+        label: "Enable the leadership assessment",
+        help: "When off, the assessment page redirects and every “Start the assessment” button is hidden.",
+      },
+    ],
+    default: {
+      assessmentEnabled: false,
     },
   },
 
@@ -951,7 +973,7 @@ export const SECTIONS: SectionDef[] = [
       ],
       image: { src: "/brand/mq_E.png", alt: "Tri T. Nguyen coaching two leaders" },
       primaryCta: { label: "Book a call with Tri", href: "/book-a-call" },
-      secondaryCta: { label: "Start the Assessment →", href: "/assessment" },
+      secondaryCta: { label: "Return to home", href: "/" },
       stats: [
         { value: "30+", label: "YEARS LEADING" },
         { value: "25 yrs", label: "IN THE C-SUITE" },
@@ -1194,8 +1216,8 @@ export const SECTIONS: SectionDef[] = [
       eyebrow: "Let's talk",
       headingLead: "Let's talk about",
       headingEmphasis: "your leadership.",
-      body: "Whether you're leading a team, a whole company, or figuring out your next chapter as a leader — I'd love to hear where you are. Start with the two-minute assessment, or book a 15-minute call and we'll talk, leader to leader.",
-      primaryCta: { label: "Start the Assessment →", href: "/assessment" },
+      body: "Whether you're leading a team, a whole company, or figuring out your next chapter as a leader — I'd love to hear where you are. Book a 15-minute call and we'll talk, leader to leader — or see when the next cohort begins.",
+      primaryCta: { label: "Upcoming Cohort Dates →", href: "/cohorts" },
       secondaryCta: { label: "Book a call with Tri", href: "/book-a-call" },
     },
   },
@@ -1315,19 +1337,35 @@ export const SECTIONS: SectionDef[] = [
       "The confirmation messages shown after enrolling (standard and waitlisted variants) and the disclaimer.",
     order: 1,
     fields: [
+      {
+        kind: "image",
+        name: "logo",
+        label: "Logo",
+        help: "Upload a logo, or leave blank to use the default Wisdom Tri mark.",
+      },
       { kind: "text", name: "heading", label: "Heading (confirmed)" },
       { kind: "textarea", name: "body", label: "Message (confirmed)" },
       { kind: "text", name: "waitlistHeading", label: "Heading (waitlisted)" },
       { kind: "textarea", name: "waitlistBody", label: "Message (waitlisted)" },
+      {
+        kind: "link",
+        name: "primaryCta",
+        label: "Primary button",
+        help: "e.g. book an appointment with the trainer. Accepts a full https:// link such as a Calendly URL. Leave the text blank to hide the button.",
+      },
       { kind: "textarea", name: "disclaimer", label: "Disclaimer" },
     ],
     default: {
+      logo: { src: "", alt: "The Wisdom Tri" },
       heading: "Your seat is reserved.",
       body: "Thank you for answering the call. We'll email you to confirm payment and shipping. Once payment is complete, your portal unlocks and your workbook ships before kickoff.",
       waitlistHeading: "You're on the waitlist.",
       waitlistBody: "This cohort is currently full. We'll email you the moment a seat opens — no further action needed.",
-      disclaimer:
-        "Payment is processed securely off-site (Stripe / ThriveCart). The TLC platform never collects card details.",
+      primaryCta: {
+        label: "Book an appointment with the trainer",
+        href: "https://calendly.com/tri-t-nguyen/tlc-fit-conversation",
+      },
+      disclaimer: "Payment is handled securely and separately — no card details are entered here.",
     },
   },
 ];

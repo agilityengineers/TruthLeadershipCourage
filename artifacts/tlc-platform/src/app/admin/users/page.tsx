@@ -1,3 +1,4 @@
+import { Link } from "wouter";
 import { requireRole } from "@/lib/session";
 import { useListUsers, useGetCompaniesData } from "@workspace/api-client-react";
 import { Card } from "@/components/ui/card";
@@ -55,12 +56,13 @@ export default function UsersPage() {
             className="grid grid-cols-[2fr_1.1fr_1fr_1fr_1.1fr] items-center border-b border-[#f1f3f8] px-5 py-3 last:border-0"
           >
             <span className="flex min-w-0 flex-col">
-              <span className="truncate text-[13px] font-semibold text-ink">
-                {u.name ?? "—"}
-              </span>
-              <span className="truncate text-[12px] text-muted-2">
-                {u.email}
-              </span>
+              <Link
+                href={`/admin/users/${u.id}`}
+                className="truncate text-[13px] font-semibold text-ink hover:text-eq hover:underline"
+              >
+                {u.name ?? u.email}
+              </Link>
+              <span className="truncate text-[12px] text-muted-2">{u.email}</span>
             </span>
             <span>
               <Badge className={ROLE_STYLE[u.role] ?? "bg-page text-muted"}>

@@ -66,12 +66,59 @@ router.get(
         role: u.role,
         status: u.status,
         title: u.title,
+        phone: u.phone ?? null,
         companyId: u.companyId ?? null,
         companyName: u.company?.name ?? null,
         hasPassword: Boolean(u.passwordHash),
         createdAt: u.createdAt,
       })),
     );
+  }),
+);
+
+/**
+ * A single user's CRM detail: profile (incl. phone), company, and every
+ * cohort enrollment with its enrollment + payment status, so an admin (or
+ * anyone helping them) can manage the relationship over time.
+ */
+router.get(
+  "/admin/users/:id",
+  asyncHandler(async (req, res) => {
+    await requireCapability(req, "user:manage");
+    const u = await db.query.user.findFirst({
+      where: eq(schema.user.id, String(req.params.id)),
+      with: {
+        company: { columns: { id: true, name: true } },
+        enrollments: {
+          with: {
+            cohort: { columns: { id: true, name: true } },
+            payment: { columns: { status: true } },
+          },
+        },
+      },
+    });
+    if (!u) throw new HttpError(404, "User not found.");
+    res.json({
+      id: u.id,
+      name: u.name,
+      email: u.email,
+      role: u.role,
+      status: u.status,
+      title: u.title,
+      phone: u.phone ?? null,
+      companyId: u.companyId ?? null,
+      companyName: u.company?.name ?? null,
+      hasPassword: Boolean(u.passwordHash),
+      createdAt: u.createdAt,
+      enrollments: (u.enrollments ?? []).map((e) => ({
+        id: e.id,
+        cohortId: e.cohortId,
+        cohortName: e.cohort?.name ?? "—",
+        status: e.status,
+        paymentStatus: e.payment?.status ?? null,
+        enrolledAt: e.enrolledAt ?? null,
+      })),
+    });
   }),
 );
 
@@ -123,6 +170,7 @@ router.post(
         name: body.name?.trim() || null,
         role,
         title: body.title?.trim() || null,
+        phone: body.phone?.trim() || null,
         companyId: body.companyId || null,
         status,
         passwordHash,
@@ -196,8 +244,11 @@ router.post(
     if (isAdminRole(target.role)) {
       throw forbidden("Administrators cannot be impersonated.");
     }
-    if (target.status !== "active") {
-      throw new HttpError(409, "Only active accounts can be impersonated.");
+    // Active and invited (not-yet-activated) accounts can be impersonated so an
+    // admin can troubleshoot a brand-new signup before they set a password. A
+    // deliberately disabled account stays off-limits.
+    if (target.status !== "active" && target.status !== "invited") {
+      throw new HttpError(409, "Only active or invited accounts can be impersonated.");
     }
 
     const token = randomUUID();
@@ -276,6 +327,7 @@ router.patch(
     const patch: Record<string, unknown> = {};
     if (body.name !== undefined) patch.name = body.name?.trim() || null;
     if (body.title !== undefined) patch.title = body.title?.trim() || null;
+    if (body.phone !== undefined) patch.phone = body.phone?.trim() || null;
     if (body.role !== undefined) patch.role = body.role;
     if (body.status !== undefined) patch.status = body.status;
     if (body.companyId !== undefined) patch.companyId = body.companyId || null;
