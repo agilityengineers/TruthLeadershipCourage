@@ -1217,7 +1217,34 @@ export const SECTIONS: SectionDef[] = [
     default: {
       heading: "Let's talk about your leadership.",
       body: "Book a 15-minute fit conversation with Tri to see whether TLC is the right fit for you or your team. Most leaders start with the two-minute assessment first.",
-      primaryCta: { label: "Start the Assessment →", href: "/assessment" },
+      // An external (https://) href opens in a new tab; an internal path (/…)
+      // navigates in-app. Point the primary button at the Calendly scheduler
+      // for now; when the inline embed lands, swap this button for the widget.
+      primaryCta: {
+        label: "Schedule your fit conversation →",
+        href: "https://calendly.com/tri-t-nguyen/tlc-fit-conversation",
+      },
+      secondaryCta: { label: "Take the 2-minute assessment first", href: "/assessment" },
+    },
+  },
+  {
+    key: "bookACall.confirmed",
+    page: "book-a-call-confirmed",
+    group: "Other pages",
+    label: "Call-booked confirmation",
+    description:
+      "The thank-you page Calendly returns to after a fit conversation is booked (set as the redirect on the Calendly event).",
+    order: 2,
+    fields: [
+      { kind: "text", name: "heading", label: "Heading" },
+      { kind: "textarea", name: "body", label: "Paragraph" },
+      linkFields("primaryCta", "Primary button"),
+      linkFields("secondaryCta", "Secondary button"),
+    ],
+    default: {
+      heading: "Your call is booked.",
+      body: "Thank you — your fit conversation with Tri is on the calendar. Calendly just emailed you the details and a calendar invite. While you're here, the two-minute assessment is the best way to arrive ready.",
+      primaryCta: { label: "Take the 2-minute assessment →", href: "/assessment" },
       secondaryCta: { label: "Back to home", href: "/" },
     },
   },
