@@ -23,7 +23,7 @@ import { ImageField, type ImageValue } from "@/components/admin/image-field";
 
 // Field descriptor shape (mirrors @workspace/site-content, delivered as JSON).
 type FieldDef =
-  | { kind: "text" | "textarea" | "url" | "image" | "link"; name: string; label: string; help?: string }
+  | { kind: "text" | "textarea" | "url" | "toggle" | "image" | "link"; name: string; label: string; help?: string }
   | { kind: "list"; name: string; label: string; help?: string; itemLabel: string; item: FieldDef[] };
 
 export type AdminSection = {
@@ -318,6 +318,28 @@ function FieldEditor({
           <Textarea value={(value as string) ?? ""} onChange={(e) => onChange(e.target.value)} rows={3} />
         </div>
       );
+    case "toggle": {
+      const on = value === true;
+      return (
+        <div className="flex items-center justify-between gap-3 rounded-[11px] border border-hair-2 p-3">
+          <div className="min-w-0">
+            <Label>{field.label}</Label>
+            {field.help && <p className="text-[11.5px] text-muted-2">{field.help}</p>}
+          </div>
+          <button
+            type="button"
+            onClick={() => onChange(!on)}
+            className={`flex h-7 w-[52px] shrink-0 items-center rounded-full px-1 transition-colors ${
+              on ? "justify-end bg-eq" : "justify-start bg-[#d3d7e2]"
+            }`}
+            aria-label={on ? "On — click to turn off" : "Off — click to turn on"}
+            title={on ? "On" : "Off"}
+          >
+            <span className="h-5 w-5 rounded-full bg-white shadow" />
+          </button>
+        </div>
+      );
+    }
     case "image":
       return (
         <ImageField
@@ -362,6 +384,7 @@ function ListEditor({
     for (const f of field.item) {
       if (f.kind === "image") obj[f.name] = { src: "", alt: "" };
       else if (f.kind === "link") obj[f.name] = { label: "", href: "" };
+      else if (f.kind === "toggle") obj[f.name] = false;
       else obj[f.name] = "";
     }
     return obj;

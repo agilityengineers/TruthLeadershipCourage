@@ -452,9 +452,11 @@ export function EditUserDialog({
 export function ImpersonateUserButton({ user }: { user: AdminUserRow }) {
   const impersonate = useImpersonateUser();
   const self = getPrincipal();
-  // Mirrors the server's guards: active, non-admin, not yourself, one at a time.
+  // Mirrors the server's guards: active or invited, non-admin, not yourself, one
+  // at a time. (Invited = a not-yet-activated signup — impersonatable so admins
+  // can troubleshoot new registrations.)
   const eligible =
-    user.status === "active" &&
+    (user.status === "active" || user.status === "invited") &&
     user.role !== "ADMIN" &&
     user.role !== "SUPER_ADMIN" &&
     user.id !== self?.id &&

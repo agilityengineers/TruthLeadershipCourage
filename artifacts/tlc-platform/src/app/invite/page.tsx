@@ -43,7 +43,7 @@ export default function InvitePage() {
     <div className="flex min-h-screen flex-col items-center justify-center bg-soft-3 px-5 py-12">
       <div className="w-full max-w-[420px]">
         <div className="mb-7 flex items-center justify-center gap-3">
-          <Logo size={70} withWordmark subtitle="TLC Platform" href="/" />
+          <Logo size={140} withWordmark subtitle="TLC Platform" href="/" />
         </div>
         <div className="rounded-[18px] border border-hair-1 bg-white p-8 shadow-card">
           {invalid ? (

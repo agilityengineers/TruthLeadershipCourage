@@ -196,8 +196,11 @@ router.post(
     if (isAdminRole(target.role)) {
       throw forbidden("Administrators cannot be impersonated.");
     }
-    if (target.status !== "active") {
-      throw new HttpError(409, "Only active accounts can be impersonated.");
+    // Active and invited (not-yet-activated) accounts can be impersonated so an
+    // admin can troubleshoot a brand-new signup before they set a password. A
+    // deliberately disabled account stays off-limits.
+    if (target.status !== "active" && target.status !== "invited") {
+      throw new HttpError(409, "Only active or invited accounts can be impersonated.");
     }
 
     const token = randomUUID();

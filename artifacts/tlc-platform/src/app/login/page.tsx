@@ -10,16 +10,19 @@ export default function LoginPage() {
   const callbackUrl = params.get("callbackUrl") ?? undefined;
   const ssoEnabled = false;
   // Editable intro copy; falls back to defaults so the form never waits on it.
-  const intro = (usePageContent("login").content("login.intro") ?? {
+  const page = usePageContent("login");
+  const intro = (page.content("login.intro") ?? {
     heading: "Welcome back",
     body: "Sign in to your TLC portal.",
   }) as { heading: string; body: string };
+  const assessmentOn =
+    (page.content("global.settings") as { assessmentEnabled?: boolean } | undefined)?.assessmentEnabled === true;
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-soft-3 px-5 py-12">
       <div className="w-full max-w-[420px]">
         <div className="mb-7 flex items-center justify-center gap-3">
-          <Logo size={70} withWordmark subtitle="TLC Platform" href="/" />
+          <Logo size={140} withWordmark subtitle="TLC Platform" href="/" />
         </div>
         <div className="rounded-[18px] border border-hair-1 bg-white p-8 shadow-card">
           <h1 className="font-display text-[26px] text-ink">{intro.heading}</h1>
@@ -36,12 +39,14 @@ export default function LoginPage() {
             </>
           )}
         </div>
-        <p className="mt-5 text-center text-[12.5px] text-muted-2">
-          New here?{" "}
-          <Link href="/assessment" className="font-semibold text-eq">
-            Start the assessment →
-          </Link>
-        </p>
+        {assessmentOn && (
+          <p className="mt-5 text-center text-[12.5px] text-muted-2">
+            New here?{" "}
+            <Link href="/assessment" className="font-semibold text-eq">
+              Start the assessment →
+            </Link>
+          </p>
+        )}
         {import.meta.env.MODE !== "production" && (
           <div className="mt-6 rounded-[12px] border border-hair-2 bg-white/60 p-4 text-[12px] leading-relaxed text-muted-2">
             <span className="font-semibold text-ink">Demo accounts</span> (set a

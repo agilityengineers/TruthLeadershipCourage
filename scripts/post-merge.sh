@@ -5,3 +5,7 @@ pnpm install --frozen-lockfile
 # database has the four demo logins and sample cohorts/enrollments.
 pnpm --filter @workspace/db push
 pnpm --filter @workspace/db seed
+# Idempotently roll changed section defaults (removed nav link, repointed About
+# Tri buttons, dropped Stripe line) onto already-seeded rows — skips any section
+# an admin has customized. Safe to run every deploy.
+pnpm --filter @workspace/db run backfill-content

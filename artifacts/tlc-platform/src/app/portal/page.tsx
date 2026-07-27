@@ -31,9 +31,14 @@ export default function PortalHome() {
   if (!home) {
     return (
       <Card className="p-8 text-center">
-        <p className="text-muted">You don't have an active enrollment yet.</p>
-        <Button asChild className="mt-4">
-          <Link href="/assessment">Start the assessment</Link>
+        <h2 className="font-display text-[18px] text-ink">No active enrollment yet</h2>
+        <p className="mx-auto mt-2 max-w-[42ch] text-[13.5px] leading-relaxed text-muted-2">
+          This account isn't in a confirmed cohort yet, so there's nothing on the portal home to
+          show. Once payment is confirmed and onboarding is complete, the participant's journey
+          appears here.
+        </p>
+        <Button asChild className="mt-4" variant="outline">
+          <Link href="/cohorts">Browse upcoming cohorts</Link>
         </Button>
       </Card>
     );
