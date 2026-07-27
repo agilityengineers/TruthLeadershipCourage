@@ -2,7 +2,36 @@
 
 _Source: DevOps punch-list captured from Slack (Clarence Williams / Tri Nguyen).
 Grounded against the actual codebase — every file/line reference below was read
-directly, not inferred. Nothing here is implemented yet; this is the plan._
+directly, not inferred._
+
+## Status — IMPLEMENTED (all 9 items)
+
+All items are implemented on branch `claude/cohort-signup-admin-dashboard-jzcqth`
+(two batches; full workspace typecheck passes). Product decisions confirmed by
+Clarence/Tri and applied:
+
+1. **Company** — required free-form text; the server find-or-creates a company
+   row per name so the CRM/company dashboards stay populated.
+2. **Impersonation** — invited (not-yet-activated) accounts are now
+   impersonatable; admins remain excluded.
+3. **Assessment** — a real admin on/off toggle (Site Content → "Site
+   settings"), **off** now; while off the `/assessment` page redirects and all
+   its buttons are hidden.
+4. **Calendly** — confirmation CTA defaults to
+   `https://calendly.com/tri-t-nguyen/tlc-fit-conversation`, editable by the
+   admin (per-trainer editing noted as a future enhancement).
+5. **Organizations** — off now; its link is removed from the top nav + home
+   footer; the page stays live and the link returns when re-added in Site
+   Content.
+6. **CRM** — admin user detail view; trainers also see contact info for
+   participants assigned to them.
+
+> Note on the live database: registry default changes for already-seeded
+> sections (nav link, About Tri buttons, confirmation disclaimer) are applied by
+> an idempotent backfill (`lib/db` `backfill-content`, wired into
+> `scripts/post-merge.sh`) that skips any section an admin has customized.
+
+The original analysis (root causes, file refs, alternatives) follows.
 
 ## Executive summary
 
