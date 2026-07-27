@@ -22,6 +22,7 @@ import AssessmentPage from "@/app/assessment/page";
 import EnrollPage from "@/app/enroll/page";
 import EnrollConfirmationPage from "@/app/enroll/confirmation/page";
 import BookACallPage from "@/app/book-a-call/page";
+import BookACallConfirmedPage from "@/app/book-a-call/confirmed/page";
 import OrganizationsPage from "@/app/organizations/page";
 import CohortsIndexPage from "@/app/cohorts/page";
 import CohortLandingPage from "@/app/cohort/[slug]/page";
@@ -118,6 +119,7 @@ function Router() {
       <Route path="/assessment" component={AssessmentPage} />
       <Route path="/enroll" component={EnrollPage} />
       <Route path="/enroll/confirmation" component={EnrollConfirmationPage} />
+      <Route path="/book-a-call/confirmed" component={BookACallConfirmedPage} />
       <Route path="/book-a-call" component={BookACallPage} />
       <Route path="/organizations" component={OrganizationsPage} />
       <Route path="/cohorts" component={CohortsIndexPage} />

@@ -47,6 +47,7 @@ const PAGE_VIEW: Record<string, string> = {
   organizations: "/organizations",
   "about-tri": "/about-tri",
   "book-a-call": "/book-a-call",
+  "book-a-call-confirmed": "/book-a-call/confirmed",
   login: "/login",
   enroll: "/enroll",
   confirmation: "/enroll/confirmation?status=enrolled",
