@@ -11,7 +11,6 @@ export default function EnrollPage() {
 
   const { data } = useGetEnrollOptions();
   const cohorts = data?.cohorts ?? [];
-  const companies = data?.companies ?? [];
 
   const copy = (usePageContent("enroll").content("enroll.intro") ?? {
     heading: "Confirm your seat in the cohort",
@@ -55,7 +54,6 @@ export default function EnrollPage() {
             <EnrollForm
               responseId={response}
               cohorts={cohorts}
-              companies={companies}
               initialCohortId={preselectCohortId}
             />
           )}

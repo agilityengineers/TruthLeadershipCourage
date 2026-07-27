@@ -158,6 +158,7 @@ export function AddUserDialog({
                       .toLowerCase(),
                     role: String(fd.get("role")) as Role,
                     title: String(fd.get("title") || "").trim() || undefined,
+                    phone: String(fd.get("phone") || "").trim() || undefined,
                     companyId: String(fd.get("companyId") || "") || null,
                     mode,
                     password:
@@ -221,9 +222,15 @@ export function AddUserDialog({
                 </select>
               </div>
             </div>
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="title">Title (optional)</Label>
-              <Input id="title" name="title" placeholder="e.g. Lead Trainer" />
+            <div className="grid grid-cols-2 gap-3">
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="title">Title (optional)</Label>
+                <Input id="title" name="title" placeholder="e.g. Lead Trainer" />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="phone">Phone (optional)</Label>
+                <Input id="phone" name="phone" type="tel" placeholder="+1 555 123 4567" />
+              </div>
             </div>
 
             <fieldset className="flex flex-col gap-2">
@@ -331,6 +338,7 @@ export function EditUserDialog({
                 data: {
                   name: String(fd.get("name") || "").trim() || null,
                   title: String(fd.get("title") || "").trim() || null,
+                  phone: String(fd.get("phone") || "").trim() || null,
                   role: String(fd.get("role")) as Role,
                   status: String(fd.get("status")),
                   companyId: String(fd.get("companyId") || "") || null,
@@ -408,6 +416,10 @@ export function EditUserDialog({
                 ))}
               </select>
             </div>
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="edit-phone">Phone</Label>
+            <Input id="edit-phone" name="phone" type="tel" defaultValue={user.phone ?? ""} />
           </div>
 
           {invitePath && <InviteLinkBox path={invitePath} />}

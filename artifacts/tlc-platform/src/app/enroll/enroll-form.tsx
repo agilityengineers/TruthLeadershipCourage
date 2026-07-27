@@ -17,12 +17,10 @@ type CohortOpt = {
 
 export function EnrollForm({
   cohorts,
-  companies,
   responseId,
   initialCohortId,
 }: {
   cohorts: CohortOpt[];
-  companies: { id: string; name: string }[];
   responseId?: string;
   initialCohortId?: string;
 }) {
@@ -43,7 +41,8 @@ export function EnrollForm({
     const payload = {
       name: String(fd.get("name") ?? ""),
       email: String(fd.get("email") ?? ""),
-      companyId: String(fd.get("companyId") ?? "") || undefined,
+      phone: String(fd.get("phone") ?? "") || undefined,
+      companyName: String(fd.get("companyName") ?? ""),
       cohortId,
       responseId,
       coupon: String(fd.get("coupon") ?? "") || undefined,
@@ -104,22 +103,8 @@ export function EnrollForm({
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Field label="Full name" name="name" required />
         <Field label="Work email" name="email" type="email" required />
-      </div>
-
-      <div className="flex flex-col gap-1.5">
-        <Label htmlFor="companyId">Company (optional)</Label>
-        <select
-          id="companyId"
-          name="companyId"
-          className="flex h-11 w-full rounded-[9px] border border-[#e0e4ee] bg-white px-3.5 text-sm text-ink focus:border-eq focus:outline-none"
-        >
-          <option value="">Independent / no company</option>
-          {companies.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.name}
-            </option>
-          ))}
-        </select>
+        <Field label="Phone" name="phone" type="tel" />
+        <Field label="Company" name="companyName" required />
       </div>
 
       {/* Shipping */}

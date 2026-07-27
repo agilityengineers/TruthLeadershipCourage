@@ -25,6 +25,8 @@ export * from './adminSection';
 export * from './adminSectionContent';
 export * from './adminSectionFieldsItem';
 export * from './adminTrainerRow';
+export * from './adminUserDetail';
+export * from './adminUserEnrollment';
 export * from './adminUserRow';
 export * from './analyticsData';
 export * from './assessmentPublic';

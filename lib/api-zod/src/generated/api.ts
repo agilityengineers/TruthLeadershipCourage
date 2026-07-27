@@ -126,7 +126,8 @@ export const GetUpcomingCohortsResponse = zod.object({
 export const CreateEnrollmentBody = zod.object({
   "name": zod.string(),
   "email": zod.string(),
-  "companyId": zod.string().optional(),
+  "phone": zod.string().optional(),
+  "companyName": zod.string(),
   "cohortId": zod.string(),
   "responseId": zod.string().optional(),
   "coupon": zod.string().optional(),
@@ -177,7 +178,8 @@ export const GetParticipantContextResponse = zod.union([zod.object({
   "name": zod.string().nullish(),
   "email": zod.string(),
   "image": zod.string().nullish(),
-  "title": zod.string().nullish()
+  "title": zod.string().nullish(),
+  "phone": zod.string().nullish()
 }),
   "cohort": zod.object({
   "id": zod.string(),
@@ -219,7 +221,8 @@ export const GetParticipantContextResponse = zod.union([zod.object({
   "name": zod.string().nullish(),
   "email": zod.string(),
   "image": zod.string().nullish(),
-  "title": zod.string().nullish()
+  "title": zod.string().nullish(),
+  "phone": zod.string().nullish()
 }),zod.null()]).optional(),
   "events": zod.array(zod.object({
   "id": zod.string(),
@@ -273,7 +276,8 @@ export const GetParticipantContextResponse = zod.union([zod.object({
   "name": zod.string().nullish(),
   "email": zod.string(),
   "image": zod.string().nullish(),
-  "title": zod.string().nullish()
+  "title": zod.string().nullish(),
+  "phone": zod.string().nullish()
 }),zod.null()]).optional()
 })),
   "certificate": zod.union([zod.object({
@@ -404,7 +408,8 @@ export const GetPortalHomeResponse = zod.union([zod.object({
   "name": zod.string().nullish(),
   "email": zod.string(),
   "image": zod.string().nullish(),
-  "title": zod.string().nullish()
+  "title": zod.string().nullish(),
+  "phone": zod.string().nullish()
 }),zod.null()]).optional()
 }),zod.null()]).optional(),
   "portalClosesAt": zod.coerce.date().nullish()
@@ -650,7 +655,8 @@ export const GetThreadResponse = zod.union([zod.object({
   "name": zod.string().nullish(),
   "email": zod.string(),
   "image": zod.string().nullish(),
-  "title": zod.string().nullish()
+  "title": zod.string().nullish(),
+  "phone": zod.string().nullish()
 })
 })),
   "messages": zod.array(zod.object({
@@ -752,7 +758,8 @@ export const BookCoachingSessionResponse = zod.object({
   "name": zod.string().nullish(),
   "email": zod.string(),
   "image": zod.string().nullish(),
-  "title": zod.string().nullish()
+  "title": zod.string().nullish(),
+  "phone": zod.string().nullish()
 }),zod.null()]).optional()
 })
 
@@ -784,7 +791,8 @@ export const ListPaymentsResponseItem = zod.object({
   "name": zod.string().nullish(),
   "email": zod.string(),
   "image": zod.string().nullish(),
-  "title": zod.string().nullish()
+  "title": zod.string().nullish(),
+  "phone": zod.string().nullish()
 }),zod.null()]).optional(),
   "cohort": zod.union([zod.object({
   "id": zod.string(),
@@ -950,7 +958,8 @@ export const GetTrainerParticipantResponse = zod.union([zod.object({
   "name": zod.string().nullish(),
   "email": zod.string(),
   "image": zod.string().nullish(),
-  "title": zod.string().nullish()
+  "title": zod.string().nullish(),
+  "phone": zod.string().nullish()
 }),
   "companyName": zod.string().nullish(),
   "cohort": zod.object({
@@ -1502,6 +1511,7 @@ export const ListUsersResponseItem = zod.object({
   "role": zod.enum(['PARTICIPANT', 'COMPANY_VIEWER', 'TRAINER', 'ADMIN', 'SUPER_ADMIN']),
   "status": zod.string(),
   "title": zod.string().nullish(),
+  "phone": zod.string().nullish(),
   "companyId": zod.string().nullish(),
   "companyName": zod.string().nullish(),
   "hasPassword": zod.boolean(),
@@ -1515,6 +1525,7 @@ export const CreateUserBody = zod.object({
   "email": zod.string(),
   "role": zod.enum(['PARTICIPANT', 'COMPANY_VIEWER', 'TRAINER', 'ADMIN', 'SUPER_ADMIN']),
   "title": zod.string().optional(),
+  "phone": zod.string().optional(),
   "companyId": zod.string().nullish(),
   "mode": zod.enum(['invite', 'password']).optional(),
   "password": zod.string().optional()
@@ -1528,6 +1539,33 @@ export const CreateUserResponse = zod.object({
 })
 
 
+export const GetUserParams = zod.object({
+  "id": zod.coerce.string()
+})
+
+export const GetUserResponse = zod.object({
+  "id": zod.string(),
+  "name": zod.string().nullish(),
+  "email": zod.string(),
+  "role": zod.enum(['PARTICIPANT', 'COMPANY_VIEWER', 'TRAINER', 'ADMIN', 'SUPER_ADMIN']),
+  "status": zod.string(),
+  "title": zod.string().nullish(),
+  "phone": zod.string().nullish(),
+  "companyId": zod.string().nullish(),
+  "companyName": zod.string().nullish(),
+  "hasPassword": zod.boolean(),
+  "createdAt": zod.coerce.date(),
+  "enrollments": zod.array(zod.object({
+  "id": zod.string(),
+  "cohortId": zod.string(),
+  "cohortName": zod.string(),
+  "status": zod.string(),
+  "paymentStatus": zod.string().nullish(),
+  "enrolledAt": zod.coerce.date().nullish()
+}))
+})
+
+
 export const UpdateUserParams = zod.object({
   "id": zod.coerce.string()
 })
@@ -1535,6 +1573,7 @@ export const UpdateUserParams = zod.object({
 export const UpdateUserBody = zod.object({
   "name": zod.string().nullish(),
   "title": zod.string().nullish(),
+  "phone": zod.string().nullish(),
   "role": zod.enum(['PARTICIPANT', 'COMPANY_VIEWER', 'TRAINER', 'ADMIN', 'SUPER_ADMIN']).optional(),
   "status": zod.string().optional(),
   "companyId": zod.string().nullish()

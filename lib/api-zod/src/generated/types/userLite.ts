@@ -12,4 +12,5 @@ export interface UserLite {
   email: string;
   image?: string | null;
   title?: string | null;
+  phone?: string | null;
 }

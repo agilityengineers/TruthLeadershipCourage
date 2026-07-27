@@ -80,6 +80,7 @@ export interface UserLite {
   email: string;
   image?: string | null;
   title?: string | null;
+  phone?: string | null;
 }
 
 export type Pillar = typeof Pillar[keyof typeof Pillar];
@@ -181,7 +182,8 @@ export interface ShippingAddress {
 export interface CreateEnrollmentRequest {
   name: string;
   email: string;
-  companyId?: string;
+  phone?: string;
+  companyName: string;
   cohortId: string;
   responseId?: string;
   coupon?: string;
@@ -904,10 +906,35 @@ export interface AdminUserRow {
   role: Role;
   status: string;
   title?: string | null;
+  phone?: string | null;
   companyId?: string | null;
   companyName?: string | null;
   hasPassword: boolean;
   createdAt: string;
+}
+
+export interface AdminUserEnrollment {
+  id: string;
+  cohortId: string;
+  cohortName: string;
+  status: string;
+  paymentStatus?: string | null;
+  enrolledAt?: string | null;
+}
+
+export interface AdminUserDetail {
+  id: string;
+  name?: string | null;
+  email: string;
+  role: Role;
+  status: string;
+  title?: string | null;
+  phone?: string | null;
+  companyId?: string | null;
+  companyName?: string | null;
+  hasPassword: boolean;
+  createdAt: string;
+  enrollments: AdminUserEnrollment[];
 }
 
 export type CreateUserRequestMode = typeof CreateUserRequestMode[keyof typeof CreateUserRequestMode];
@@ -923,6 +950,7 @@ export interface CreateUserRequest {
   email: string;
   role: Role;
   title?: string;
+  phone?: string;
   companyId?: string | null;
   mode?: CreateUserRequestMode;
   password?: string;
@@ -931,6 +959,7 @@ export interface CreateUserRequest {
 export interface UpdateUserRequest {
   name?: string | null;
   title?: string | null;
+  phone?: string | null;
   role?: Role;
   status?: string;
   companyId?: string | null;

@@ -54,6 +54,7 @@ import AdminParticipants from "@/app/admin/participants/page";
 import AdminResources from "@/app/admin/resources/page";
 import AdminTrainers from "@/app/admin/trainers/page";
 import AdminUsers from "@/app/admin/users/page";
+import AdminUserDetail from "@/app/admin/users/[id]/page";
 
 // Trainer pages
 import TrainerHome from "@/app/trainer/page";
@@ -152,6 +153,7 @@ function Router() {
         ["/admin/resources", AdminResources],
         ["/admin/trainers", AdminTrainers],
         ["/admin/users", AdminUsers],
+        ["/admin/users/:id", AdminUserDetail],
       ])}
 
       {/* Trainer */}

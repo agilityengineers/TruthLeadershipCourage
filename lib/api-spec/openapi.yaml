@@ -964,6 +964,17 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/InviteResult" }
   /admin/users/{id}:
+    get:
+      operationId: getUser
+      tags: [admin]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: User detail
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminUserDetail" }
     patch:
       operationId: updateUser
       tags: [admin]
@@ -1276,6 +1287,7 @@ components:
         email: { type: string }
         image: { type: string, nullable: true }
         title: { type: string, nullable: true }
+        phone: { type: string, nullable: true }
 
     Pillar:
       type: string
@@ -1396,11 +1408,12 @@ components:
         country: { type: string }
     CreateEnrollmentRequest:
       type: object
-      required: [name, email, cohortId, shipping]
+      required: [name, email, companyName, cohortId, shipping]
       properties:
         name: { type: string }
         email: { type: string }
-        companyId: { type: string }
+        phone: { type: string }
+        companyName: { type: string }
         cohortId: { type: string }
         responseId: { type: string }
         coupon: { type: string }
@@ -2222,10 +2235,39 @@ components:
         role: { $ref: "#/components/schemas/Role" }
         status: { type: string }
         title: { type: string, nullable: true }
+        phone: { type: string, nullable: true }
         companyId: { type: string, nullable: true }
         companyName: { type: string, nullable: true }
         hasPassword: { type: boolean }
         createdAt: { type: string, format: date-time }
+    AdminUserDetail:
+      type: object
+      required: [id, email, role, status, hasPassword, createdAt, enrollments]
+      properties:
+        id: { type: string }
+        name: { type: string, nullable: true }
+        email: { type: string }
+        role: { $ref: "#/components/schemas/Role" }
+        status: { type: string }
+        title: { type: string, nullable: true }
+        phone: { type: string, nullable: true }
+        companyId: { type: string, nullable: true }
+        companyName: { type: string, nullable: true }
+        hasPassword: { type: boolean }
+        createdAt: { type: string, format: date-time }
+        enrollments:
+          type: array
+          items: { $ref: "#/components/schemas/AdminUserEnrollment" }
+    AdminUserEnrollment:
+      type: object
+      required: [id, cohortId, cohortName, status]
+      properties:
+        id: { type: string }
+        cohortId: { type: string }
+        cohortName: { type: string }
+        status: { type: string }
+        paymentStatus: { type: string, nullable: true }
+        enrolledAt: { type: string, format: date-time, nullable: true }
     CreateUserRequest:
       type: object
       required: [email, role]
@@ -2234,6 +2276,7 @@ components:
         email: { type: string }
         role: { $ref: "#/components/schemas/Role" }
         title: { type: string }
+        phone: { type: string }
         companyId: { type: string, nullable: true }
         mode: { type: string, enum: [invite, password] }
         password: { type: string }
@@ -2242,6 +2285,7 @@ components:
       properties:
         name: { type: string, nullable: true }
         title: { type: string, nullable: true }
+        phone: { type: string, nullable: true }
         role: { $ref: "#/components/schemas/Role" }
         status: { type: string }
         companyId: { type: string, nullable: true }

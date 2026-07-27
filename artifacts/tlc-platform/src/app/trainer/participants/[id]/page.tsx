@@ -40,8 +40,9 @@ export default function ParticipantDetailPage() {
         <div className="min-w-0">
           <h2 className="font-display text-[22px] text-ink">{name}</h2>
           <div className="text-[13px] text-muted-2">
-            {enrollment.user.email} · {enrollment.companyName ?? "Independent"} ·{" "}
-            {enrollment.cohort.name}
+            {enrollment.user.email}
+            {enrollment.user.phone ? ` · ${enrollment.user.phone}` : ""} ·{" "}
+            {enrollment.companyName ?? "Independent"} · {enrollment.cohort.name}
           </div>
         </div>
         <div className="ml-auto text-right">
