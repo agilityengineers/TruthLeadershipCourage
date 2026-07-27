@@ -43,7 +43,7 @@ export default function EnrollPage() {
             {copy.intro}{" "}
             {primary && (
               <>
-                Investment for {primary.name}:{" "}
+                Investment:{" "}
                 <span className="font-semibold text-ink">{formatPrice(primary.price, primary.currency)}</span>.
               </>
             )}
