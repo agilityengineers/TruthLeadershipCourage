@@ -588,8 +588,25 @@ export function EditCohortDialog({ cohort }: { cohort: AdminCohortRow }) {
   const [open, setOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const [confirmingArchive, setConfirmingArchive] = useState(false);
   const pending = updateCohort.isPending;
   const deleting = deleteCohort.isPending;
+
+  async function onArchive() {
+    setError(null);
+    try {
+      const result = await updateCohort.mutateAsync({
+        id: cohort.id,
+        data: { status: "ARCHIVED" },
+      });
+      if (!result.ok) throw new Error("Could not archive this cohort.");
+      handleOpenChange(false);
+      toast.success("Cohort archived — hidden from the front page. Participant and payment records preserved.");
+      qc.invalidateQueries();
+    } catch (err) {
+      setError(apiErrorMessage(err, "Could not archive this cohort. Please try again."));
+    }
+  }
 
   async function onDelete() {
     setError(null);
@@ -608,6 +625,7 @@ export function EditCohortDialog({ cohort }: { cohort: AdminCohortRow }) {
     setOpen(next);
     if (!next) {
       setConfirmingDelete(false);
+      setConfirmingArchive(false);
       setError(null);
     }
   }
@@ -664,6 +682,42 @@ export function EditCohortDialog({ cohort }: { cohort: AdminCohortRow }) {
           }}
           className="flex flex-col gap-4"
         >
+          {cohort.status !== "ARCHIVED" && (
+            <div className="flex flex-col gap-2.5 rounded-[10px] border border-eq/20 bg-eq/5 p-3.5">
+              <p className="text-[13px] text-ink">
+                Want to hide this cohort from the front page? Archive it to preserve participant and payment records.
+                You can restore it later using the Status field.
+              </p>
+              {confirmingArchive ? (
+                <>
+                  <p className="text-[13px] font-semibold text-ink">
+                    Archive {cohort.name}? Only its status will change; unsaved form edits will not be saved.
+                  </p>
+                  <div className="flex flex-wrap justify-end gap-2.5">
+                    <Button type="button" variant="outline" disabled={pending || deleting} onClick={() => setConfirmingArchive(false)}>
+                      Keep editing
+                    </Button>
+                    <Button type="button" disabled={pending || deleting} onClick={onArchive}>
+                      {pending ? "Archiving…" : "Yes, archive cohort"}
+                    </Button>
+                  </div>
+                </>
+              ) : (
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={pending || deleting}
+                  onClick={() => {
+                    setConfirmingDelete(false);
+                    setConfirmingArchive(true);
+                    setError(null);
+                  }}
+                >
+                  Archive cohort
+                </Button>
+              )}
+            </div>
+          )}
           <CohortFields options={options} defaults={cohort} />
           {error && <p className="text-[13px] text-danger">{error}</p>}
           {confirmingDelete ? (
@@ -691,8 +745,10 @@ export function EditCohortDialog({ cohort }: { cohort: AdminCohortRow }) {
                 type="button"
                 onClick={() => {
                   setError(null);
+                  setConfirmingArchive(false);
                   setConfirmingDelete(true);
                 }}
+                disabled={pending || deleting}
                 className="text-[12.5px] font-semibold text-danger hover:underline"
               >
                 Delete cohort
@@ -701,7 +757,7 @@ export function EditCohortDialog({ cohort }: { cohort: AdminCohortRow }) {
                 <Button type="button" variant="outline" onClick={() => setOpen(false)}>
                   Cancel
                 </Button>
-                <Button type="submit" disabled={pending}>
+                <Button type="submit" disabled={pending || deleting || confirmingArchive}>
                   {pending ? "Saving…" : "Save changes"}
                 </Button>
               </div>
